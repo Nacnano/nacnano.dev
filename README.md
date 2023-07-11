@@ -1,2 +1,2 @@
 # nacnano.dev
-My personal website for sharing my experiences
+My personal website for sharing my experiences and reflecting myself
