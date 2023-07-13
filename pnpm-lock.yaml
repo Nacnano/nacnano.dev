@@ -24,41 +24,7 @@ importers:
         specifier: latest
         version: 1.10.6
 
-  apps/docs:
-    dependencies:
-      next:
-        specifier: ^13.4.1
-        version: 13.4.1(react-dom@18.2.0)(react@18.2.0)
-      react:
-        specifier: ^18.2.0
-        version: 18.2.0
-      react-dom:
-        specifier: ^18.2.0
-        version: 18.2.0(react@18.2.0)
-      ui:
-        specifier: workspace:*
-        version: link:../../packages/ui
-    devDependencies:
-      '@types/node':
-        specifier: ^17.0.12
-        version: 17.0.45
-      '@types/react':
-        specifier: ^18.0.22
-        version: 18.2.5
-      '@types/react-dom':
-        specifier: ^18.0.7
-        version: 18.2.3
-      eslint-config-custom:
-        specifier: workspace:*
-        version: link:../../packages/eslint-config-custom
-      tsconfig:
-        specifier: workspace:*
-        version: link:../../packages/tsconfig
-      typescript:
-        specifier: ^4.5.3
-        version: 4.9.5
-
-  apps/web:
+  apps/client:
     dependencies:
       next:
         specifier: ^13.4.1
@@ -1157,6 +1123,7 @@ packages:
 
   /eslint-config-prettier@8.8.0(eslint@7.32.0):
     resolution: {integrity: sha512-wLbQiFre3tdGgpDv67NQKnJuTlcUVYHas3k+DZCc2U2BadthoEY4B7hLPvAxaqdyOGCzuLfii2fqGph10va7oA==}
+    hasBin: true
     peerDependencies:
       eslint: '>=7.0.0'
     dependencies:
@@ -2175,6 +2142,7 @@ packages:
 
   /loose-envify@1.4.0:
     resolution: {integrity: sha512-lyuxPGr/Wfhrlem2CL/UcnUc1zcqKAImBDzukY7Y5F/yQiNdko6+fRLevlw1HgMySw7f611UIY408EtxRSoK3Q==}
+    hasBin: true
     dependencies:
       js-tokens: 4.0.0
 
@@ -2257,6 +2225,7 @@ packages:
   /nanoid@3.3.6:
     resolution: {integrity: sha512-BGcqMMJuToF7i1rt+2PWSNVnWIkGCU78jBG3RxO/bZlnZPK2Cmi2QaffxGO/2RvWi9sL+FAiRiXMgsyxQ1DIDA==}
     engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
+    hasBin: true
     dev: false
 
   /natural-compare@1.4.0:
@@ -2269,6 +2238,7 @@ packages:
   /next@13.4.1(react-dom@18.2.0)(react@18.2.0):
     resolution: {integrity: sha512-JBw2kAIyhKDpjhEWvNVoFeIzNp9xNxg8wrthDOtMctfn3EpqGCmW0FSviNyGgOSOSn6zDaX48pmvbdf6X2W9xA==}
     engines: {node: '>=16.8.0'}
+    hasBin: true
     peerDependencies:
       '@opentelemetry/api': ^1.1.0
       fibers: '>= 3.1.0'
@@ -3002,6 +2972,7 @@ packages:
 
   /ts-node@10.9.1(@types/node@17.0.45)(typescript@4.9.5):
     resolution: {integrity: sha512-NtVysVPkxxrwFGUUxGYhfux8k78pQB3JqYBXlLRZgdGUqTO5wU/UyHop5p70iEbGhB7q5KmiZiU0Y3KlJrScEw==}
+    hasBin: true
     peerDependencies:
       '@swc/core': '>=1.2.50'
       '@swc/wasm': '>=1.2.50'
@@ -3142,6 +3113,7 @@ packages:
   /typescript@4.9.5:
     resolution: {integrity: sha512-1FXk9E2Hm+QzZQ7z+McJiHL4NW1F2EzMu9Nq9i3zAaGqibafqYwCVU6WyWAuyQRRzOlxou8xZSyXLEN8oKj24g==}
     engines: {node: '>=4.2.0'}
+    hasBin: true
 
   /uglify-js@3.17.4:
     resolution: {integrity: sha512-T9q82TJI9e/C1TAxYvfb16xO120tMVFZrGA3f9/P4424DNu6ypK103y0GPFVa17yotwSyZW5iYXgjYHkGrJW/g==}
