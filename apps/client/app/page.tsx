@@ -1,10 +1,12 @@
-import { Button, Header } from "ui";
+import { NextPage } from "next";
+import { LandingPage } from "../modules/LandingPage";
 
-export default function Page() {
+const IndexPage: NextPage = () => {
   return (
     <>
-      <Header text="Web" />
-      <Button />
+      <LandingPage />
     </>
   );
-}
+};
+
+export default IndexPage;
