@@ -1,5 +1,6 @@
 import { FC, PropsWithChildren, useEffect, useState } from "react";
 import { AppContext, themeOptions } from "./appContext";
+import React from "react";
 
 export const AppProvider: FC<PropsWithChildren> = ({ children }) => {
   const [theme, setTheme] = useState<themeOptions>("default");
