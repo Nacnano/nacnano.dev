@@ -8,7 +8,6 @@ export const Logo: FC = () => {
         <Image alt="nacnano-logo" src="images/oong-oong-cropped.jpg" />
         <span className="text-gray-400"> Nacnano </span>
       </div>
-      /2
     </>
   );
 };
