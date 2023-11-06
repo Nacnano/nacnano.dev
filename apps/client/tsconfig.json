@@ -1,15 +1,32 @@
 {
   "extends": "tsconfig/nextjs.json",
   "compilerOptions": {
-    "jsx": "react",
-    "plugins": [{ "name": "next" }],
+    "jsx": "preserve",
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
     "paths": {
-      "@/*": ["./src/*"],
-      "$modules/*": ["./src/modules/*"],
-      "$context/*": ["./src/core/context/*"]
+      "@/*": [
+        "./src/*"
+      ],
+      "$modules/*": [
+        "./src/modules/*"
+      ],
+      "$context/*": [
+        "./src/core/context/*"
+      ]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
-  "exclude": ["node_modules"],
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ],
   "baseUrl": "."
 }
