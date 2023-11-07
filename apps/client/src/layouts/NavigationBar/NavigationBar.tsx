@@ -9,19 +9,15 @@ export const NavigationBar: FC = () => {
       <nav className="hidden bg-gray-900 md:flex justify-between border-gray-500">
         <div className="flex space-x-10 items-baseline">
           <Link href="/">
-            <div className=" flex items-center cursor-pointer ">
+            <div className="flex items-center cursor-pointer ">
               <Logo />
             </div>
           </Link>
           <Link href="/me" className="text-gray select-none cursor-pointer">
-            <div> Me</div>
+            Me
           </Link>
-          <Link href="/blog">
-            <div> Blogs</div>
-          </Link>
-          <Link href="/projects">
-            <div> Projects</div>
-          </Link>
+          <Link href="/blog">Blogs</Link>
+          <Link href="/projects">Projects</Link>
         </div>
         <div className="flex space-x-6">
           <FacebookButton />

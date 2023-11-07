@@ -1,5 +1,6 @@
 import { Metadata } from "next";
 import { AppProvider } from "../core/context/appProvider";
+import { NavigationBar } from "@/layouts/NavigationBar";
 
 export const metadata: Metadata = {
   title: "Nacnano",
