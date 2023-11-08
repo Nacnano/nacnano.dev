@@ -6,7 +6,7 @@ import { FacebookButton } from "@/components/buttons";
 export const NavigationBar: FC = () => {
   return (
     <>
-      <nav className="hidden flex-col bg-gray-900 md:flex justify-between border-gray-500">
+      <div className="hidden flex-col bg-gray-900 md:flex justify-between border-gray-500">
         <div className="flex space-x-10 items-center">
           <Link href="/">
             <div className="flex items-center cursor-pointer ">
@@ -14,14 +14,14 @@ export const NavigationBar: FC = () => {
             </div>
           </Link>
           <Link href="/me">
-            <div className="text-gray select-none cursor-pointer"> Me</div>
+            <span className="text-gray select-none cursor-pointer"> Me </span>
           </Link>
           <Link href="/blog">Blogs</Link>
         </div>
         <div className="flex space-x-6">
           <FacebookButton />
         </div>
-      </nav>
+      </div>
     </>
   );
 };

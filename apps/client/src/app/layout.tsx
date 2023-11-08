@@ -15,6 +15,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
   return (
     <html lang="en">
       <AppProvider>
+        <NavigationBar />
         <body>{children}</body>
       </AppProvider>
     </html>
