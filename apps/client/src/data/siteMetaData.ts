@@ -1,4 +1,4 @@
-const siteMetaData = {
+export const siteMetaData = {
   title: "Nacnano.dev",
   author: "Nacnano",
   headerTitle: "Nacnano.dev",
