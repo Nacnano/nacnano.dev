@@ -8,6 +8,7 @@ export const siteMetaData = {
   siteUrl: "https://nacnano-dev-client-nacnano.vercel.app/",
   siteRepo: "https://github.com/nacnano/nacnano.dev",
   siteLogo: "/static/images/logo.png",
+  socialBanner: "/static/images/oong-oong.jpg",
   email: "chotpisit.adu@gmail.com",
   facebook: "https://www.facebook.com/chotpisit.adunsehawat/",
   instagram: "https://www.instagram.com/chotpisit_nac/",
