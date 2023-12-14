@@ -4,6 +4,7 @@ import { siteMetaData } from "@/data/siteMetaData";
 export default function sitemap(): MetadataRoute.Sitemap {
   const siteUrl = siteMetaData.siteUrl;
 
+  // TODO: Add blog posts to sitemap
   //   const blogRoutes = allBlogs.map((post) => ({
   //     url: `${siteUrl}/${post.path}`,
   //     lastModified: post.lastmod || post.date,
