@@ -1,9 +1,12 @@
+"use client";
+
 import { Inter } from "next/font/google";
 
 import { Metadata } from "next";
-import { AppProvider } from "../core/context/appProvider";
 import { NavigationBar } from "@/layouts/NavigationBar";
 import { siteMetaData } from "@/data/siteMetaData";
+import SectionContainer from "@/components/SectionContainer";
+import { ThemeProviders } from "./theme-provider";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -49,11 +52,19 @@ type RootLayoutProps = {
 
 export default function RootLayout({ children }: RootLayoutProps) {
   return (
-    <html lang="en">
-      <AppProvider>
-        <NavigationBar />
-        <body>{children}</body>
-      </AppProvider>
+    <html
+      lang={siteMetaData.language}
+      className={"${inter.variable} scroll-smooth"}
+      suppressHydrationWarning
+    >
+      <ThemeProviders>
+        <SectionContainer>
+          <div className="">
+            <NavigationBar />
+            <body>{children}</body>
+          </div>
+        </SectionContainer>
+      </ThemeProviders>
     </html>
   );
 }
