@@ -57,14 +57,38 @@ export default function RootLayout({ children }: RootLayoutProps) {
       className={"${inter.variable} scroll-smooth"}
       suppressHydrationWarning
     >
-      <ThemeProviders>
-        <SectionContainer>
-          <div className="">
-            <Header />
-            <body>{children}</body>
-          </div>
-        </SectionContainer>
-      </ThemeProviders>
+      <link
+        rel="apple-touch-icon"
+        sizes="32x32"
+        href="/static/favicons/apple-touch-icon.png"
+      />
+      <link
+        rel="icon"
+        type="image/png"
+        sizes="32x32"
+        href="/static/favicons/favicon-32x32.png"
+      />
+      <meta
+        name="theme-color"
+        media="(prefers-color-scheme: light)"
+        content="#fff"
+      />
+      <meta
+        name="theme-color"
+        media="(prefers-color-scheme: dark)"
+        content="#000"
+      />
+      <link rel="alternate" type="application/rss+xml" href="/feed.xml" />
+      <body className="bg-white text-black antialiased dark:bg-gray-950 dark:text-white">
+        <ThemeProviders>
+          <SectionContainer>
+            <div className="">
+              <Header />
+              <body>{children}</body>
+            </div>
+          </SectionContainer>
+        </ThemeProviders>
+      </body>
     </html>
   );
 }
