@@ -82,9 +82,9 @@ export default function RootLayout({ children }: RootLayoutProps) {
       <body className="bg-white text-black antialiased dark:bg-gray-950 dark:text-white">
         <ThemeProviders>
           <SectionContainer>
-            <div className="">
+            <div className="flex h-screen flex-col justify-center font-sans">
               <Header />
-              <body>{children}</body>
+              <main className="mb-auto">{children}</main>
             </div>
           </SectionContainer>
         </ThemeProviders>

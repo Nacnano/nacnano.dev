@@ -4,15 +4,17 @@ import { Logo } from "./Logo";
 
 export default function Header() {
   return (
-    <header className="">
+    <header className="flex items-center justify-between py-10">
       <div>
         <Link href="/" aria-label={siteMetaData.headerTitle}>
-          <div>
-            <div>
+          <div className="flex items-center justify-between">
+            <div className="mr-3">
               <Logo />
             </div>
             {typeof siteMetaData.headerTitle === "string" ? (
-              <div className="">{siteMetaData.headerTitle}</div>
+              <div className="hidden h-6 text-2xl font-semibold sm:block">
+                {siteMetaData.headerTitle}
+              </div>
             ) : (
               siteMetaData.headerTitle
             )}

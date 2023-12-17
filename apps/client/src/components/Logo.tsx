@@ -12,7 +12,6 @@ export const Logo: FC = () => {
           height={30}
           sizes="100vw"
         />
-        <span className="text-gray-400"> Nacnano </span>
       </div>
     </>
   );
