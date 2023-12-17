@@ -3,10 +3,10 @@
 import { Inter } from "next/font/google";
 
 import { Metadata } from "next";
-import { NavigationBar } from "@/layouts/NavigationBar";
 import { siteMetaData } from "@/data/siteMetaData";
 import SectionContainer from "@/components/SectionContainer";
 import { ThemeProviders } from "./theme-provider";
+import Header from "@/components/Header";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -60,7 +60,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
       <ThemeProviders>
         <SectionContainer>
           <div className="">
-            <NavigationBar />
+            <Header />
             <body>{children}</body>
           </div>
         </SectionContainer>
