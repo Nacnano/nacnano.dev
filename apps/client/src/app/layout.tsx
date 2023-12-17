@@ -14,7 +14,7 @@ const inter = Inter({
   variable: "--font-inter",
 });
 
-export const metadata: Metadata = {
+const metadata: Metadata = {
   metadataBase: new URL(siteMetaData.siteUrl),
   title: {
     default: siteMetaData.title,
