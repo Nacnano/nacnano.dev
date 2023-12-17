@@ -1,5 +1,3 @@
-"use client";
-
 import { Inter } from "next/font/google";
 
 import { Metadata } from "next";
@@ -46,16 +44,16 @@ const metadata: Metadata = {
   },
 };
 
-type RootLayoutProps = {
+export default function RootLayout({
+  children,
+}: {
   children: React.ReactNode;
-};
-
-export default function RootLayout({ children }: RootLayoutProps) {
+}) {
   return (
     <html
       lang={siteMetaData.language}
       className={"${inter.variable} scroll-smooth"}
-      suppressHydrationWarning
+      suppressHydrationWarning={true}
     >
       <link
         rel="apple-touch-icon"
@@ -82,7 +80,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
       <body className="bg-white text-black antialiased dark:bg-gray-950 dark:text-white">
         <ThemeProviders>
           <SectionContainer>
-            <div className="flex h-screen flex-col justify-center font-sans">
+            <div className="flex h-screen flex-col justify-between font-sans">
               <Header />
               <main className="mb-auto">{children}</main>
             </div>
