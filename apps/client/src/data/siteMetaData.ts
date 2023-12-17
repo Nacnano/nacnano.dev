@@ -1,7 +1,7 @@
 export const siteMetaData = {
   title: "Nacnano.dev",
   author: "Nacnano",
-  headerTitle: "Nacnano.dev",
+  headerTitle: "Nacnano",
   description: "Nacnano's personal website",
   language: "en-us",
   theme: "system",
