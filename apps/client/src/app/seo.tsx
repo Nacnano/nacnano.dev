@@ -1,4 +1,4 @@
-import { siteMetaData } from "@/data/siteMetaData";
+import siteMetadata from "@/data/siteMetadata";
 import { Metadata } from "next";
 
 interface PageSEOProps {
@@ -17,18 +17,18 @@ export function genPageMetaData({
   return {
     title,
     openGraph: {
-      title: `${title} | ${siteMetaData.title}`,
-      description: `${description} | ${siteMetaData.description}`,
+      title: `${title} | ${siteMetadata.title}`,
+      description: `${description} | ${siteMetadata.description}`,
       url: "./",
-      siteName: siteMetaData.title,
-      images: image ? [image] : siteMetaData.socialBanner,
+      siteName: siteMetadata.title,
+      images: image ? [image] : siteMetadata.socialBanner,
       locale: "en_US",
       type: "website",
     },
     twitter: {
-      title: `${title} | ${siteMetaData.title}`,
+      title: `${title} | ${siteMetadata.title}`,
       card: "summary_large_image",
-      images: image ? [image] : siteMetaData.socialBanner,
+      images: image ? [image] : siteMetadata.socialBanner,
     },
     ...rest,
   };

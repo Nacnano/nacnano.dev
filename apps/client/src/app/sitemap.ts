@@ -1,8 +1,8 @@
 import { MetadataRoute } from "next";
-import { siteMetaData } from "@/data/siteMetaData";
+import siteMetadata from "@/data/siteMetadata";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const siteUrl = siteMetaData.siteUrl;
+  const siteUrl = siteMetadata.siteUrl;
 
   // TODO: Add blog posts to sitemap
   //   const blogRoutes = allBlogs.map((post) => ({

@@ -1,4 +1,4 @@
-import { siteMetaData } from "@/data/siteMetaData";
+import siteMetadata from "@/data/siteMetadata";
 import { MetadataRoute } from "next";
 
 export default function robots(): MetadataRoute.Robots {
@@ -8,6 +8,6 @@ export default function robots(): MetadataRoute.Robots {
       allow: "/",
       disallow: "/private/",
     },
-    sitemap: siteMetaData.siteUrl + "sitemap.xml",
+    sitemap: siteMetadata.siteUrl + "sitemap.xml",
   };
 }

@@ -1,4 +1,4 @@
-export const siteMetaData = {
+const siteMetadata = {
   title: "Nacnano.dev",
   author: "Nacnano",
   headerTitle: "Nacnano",
@@ -18,3 +18,5 @@ export const siteMetaData = {
 };
 
 //TODO: Add Analytics
+
+export default siteMetadata;

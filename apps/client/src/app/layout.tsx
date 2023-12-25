@@ -1,7 +1,7 @@
 import { Inter } from "next/font/google";
 
 import { Metadata } from "next";
-import { siteMetaData } from "@/data/siteMetaData";
+import siteMetadata from "@/data/siteMetadata";
 import SectionContainer from "@/components/SectionContainer";
 import { ThemeProviders } from "./theme-provider";
 import Header from "@/components/Header";
@@ -13,19 +13,19 @@ const inter = Inter({
 });
 
 const metadata: Metadata = {
-  metadataBase: new URL(siteMetaData.siteUrl),
+  metadataBase: new URL(siteMetadata.siteUrl),
   title: {
-    default: siteMetaData.title,
+    default: siteMetadata.title,
 
-    template: `%s" | ${siteMetaData.title}`,
+    template: `%s" | ${siteMetadata.title}`,
   },
-  description: siteMetaData.description,
+  description: siteMetadata.description,
   openGraph: {
-    title: siteMetaData.title,
-    description: siteMetaData.description,
+    title: siteMetadata.title,
+    description: siteMetadata.description,
     url: "./",
-    siteName: siteMetaData.title,
-    images: [siteMetaData.socialBanner],
+    siteName: siteMetadata.title,
+    images: [siteMetadata.socialBanner],
     locale: "en_US",
     type: "website",
   },
@@ -51,7 +51,7 @@ export default function RootLayout({
 }) {
   return (
     <html
-      lang={siteMetaData.language}
+      lang={siteMetadata.language}
       className={"${inter.variable} scroll-smooth"}
       suppressHydrationWarning={true}
     >
