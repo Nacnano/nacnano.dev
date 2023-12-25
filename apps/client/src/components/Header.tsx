@@ -2,6 +2,7 @@ import { siteMetaData } from "@/data/siteMetaData";
 import Link from "next/link";
 import { Logo } from "./Logo";
 import headerNavLinks from "@/data/headerNavLinks";
+import ThemeSwitch from "./ThemeSwitch";
 
 export default function Header() {
   return (
@@ -39,6 +40,7 @@ export default function Header() {
               {link.title}
             </Link>
           ))}
+        <ThemeSwitch />
       </div>
     </header>
   );
