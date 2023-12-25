@@ -1,7 +1,7 @@
 import Image from "next/image";
 import { FC } from "react";
 
-export const Logo: FC = () => {
+const Logo: FC = () => {
   return (
     <>
       <div className="select-none items-center">
@@ -16,3 +16,5 @@ export const Logo: FC = () => {
     </>
   );
 };
+
+export default Logo;
