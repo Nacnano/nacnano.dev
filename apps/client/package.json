@@ -9,10 +9,10 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "autoprefixer": "^10.4.14",
-    "next": "^13.4.1",
+    "autoprefixer": "^10.4.13",
+    "next": "14.0.3",
     "next-themes": "^0.2.1",
-    "postcss": "^8.4.26",
+    "postcss": "^8.4.24",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "tailwindcss": "^3.3.3",
@@ -20,10 +20,11 @@
   },
   "devDependencies": {
     "@types/node": "^17.0.12",
-    "@types/react": "^18.0.22",
-    "@types/react-dom": "^18.0.7",
-    "eslint-config-custom": "workspace:*",
+    "@types/react": "^18.2.14",
+    "eslint-config-next": "14.0.3",
+    "eslint-config-prettier": "^8.8.0",
+    "eslint-plugin-prettier": "^5.0.0",
     "tsconfig": "workspace:*",
-    "typescript": "^4.5.3"
+    "typescript": "^5.1.3"
   }
 }
