@@ -7,7 +7,7 @@ export const Logo: FC = () => {
       <div className="select-none items-center">
         <Image
           alt="nacnano-logo"
-          src="/images/oong-oong-cropped.jpg"
+          src="/static/images/oong-oong-cropped.jpg"
           width={30}
           height={30}
           sizes="100vw"
