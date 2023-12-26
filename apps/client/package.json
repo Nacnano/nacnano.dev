@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "autoprefixer": "^10.4.13",
+    "github-slugger": "^2.0.0",
     "next": "14.0.3",
     "next-themes": "^0.2.1",
     "postcss": "^8.4.24",
