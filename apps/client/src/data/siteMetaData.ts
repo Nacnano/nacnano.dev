@@ -15,6 +15,7 @@ const siteMetadata = {
   github: "https://www.github.com/nacnano",
   linkedin: "https://www.linkedin.com/in/chotpisit-adunsehawat-b68912210/",
   youtube: "https://www.youtube.com/channel/UC35blZ3e07Srxg_bbdXLZKQ",
+  locale: "en-US",
 };
 
 //TODO: Add Analytics

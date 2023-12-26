@@ -4,7 +4,8 @@ import React from "react";
 import Main from "./Main";
 
 const IndexPage: NextPage = () => {
-  return <Main />;
+  const posts = [];
+  return <Main posts={posts} />;
 };
 
 export default IndexPage;
