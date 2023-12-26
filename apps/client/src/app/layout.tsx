@@ -1,15 +1,22 @@
-import { Inter } from "next/font/google";
+import { Inter, Space_Grotesk } from "next/font/google";
 
 import { Metadata } from "next";
 import siteMetadata from "@/data/siteMetadata";
 import SectionContainer from "@/components/SectionContainer";
 import { ThemeProviders } from "./theme-provider";
 import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 
 const inter = Inter({
   subsets: ["latin"],
   display: "swap",
   variable: "--font-inter",
+});
+
+const space_grotesk = Space_Grotesk({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-space-grotesk",
 });
 
 const metadata: Metadata = {
@@ -52,7 +59,7 @@ export default function RootLayout({
   return (
     <html
       lang={siteMetadata.language}
-      className={"${inter.variable} scroll-smooth"}
+      className={`${space_grotesk.variable} scroll-smooth`}
       suppressHydrationWarning={true}
     >
       <link
@@ -83,6 +90,7 @@ export default function RootLayout({
             <div className="flex h-screen flex-col justify-between font-sans">
               <Header />
               <main className="mb-auto">{children}</main>
+              <Footer />
             </div>
           </SectionContainer>
         </ThemeProviders>
