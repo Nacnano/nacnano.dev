@@ -1,3 +1,5 @@
+import "src/styles/tailwind.css";
+
 import { Inter, Space_Grotesk } from "next/font/google";
 
 import { Metadata } from "next";
