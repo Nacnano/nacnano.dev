@@ -8,8 +8,8 @@ const Logo: FC = () => {
         <Image
           alt="nacnano-logo"
           src="/static/images/oong-oong-cropped.jpg"
-          width={30}
-          height={30}
+          width={32}
+          height={32}
           sizes="100vw"
         />
       </div>
