@@ -1,10 +1,12 @@
 import { NextPage } from "next";
-import { LandingPage } from "@/modules/LandingPage";
 import React from "react";
 import Main from "./Main";
+import { sortPosts, allCoreContent } from "pliny/utils/contentlayer";
+import { allBlogs } from "../../.contentlayer/generated";
 
 const IndexPage: NextPage = () => {
-  const posts = [];
+  const sortedBlogs = sortPosts(allBlogs);
+  const posts = allCoreContent(sortedBlogs);
   return <Main posts={posts} />;
 };
 
