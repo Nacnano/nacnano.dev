@@ -13,7 +13,7 @@
       "@/*": ["./*"],
       "$modules/*": ["./modules/*"],
       "$context/*": ["./core/context/*"],
-      "contentlayer/generated": ["./.contentlayer/generated"]
+      "contentlayer/generated": [".././.contentlayer/generated"]
     }
   },
   "include": [
