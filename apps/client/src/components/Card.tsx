@@ -1,5 +1,5 @@
-import Image from "./Image";
-import CustomLink from "./Link";
+import Image from "@/components/Image";
+import CustomLink from "@/components/Link";
 
 const Card = ({ title, description, imgSrc, href }) => {
   return (

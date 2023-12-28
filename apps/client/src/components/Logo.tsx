@@ -1,4 +1,4 @@
-import Image from "next/image";
+import Image from "@/components/Image";
 import { FC } from "react";
 
 const Logo: FC = () => {

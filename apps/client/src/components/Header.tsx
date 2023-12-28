@@ -1,8 +1,8 @@
 import siteMetadata from "@/data/siteMetadata";
 import headerNavLinks from "@/data/headerNavLinks";
-import Logo from "./Logo";
-import Link from "./Link";
-import ThemeSwitch from "./ThemeSwitch";
+import Logo from "@/components/Logo";
+import Link from "@/components/Link";
+import ThemeSwitch from "@/components/ThemeSwitch";
 
 const Header = () => {
   return (
