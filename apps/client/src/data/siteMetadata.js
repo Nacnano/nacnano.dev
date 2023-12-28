@@ -11,6 +11,7 @@ const siteMetadata = {
   socialBanner: '/static/images/oong-oong.jpg',
   email: 'chotpisit.adu@gmail.com',
   facebook: 'https://www.facebook.com/chotpisit.adunsehawat/',
+  twitter: 'twitter.com',
   instagram: 'https://www.instagram.com/chotpisit_nac/',
   github: 'https://www.github.com/nacnano',
   linkedin: 'https://www.linkedin.com/in/chotpisit-adunsehawat-b68912210/',
