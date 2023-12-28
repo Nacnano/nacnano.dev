@@ -29,8 +29,9 @@
     "rehype-preset-minify": "6.0.0",
     "rehype-prism-plus": "^1.6.0",
     "rehype-slug": "^5.1.0",
-    "remark-gfm": "^4.0.0",
-    "remark-math": "^6.0.0",
+    "remark": "^14.0.2",
+    "remark-gfm": "^3.0.1",
+    "remark-math": "^5.1.1",
     "tailwindcss": "^3.3.3"
   },
   "devDependencies": {

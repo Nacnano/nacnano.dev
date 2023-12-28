@@ -8,10 +8,11 @@
         "name": "next"
       }
     ],
+    "baseUrl": "src",
     "paths": {
-      "@/*": ["./src/*"],
-      "$modules/*": ["./src/modules/*"],
-      "$context/*": ["./src/core/context/*"],
+      "@/*": ["./*"],
+      "$modules/*": ["./modules/*"],
+      "$context/*": ["./core/context/*"],
       "contentlayer/generated": ["./.contentlayer/generated"]
     }
   },
@@ -22,6 +23,5 @@
     ".next/types/**/*.ts",
     ".contentlayer/generated"
   ],
-  "exclude": ["node_modules"],
-  "baseUrl": "."
+  "exclude": ["node_modules"]
 }
