@@ -4,11 +4,11 @@ const headerNavLinks = [
     title: "Home",
   },
   {
-    href: "/blog",
+    href: "/blogs",
     title: "Blogs",
   },
   {
-    href: "/project",
+    href: "/projects",
     title: "Projects",
   },
   {
