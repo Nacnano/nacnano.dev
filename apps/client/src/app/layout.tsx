@@ -21,12 +21,11 @@ const space_grotesk = Space_Grotesk({
   variable: "--font-space-grotesk",
 });
 
-const metadata: Metadata = {
+export const metadata: Metadata = {
   metadataBase: new URL(siteMetadata.siteUrl),
   title: {
     default: siteMetadata.title,
-
-    template: `%s" | ${siteMetadata.title}`,
+    template: `%s | ${siteMetadata.title}`,
   },
   description: siteMetadata.description,
   openGraph: {
