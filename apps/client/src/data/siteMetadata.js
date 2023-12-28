@@ -2,7 +2,7 @@ const siteMetadata = {
   title: 'Nacnano.dev',
   author: 'Nacnano',
   headerTitle: 'Nacnano',
-  description: "Nacnano's personal website",
+  description: 'Blogs written by Nacnano',
   language: 'en-us',
   theme: 'system',
   siteUrl: 'https://nacnano-dev-client-nacnano.vercel.app/',
