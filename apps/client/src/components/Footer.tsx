@@ -1,6 +1,7 @@
 import siteMetadata from "@/data/siteMetadata";
 import Link from "@/components/Link";
 import SocialIcon from "@/components/social-icons";
+import CustomLink from "@/components/Link";
 
 const Footer = () => {
   return (
@@ -23,13 +24,13 @@ const Footer = () => {
           <div>{` • `}</div>
           <div>{`© ${new Date().getFullYear()}`}</div>
           <div>{` • `}</div>
-          <Link href="/">{siteMetadata.title}</Link>
+          <CustomLink href="/">{siteMetadata.title}</CustomLink>
         </div>
         <div className="mb-80 text-sm text-gray-500 dark:text-gray-400">
           Based on{" "}
-          <Link href="https://github.com/timlrx/tailwind-nextjs-starter-blog">
+          <CustomLink href="https://github.com/timlrx/tailwind-nextjs-starter-blog">
             Tailwind Nextjs Theme
-          </Link>
+          </CustomLink>
         </div>
       </div>
     </footer>

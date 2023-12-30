@@ -1,7 +1,7 @@
 import siteMetadata from "@/data/siteMetadata";
-import Link from "@/components/Link";
 import Tag from "@/components/Tag";
 import { formatDate } from "pliny/utils/formatDate";
+import CustomLink from "@/components/Link";
 
 const MAX_DISPLAY = 5;
 
@@ -37,12 +37,12 @@ const Main = ({ posts }) => {
                       <div className="space-y-6">
                         <div>
                           <h2 className="text-2xl font-bold leading-8 tracking-tight">
-                            <Link
+                            <CustomLink
                               href={`/blog/${slug}`}
                               className="text-gray-900 dark:text-gray-100"
                             >
                               {title}
-                            </Link>
+                            </CustomLink>
                           </h2>
                           <div className="flex flex-wrap">
                             {tags.map((tag) => (
@@ -55,13 +55,13 @@ const Main = ({ posts }) => {
                         </div>
                       </div>
                       <div className="text-base font-medium leading-6">
-                        <Link
+                        <CustomLink
                           href={`/blog/${slug}`}
                           className="text-primary-500 hover:text-primary-600 dark:hover:text-primary-400"
                           aria-label={`Read more: "${title}"`}
                         >
                           Read more &rarr;
-                        </Link>
+                        </CustomLink>
                       </div>
                     </div>
                   </div>
@@ -73,13 +73,13 @@ const Main = ({ posts }) => {
       </div>
       {posts.length > MAX_DISPLAY && (
         <div className="flex justify-end text-base font-medium leading-6">
-          <Link
+          <CustomLink
             href="/blog"
             className="text-primary-500 hover:text-primary-600 dark:hover:text-primary-400"
             aria-label="All posts"
           >
             All Posts &rarr;
-          </Link>
+          </CustomLink>
         </div>
       )}
       {/* TODO: Add Newsletter */}

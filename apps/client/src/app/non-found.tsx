@@ -1,4 +1,4 @@
-import Link from "next/link";
+import CustomLink from "@/components/Link";
 
 export default function NotFound() {
   return (
@@ -8,7 +8,7 @@ export default function NotFound() {
       <div>
         Do you want me to create this page? If yes, feel free to contact me!
       </div>
-      <Link href="/">Go back to Homepage</Link>
+      <CustomLink href="/">Go back to Homepage</CustomLink>
     </div>
   );
 }
