@@ -21,7 +21,12 @@ export default function Blogs() {
   };
   return (
     <>
-      <ListLayout blogs={blogs} title="All Blogs" />
+      <ListLayout
+        blogs={blogs}
+        title="All Blogs"
+        pagination={pagination}
+        initialDisplayBlogs={initialDisplayBlogs}
+      />
     </>
   );
 }

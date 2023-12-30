@@ -7,6 +7,7 @@ import { Blog } from "contentlayer/generated";
 import { CoreContent } from "pliny/utils/contentlayer";
 import { formatDate } from "pliny/utils/formatDate";
 import { useState } from "react";
+import Pagination from "./Pagination";
 
 interface PaginationProps {
   currentPage: number;
@@ -112,6 +113,14 @@ export default function ListLayout({
           })}
         </ul>
       </div>
+      {pagination &&
+        // &&  pagination.totalPages > 1
+        !searchValue && (
+          <Pagination
+            currentPage={pagination.currentPage}
+            totalPages={pagination.totalPages}
+          />
+        )}
     </>
   );
 }
