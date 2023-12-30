@@ -1,7 +1,11 @@
 "use client";
 
+import CustomLink from "@/components/Link";
+import Tag from "@/components/Tag";
+import siteMetadata from "@/data/siteMetadata";
 import { Blog } from "contentlayer/generated";
 import { CoreContent } from "pliny/utils/contentlayer";
+import { formatDate } from "pliny/utils/formatDate";
 import { useState } from "react";
 
 interface PaginationProps {
@@ -18,24 +22,36 @@ interface Props {
 export default function ListLayout({
   blogs,
   title,
-  initialDisplayBlogs,
+  initialDisplayBlogs = [],
   pagination,
 }: Props) {
   const [searchValue, setSearchValue] = useState("");
+  const filteredBlogs = blogs.filter((blog) => {
+    const searchContent = blog.title + blog.summary + blog.tags?.join(" ");
+    return searchContent.toLowerCase().includes(searchValue.toLowerCase());
+  });
+
+  const displayBlogs =
+    initialDisplayBlogs.length > 0 && !searchValue
+      ? initialDisplayBlogs
+      : filteredBlogs;
 
   return (
     <>
-      <div>
-        <div>
-          <h1> {title}</h1>
-          <div>
+      <div className="divide-y divide-grey-200 dark:divide-gray-700">
+        <div className="space-y-2 pb-8 pt-6 md:space-y-5">
+          <h1 className="text-3xl font-extrabold leading-9 tracking-tight text-gray-900 dark:text-gray-100 sm:text-4xl sm:leading-10 md:text-6xl md:leading-14">
+            {title}
+          </h1>
+          <div className="relative max-w-lg">
             <label>
               <span className="sr-only"></span>
               <input
                 aria-label="Search Blogs"
                 type="text"
                 onChange={(e) => setSearchValue(e.target.value)}
-                placeholder="Search articles"
+                placeholder="Search blogs"
+                className="block w-full rounded-md border border-gray-300 bg-white px-4 py-2 text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-900 dark:bg-gray-800 dark:text-gray-100"
               />
             </label>
             <svg
@@ -54,6 +70,40 @@ export default function ListLayout({
             </svg>
           </div>
         </div>
+        <ul>
+          {true && "Sorry, No blog found."}
+          {displayBlogs.map((blog) => {
+            const { path, date, title, summary, tags } = blog;
+
+            return (
+              <li key={path}>
+                <article>
+                  <dl>
+                    <dt> Published on </dt>
+                    <dd>
+                      <time dateTime={date}>
+                        {formatDate(date, siteMetadata.locale)}
+                      </time>
+                    </dd>
+                  </dl>
+                  <div>
+                    <div>
+                      <h3>
+                        <CustomLink href={path}>{title}</CustomLink>
+                      </h3>
+                      <div>
+                        {tags?.map((tag) => (
+                          <Tag key={tag} text={tag} />
+                        ))}
+                      </div>
+                    </div>
+                    <div>{summary}</div>
+                  </div>
+                </article>
+              </li>
+            );
+          })}
+        </ul>
       </div>
     </>
   );
