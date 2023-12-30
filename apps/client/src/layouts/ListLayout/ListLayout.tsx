@@ -72,7 +72,11 @@ export default function ListLayout({
           </div>
         </div>
         <ul>
-          {!displayBlogs.length && "Sorry, No blog found."}
+          {!displayBlogs.length && (
+            <div className="  py-4 text-2xl font-medium leading-8 tracking-tight">
+              No blog found.
+            </div>
+          )}
           {displayBlogs.map((blog) => {
             const { path, date, title, summary, tags } = blog;
 
