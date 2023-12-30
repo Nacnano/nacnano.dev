@@ -13,7 +13,7 @@ export const generateStaticParams = async () => {
   return paths;
 };
 
-export default function ({ params }: { params: { page: string } }) {
+export default function Page({ params }: { params: { page: string } }) {
   const blogs = allCoreContent(sortPosts(allBlogs));
   const pageNumber = parseInt(params.page);
   const initialDisplayBlogs = blogs.slice(
