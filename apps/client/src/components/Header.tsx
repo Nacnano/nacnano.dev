@@ -3,6 +3,7 @@ import headerNavLinks from "@/data/headerNavLinks";
 import Logo from "@/components/Logo";
 import ThemeSwitch from "@/components/ThemeSwitch";
 import CustomLink from "@/components/Link";
+import MobileNav from "./MobileNav";
 
 const Header = () => {
   return (
@@ -36,6 +37,7 @@ const Header = () => {
             </CustomLink>
           ))}
         <ThemeSwitch />
+        <MobileNav />
       </div>
     </header>
   );
