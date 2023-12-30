@@ -9,14 +9,20 @@ interface Props {
 export default function Pagination({ currentPage, totalPages }: Props) {
   const pathName = usePathname();
   const basePath = pathName.split("/")[1];
-  //   const prevPage = currentPage - 1 > 0;
-  const prevPage = true;
+  const prevPage = currentPage - 1 > 0;
   const nextPage = currentPage + 1 <= totalPages;
   return (
     <>
-      <div>
-        <nav>
-          {!prevPage && <button> Previous</button>}{" "}
+      <div className="space-y-2 pb-8 pt-6 md:space-y-5">
+        <nav className="flex justify-between">
+          {!prevPage && (
+            <button
+              className="cursor-auto disabled:opacity-50"
+              disabled={!prevPage}
+            >
+              Previous
+            </button>
+          )}
           {prevPage && (
             <CustomLink
               href={
