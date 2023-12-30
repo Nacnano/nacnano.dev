@@ -71,7 +71,7 @@ export default function ListLayout({
           </div>
         </div>
         <ul>
-          {true && "Sorry, No blog found."}
+          {!displayBlogs.length && "Sorry, No blog found."}
           {displayBlogs.map((blog) => {
             const { path, date, title, summary, tags } = blog;
 
