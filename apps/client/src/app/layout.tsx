@@ -1,5 +1,4 @@
-import "styles/tailwind.css";
-import "styles/prism.css";
+import "@/styles/tailwind.css";
 
 import { Inter, Space_Grotesk } from "next/font/google";
 
@@ -56,6 +55,11 @@ export const metadata: Metadata = {
       "max-image-preview": "large",
       "max-snippet": -1,
     },
+  },
+  twitter: {
+    title: siteMetadata.title,
+    card: "summary_large_image",
+    images: [siteMetadata.socialBanner],
   },
 };
 

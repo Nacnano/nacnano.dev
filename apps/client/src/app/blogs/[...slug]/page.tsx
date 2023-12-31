@@ -1,3 +1,5 @@
+import "@/styles/prism.css";
+
 import { Authors, Blog, allAuthors, allBlogs } from "contentlayer/generated";
 import { notFound } from "next/navigation";
 import {
