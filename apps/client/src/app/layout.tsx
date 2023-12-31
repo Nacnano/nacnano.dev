@@ -38,6 +38,12 @@ export const metadata: Metadata = {
     locale: "en_US",
     type: "website",
   },
+  alternates: {
+    canonical: "./",
+    types: {
+      "application/rss+xml": `${siteMetadata.siteUrl}/feed.xml`,
+    },
+  },
   robots: {
     index: false,
     follow: true,
