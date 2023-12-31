@@ -1,4 +1,5 @@
 import "styles/tailwind.css";
+import "styles/prism.css";
 
 import { Inter, Space_Grotesk } from "next/font/google";
 
