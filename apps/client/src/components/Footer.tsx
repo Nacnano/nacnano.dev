@@ -26,7 +26,7 @@ const Footer = () => {
           <div>{` • `}</div>
           <CustomLink href="/">{siteMetadata.title}</CustomLink>
         </div>
-        <div className="mb-80 text-sm text-gray-500 dark:text-gray-400">
+        <div className="mb-8 text-sm text-gray-500 dark:text-gray-400">
           Based on{" "}
           <CustomLink href="https://github.com/timlrx/tailwind-nextjs-starter-blog">
             Tailwind Nextjs Theme
