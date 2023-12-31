@@ -30,7 +30,7 @@ export default function Pagination({ currentPage, totalPages }: Props) {
                   ? `/${basePath}/`
                   : `/${basePath}/page/${currentPage - 1}`
               }
-              rel="TODO"
+              rel="prev"
             >
               Previous
             </CustomLink>
