@@ -56,7 +56,7 @@ const Main = ({ posts }) => {
                       </div>
                       <div className="text-base font-medium leading-6">
                         <CustomLink
-                          href={`/blog/${slug}`}
+                          href={`/blogs/${slug}`}
                           className="text-primary-500 hover:text-primary-600 dark:hover:text-primary-400"
                           aria-label={`Read more: "${title}"`}
                         >
@@ -74,11 +74,11 @@ const Main = ({ posts }) => {
       {posts.length > MAX_DISPLAY && (
         <div className="flex justify-end text-base font-medium leading-6">
           <CustomLink
-            href="/blog"
+            href="/blogs"
             className="text-primary-500 hover:text-primary-600 dark:hover:text-primary-400"
-            aria-label="All posts"
+            aria-label="All Blogs"
           >
-            All Posts &rarr;
+            All Blogs &rarr;
           </CustomLink>
         </div>
       )}
