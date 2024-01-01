@@ -21,4 +21,4 @@ const siteMetadata = {
 
 //TODO: Add Analytics
 
-export default siteMetadata
+module.exports = siteMetadata
