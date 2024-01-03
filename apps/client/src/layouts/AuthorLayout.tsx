@@ -34,6 +34,8 @@ export default function AuthorLayout({ children, content }: Props) {
               <Image
                 src={avatar}
                 alt="avatar"
+                placeholder="blur"
+                blurDataURL={avatar}
                 width={192}
                 height={192}
                 className="h-48 w-48 rounded-full"

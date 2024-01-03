@@ -72,6 +72,8 @@ export default function BlogWithDetail({
                         {author.avatar && (
                           <Image
                             src={author.avatar}
+                            placeholder="blur"
+                            blurDataURL={author.avatar}
                             width={38}
                             height={38}
                             alt="avatar"

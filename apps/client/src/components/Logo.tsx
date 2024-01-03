@@ -2,15 +2,18 @@ import Image from "@/components/Image";
 import { FC } from "react";
 
 const Logo: FC = () => {
+  const title = "nacnano-logo";
+  const imgSrc = "/static/images/oong-oong-cropped.jpg";
   return (
     <>
       <div className="select-none items-center">
         <Image
-          alt="nacnano-logo"
-          src="/static/images/oong-oong-cropped.jpg"
-          width={50}
+          alt={title}
+          src={imgSrc}
+          placeholder="blur"
+          blurDataURL={imgSrc}
           height={50}
-          sizes="100vw"
+          width={50}
         />
       </div>
     </>

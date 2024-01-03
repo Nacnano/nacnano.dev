@@ -17,12 +17,21 @@ const Card = ({ title, description, imgSrc, href }) => {
                 aria-label={`Link to ${title}`}
                 className="object-cover object-center md:h-36 lg:h-48"
               >
-                <Image src={imgSrc} alt={title} width={544} height={306} />
+                <Image
+                  src={imgSrc}
+                  alt={title}
+                  placeholder="blur"
+                  blurDataURL={imgSrc}
+                  width={544}
+                  height={306}
+                />
               </CustomLink>
             ) : (
               <Image
                 src={imgSrc}
                 alt={title}
+                placeholder="blur"
+                blurDataURL={imgSrc}
                 width={544}
                 height={306}
                 className="object-cover object-center md:h-36 lg:h-48"
