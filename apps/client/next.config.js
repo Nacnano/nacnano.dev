@@ -4,7 +4,7 @@ const { withContentlayer } = require('next-contentlayer')
 const ContentSecurityPolicy = `
   default-src 'self';
   script-src 'self' 'unsafe-eval' 'unsafe-inline' giscus.app analytics.umami.is;
-  style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; 
+  style-src 'self' 'unsafe-inline';
   font-src 'self' https://fonts.gstatic.com;
   img-src * blob: data:;
   media-src *.s3.amazonaws.com;
