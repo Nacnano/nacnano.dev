@@ -5,7 +5,7 @@ import {
 } from "contentlayer/source-files";
 import { writeFileSync } from "fs";
 import readingTime from "reading-time";
-import GithubSlugger, { slug } from "github-slugger";
+import GithubSlugger, slug from "github-slugger";
 import path from "path";
 // Remark packages
 import remarkGfm from "remark-gfm";
