@@ -12,8 +12,10 @@ const Logo: FC = () => {
           src={imgSrc}
           placeholder="blur"
           blurDataURL={imgSrc}
-          height={50}
-          width={50}
+          width="0"
+          height="0"
+          sizes="100vw"
+          className="w-auto h-12"
         />
       </div>
     </>
