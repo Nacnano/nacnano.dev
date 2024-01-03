@@ -1,4 +1,4 @@
-import slug from "github-slugger";
+import { slug } from "github-slugger";
 import CustomLink from "./Link";
 
 interface Props {
