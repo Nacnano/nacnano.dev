@@ -4,8 +4,8 @@
   "private": true,
   "scripts": {
     "start": "next dev",
-    "dev": "cross-env INIT_CWD=$PWD next dev && cross-env NODE_OPTIONS='--experimental-json-modules' node ./apps/client/src/scripts/postbuild.mjs",
-    "build": "next build",
+    "dev": "cross-env INIT_CWD=$PWD next dev",
+    "build": "cross-env INIT_CWD=$PWD next build && cross-env NODE_OPTIONS='--experimental-json-modules' node ./scripts/postbuild.mjs",
     "serve": "next start",
     "analyze": "cross-env ANALYZE=true next build",
     "lint": "next lint --fix --dir src/app --dir src/components --dir src/layouts --dir src/scripts"
