@@ -2,18 +2,18 @@
   <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
     <channel>
       <title>Nacnano.dev</title>
-      <link>https://nacnano-dev-client-nacnano.vercel.app//blog</link>
+      <link>https://nacnano-dev-client-nacnano.vercel.app/blog</link>
       <description>Blogs written by Nacnano</description>
       <language>en-us</language>
       <managingEditor>chotpisit.adu@gmail.com (Nacnano)</managingEditor>
       <webMaster>chotpisit.adu@gmail.com (Nacnano)</webMaster>
       <lastBuildDate>Tue, 08 Mar 2016 00:00:00 GMT</lastBuildDate>
-      <atom:link href="https://nacnano-dev-client-nacnano.vercel.app//tags/markdown/feed.xml" rel="self" type="application/rss+xml"/>
+      <atom:link href="https://nacnano-dev-client-nacnano.vercel.app/tags/markdown/feed.xml" rel="self" type="application/rss+xml"/>
       
   <item>
-    <guid>https://nacnano-dev-client-nacnano.vercel.app//blog/test copy 10</guid>
+    <guid>https://nacnano-dev-client-nacnano.vercel.app/blog/test copy 10</guid>
     <title>Sample .md file</title>
-    <link>https://nacnano-dev-client-nacnano.vercel.app//blog/test copy 10</link>
+    <link>https://nacnano-dev-client-nacnano.vercel.app/blog/test copy 10</link>
     <description>Example of a markdown file with code blocks and syntax highlighting</description>
     <pubDate>Tue, 08 Mar 2016 00:00:00 GMT</pubDate>
     <author>chotpisit.adu@gmail.com (Nacnano)</author>
@@ -21,9 +21,9 @@
   </item>
 
   <item>
-    <guid>https://nacnano-dev-client-nacnano.vercel.app//blog/test copy 2</guid>
+    <guid>https://nacnano-dev-client-nacnano.vercel.app/blog/test copy 2</guid>
     <title>Sample .md file</title>
-    <link>https://nacnano-dev-client-nacnano.vercel.app//blog/test copy 2</link>
+    <link>https://nacnano-dev-client-nacnano.vercel.app/blog/test copy 2</link>
     <description>Example of a markdown file with code blocks and syntax highlighting</description>
     <pubDate>Tue, 08 Mar 2016 00:00:00 GMT</pubDate>
     <author>chotpisit.adu@gmail.com (Nacnano)</author>
@@ -31,9 +31,9 @@
   </item>
 
   <item>
-    <guid>https://nacnano-dev-client-nacnano.vercel.app//blog/test copy 3</guid>
+    <guid>https://nacnano-dev-client-nacnano.vercel.app/blog/test copy 3</guid>
     <title>Sample .md file</title>
-    <link>https://nacnano-dev-client-nacnano.vercel.app//blog/test copy 3</link>
+    <link>https://nacnano-dev-client-nacnano.vercel.app/blog/test copy 3</link>
     <description>Example of a markdown file with code blocks and syntax highlighting</description>
     <pubDate>Tue, 08 Mar 2016 00:00:00 GMT</pubDate>
     <author>chotpisit.adu@gmail.com (Nacnano)</author>
@@ -41,9 +41,9 @@
   </item>
 
   <item>
-    <guid>https://nacnano-dev-client-nacnano.vercel.app//blog/test copy 4</guid>
+    <guid>https://nacnano-dev-client-nacnano.vercel.app/blog/test copy 4</guid>
     <title>Sample .md file</title>
-    <link>https://nacnano-dev-client-nacnano.vercel.app//blog/test copy 4</link>
+    <link>https://nacnano-dev-client-nacnano.vercel.app/blog/test copy 4</link>
     <description>Example of a markdown file with code blocks and syntax highlighting</description>
     <pubDate>Tue, 08 Mar 2016 00:00:00 GMT</pubDate>
     <author>chotpisit.adu@gmail.com (Nacnano)</author>
@@ -51,9 +51,9 @@
   </item>
 
   <item>
-    <guid>https://nacnano-dev-client-nacnano.vercel.app//blog/test copy 5</guid>
+    <guid>https://nacnano-dev-client-nacnano.vercel.app/blog/test copy 5</guid>
     <title>Sample .md file</title>
-    <link>https://nacnano-dev-client-nacnano.vercel.app//blog/test copy 5</link>
+    <link>https://nacnano-dev-client-nacnano.vercel.app/blog/test copy 5</link>
     <description>Example of a markdown file with code blocks and syntax highlighting</description>
     <pubDate>Tue, 08 Mar 2016 00:00:00 GMT</pubDate>
     <author>chotpisit.adu@gmail.com (Nacnano)</author>
@@ -61,9 +61,9 @@
   </item>
 
   <item>
-    <guid>https://nacnano-dev-client-nacnano.vercel.app//blog/test copy 6</guid>
+    <guid>https://nacnano-dev-client-nacnano.vercel.app/blog/test copy 6</guid>
     <title>Sample .md file</title>
-    <link>https://nacnano-dev-client-nacnano.vercel.app//blog/test copy 6</link>
+    <link>https://nacnano-dev-client-nacnano.vercel.app/blog/test copy 6</link>
     <description>Example of a markdown file with code blocks and syntax highlighting</description>
     <pubDate>Tue, 08 Mar 2016 00:00:00 GMT</pubDate>
     <author>chotpisit.adu@gmail.com (Nacnano)</author>
@@ -71,9 +71,9 @@
   </item>
 
   <item>
-    <guid>https://nacnano-dev-client-nacnano.vercel.app//blog/test copy 7</guid>
+    <guid>https://nacnano-dev-client-nacnano.vercel.app/blog/test copy 7</guid>
     <title>Sample .md file</title>
-    <link>https://nacnano-dev-client-nacnano.vercel.app//blog/test copy 7</link>
+    <link>https://nacnano-dev-client-nacnano.vercel.app/blog/test copy 7</link>
     <description>Example of a markdown file with code blocks and syntax highlighting</description>
     <pubDate>Tue, 08 Mar 2016 00:00:00 GMT</pubDate>
     <author>chotpisit.adu@gmail.com (Nacnano)</author>
@@ -81,9 +81,9 @@
   </item>
 
   <item>
-    <guid>https://nacnano-dev-client-nacnano.vercel.app//blog/test copy 8</guid>
+    <guid>https://nacnano-dev-client-nacnano.vercel.app/blog/test copy 8</guid>
     <title>Sample .md file</title>
-    <link>https://nacnano-dev-client-nacnano.vercel.app//blog/test copy 8</link>
+    <link>https://nacnano-dev-client-nacnano.vercel.app/blog/test copy 8</link>
     <description>Example of a markdown file with code blocks and syntax highlighting</description>
     <pubDate>Tue, 08 Mar 2016 00:00:00 GMT</pubDate>
     <author>chotpisit.adu@gmail.com (Nacnano)</author>
@@ -91,9 +91,9 @@
   </item>
 
   <item>
-    <guid>https://nacnano-dev-client-nacnano.vercel.app//blog/test copy 9</guid>
+    <guid>https://nacnano-dev-client-nacnano.vercel.app/blog/test copy 9</guid>
     <title>Sample .md file</title>
-    <link>https://nacnano-dev-client-nacnano.vercel.app//blog/test copy 9</link>
+    <link>https://nacnano-dev-client-nacnano.vercel.app/blog/test copy 9</link>
     <description>Example of a markdown file with code blocks and syntax highlighting</description>
     <pubDate>Tue, 08 Mar 2016 00:00:00 GMT</pubDate>
     <author>chotpisit.adu@gmail.com (Nacnano)</author>
@@ -101,9 +101,9 @@
   </item>
 
   <item>
-    <guid>https://nacnano-dev-client-nacnano.vercel.app//blog/test copy</guid>
+    <guid>https://nacnano-dev-client-nacnano.vercel.app/blog/test copy</guid>
     <title>Sample .md file</title>
-    <link>https://nacnano-dev-client-nacnano.vercel.app//blog/test copy</link>
+    <link>https://nacnano-dev-client-nacnano.vercel.app/blog/test copy</link>
     <description>Example of a markdown file with code blocks and syntax highlighting</description>
     <pubDate>Tue, 08 Mar 2016 00:00:00 GMT</pubDate>
     <author>chotpisit.adu@gmail.com (Nacnano)</author>
@@ -111,9 +111,9 @@
   </item>
 
   <item>
-    <guid>https://nacnano-dev-client-nacnano.vercel.app//blog/test</guid>
+    <guid>https://nacnano-dev-client-nacnano.vercel.app/blog/test</guid>
     <title>Sample .md file</title>
-    <link>https://nacnano-dev-client-nacnano.vercel.app//blog/test</link>
+    <link>https://nacnano-dev-client-nacnano.vercel.app/blog/test</link>
     <description>Example of a markdown file with code blocks and syntax highlighting</description>
     <pubDate>Tue, 08 Mar 2016 00:00:00 GMT</pubDate>
     <author>chotpisit.adu@gmail.com (Nacnano)</author>
