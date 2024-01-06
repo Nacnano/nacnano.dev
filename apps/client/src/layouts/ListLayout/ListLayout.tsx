@@ -41,7 +41,6 @@ export default function ListLayout({
   };
 
   const pathname = usePathname();
-  console.log(pathname.split("/"));
   const tagCounts = tagData as Record<string, number>;
   const tagKeys = Object.keys(tagCounts);
   const sortedTags = tagKeys.sort((a, b) => tagCounts[b] - tagCounts[a]);
@@ -156,7 +155,7 @@ export default function ListLayout({
                     <div>
                       <h3 className="text-2xl font-bold leading-8 tracking-tight">
                         <CustomLink
-                          href={path}
+                          href={`/${path}`}
                           className="text-gray-900 dark:text-gray-100"
                         >
                           {title}
