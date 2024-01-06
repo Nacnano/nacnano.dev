@@ -72,11 +72,11 @@ export async function generateMetadata({
   };
 }
 
-export const generateStaticParams = () => {
-  const paths = allBlogs.map((p) => ({ slug: p.slug.split("/") }));
+// export const generateStaticParams = () => {
+//   const paths = allBlogs.map((p) => ({ slug: p.slug.split("/") }));
 
-  return paths;
-};
+//   return paths;
+// };
 
 export default async function Page({ params }: { params: { slug: string[] } }) {
   const slug = decodeURI(params.slug.join("/"));
