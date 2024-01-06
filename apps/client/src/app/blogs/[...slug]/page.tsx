@@ -78,7 +78,7 @@ export const generateStaticParams = () => {
   return paths;
 };
 
-export default function Page({ params }: { params: { slug: string[] } }) {
+export default async function Page({ params }: { params: { slug: string[] } }) {
   const slug = decodeURI(params.slug.join("/"));
 
   const blogs = allCoreContent(sortPosts(allBlogs));
