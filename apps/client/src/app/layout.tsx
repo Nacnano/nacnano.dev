@@ -85,6 +85,7 @@ export default function RootLayout({
         sizes="32x32"
         href="/static/favicons/favicon-32x32.png"
       />
+      <link rel="manifest" href="/static/favicons/site.webmanifest" />
       <meta
         name="theme-color"
         media="(prefers-color-scheme: light)"
