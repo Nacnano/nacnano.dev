@@ -30,15 +30,6 @@ export default function ListLayout({
   pagination,
 }: Props) {
   const [searchValue, setSearchValue] = useState("");
-  const [tagValue, setTagValue] = useState([]);
-
-  const handleTagCLick = (tag) => {
-    if (tagValue.includes(tag)) {
-      setTagValue(tagValue.filter((t) => t !== tag));
-    } else {
-      setTagValue([...tagValue, tag]);
-    }
-  };
 
   const pathname = usePathname();
   const tagCounts = tagData as Record<string, number>;
@@ -49,12 +40,6 @@ export default function ListLayout({
     const searchContent = blog.title + blog.summary + blog.tags?.join(" ");
     return searchContent.toLowerCase().includes(searchValue.toLowerCase());
   });
-
-  if (tagValue.length > 0) {
-    filteredBlogs = filteredBlogs.filter((blog) => {
-      return tagValue.every((tag) => blog.tags?.includes(tag));
-    });
-  }
 
   const displayBlogs =
     initialDisplayBlogs.length > 0 && !searchValue
@@ -97,34 +82,31 @@ export default function ListLayout({
         </div>
         <div className="px-6 py-4">
           {pathname.split("/")[1] === "blogs" ? (
-            <h3 className="font-bold uppercase text-primary-500">All-Tags</h3>
+            <h3 className="font-bold uppercase text-primary-500">All Tags</h3>
           ) : (
             <CustomLink
               href={`/blogs`}
               className="font-bold uppercase text-gray-700 hover:text-primary-500 dark:text-gray-300 dark:hover:text-primary-500"
             >
-              All-Tags
+              All Tags
             </CustomLink>
           )}
           <ul className="flex flex-wrap">
             {sortedTags.map((t) => {
               return (
                 <li key={t} className="my-3">
-                  {tagValue.includes(slug(t)) ? (
-                    <button
-                      onClick={handleTagCLick.bind(this, slug(t))}
-                      className="inline px-3 py-2 text-sm font-bold uppercase text-primary-500"
-                    >
+                  {pathname.split("/tags/")[1] === slug(t) ? (
+                    <h3 className="inline px-3 py-2 text-sm font-bold uppercase text-primary-500">
                       {`${t} (${tagCounts[t]})`}
-                    </button>
+                    </h3>
                   ) : (
-                    <button
-                      onClick={handleTagCLick.bind(this, slug(t))}
+                    <CustomLink
+                      href={`/tags/${slug(t)}`}
                       className="px-3 py-2 text-sm font-medium uppercase text-gray-500 hover:text-primary-500 dark:text-gray-300 dark:hover:text-primary-500"
                       aria-label={`View posts tagged ${t}`}
                     >
                       {`${t} (${tagCounts[t]})`}
-                    </button>
+                    </CustomLink>
                   )}
                 </li>
               );
