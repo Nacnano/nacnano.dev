@@ -20,18 +20,21 @@ const Main = ({ posts }) => {
         <ul className="divide-y divide-gray-200 dark:divide-gray-700">
           {!posts.length && "No posts found."}
           {posts.slice(0, MAX_DISPLAY).map((post) => {
-            const { slug, date, title, summary, tags } = post;
+            const { slug, date, title, summary, tags, readingTime } = post;
             return (
               <li key={slug} className="py-12">
                 <article>
                   <div className="space-y-2 xl:grid xl:grid-cols-4 xl:items-baseline xl:space-y-0">
-                    <dl>
+                    <dl className="flex flex-wrap items-center">
                       <dt className="sr-only">Published on</dt>
                       <dd className="text-base font-medium leading-6 text-gray-500 dark:text-gray-400">
-                        <time dateTime={date}>
+                        <time className="text-lg mr-3" dateTime={date}>
                           {formatDate(date, siteMetadata.locale)}
                         </time>
                       </dd>
+                      <span className="text-base text-gray-400 dark:text-gray-500">
+                        {readingTime.text}
+                      </span>
                     </dl>
                     <div className="space-y-5 xl:col-span-3">
                       <div className="space-y-6">
@@ -50,8 +53,13 @@ const Main = ({ posts }) => {
                             ))}
                           </div>
                         </div>
-                        <div className="prose max-w-none text-gray-500 dark:text-gray-400">
-                          {summary}
+                        <div>
+                          <CustomLink
+                            href={`/blogs/${slug}`}
+                            className="prose max-w-none text-gray-500 dark:text-gray-400"
+                          >
+                            {summary}
+                          </CustomLink>
                         </div>
                       </div>
                       <div className="text-base font-medium leading-6">
