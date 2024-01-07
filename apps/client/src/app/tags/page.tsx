@@ -26,7 +26,7 @@ export default function Page() {
           {!tagKeys.length && "No Tag found."}
           {sortedTags.map((tag) => {
             return (
-              <div className="mb-2 mr-5 mt-2">
+              <div key={tag} className="mb-2 mr-5 mt-2">
                 <Tag text={tag} />
                 <CustomLink
                   href={`/tags/${slug(tag)}`}
