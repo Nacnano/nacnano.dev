@@ -5,7 +5,7 @@ const siteMetadata = {
   description: 'Blogs written by Nacnano',
   language: 'en-us',
   theme: 'system',
-  siteUrl: 'https://nacnano-dev-client-nacnano.vercel.app',
+  siteUrl: 'https://nacnano.dev',
   siteRepo: 'https://github.com/nacnano/nacnano.dev',
   siteLogo: '/static/images/logo.png',
   socialBanner: '/static/images/oong-oong.jpg',
