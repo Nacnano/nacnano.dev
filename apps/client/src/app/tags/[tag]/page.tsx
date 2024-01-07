@@ -1,13 +1,18 @@
 import { genPageMetaData } from "@/app/seo";
 import ListLayout from "@/layouts/ListLayout";
-import { allBlogs } from "contentlayer/generated";
+import { Blog, allBlogs } from "contentlayer/generated";
 import { allCoreContent, sortPosts } from "pliny/utils/contentlayer";
 import { slug } from "github-slugger";
 import tagData from "app/tag-data.json";
 import siteMetadata from "@/data/siteMetadata";
+import { Metadata } from "next";
 
-export async function getStaticPaths({ params }: { params: { tags: string } }) {
-  const tag = decodeURI(params.tags);
+export async function generateMetadata({
+  params,
+}: {
+  params: { tag: string };
+}): Promise<Metadata> {
+  const tag = decodeURI(params.tag);
 
   return genPageMetaData({
     title: "Tags",
@@ -31,12 +36,16 @@ export const generateStaticParams = async () => {
   return paths;
 };
 
-export default function Page({ params }: { params: { tags: string } }) {
-  const tag = decodeURI(params.tags);
+export default function Page({ params }: { params: { tag: string } }) {
+  const tag = decodeURI(params.tag);
   const title = tag[0].toUpperCase() + tag.split(" ").join("-").slice(1);
-  const filterBlogs = allCoreContent(sortPosts(allBlogs)).filter((blog) => {
-    blog.tags && blog.tags.map((_tag) => slug(_tag)).includes(tag);
-  });
+  const filterBlogs = allCoreContent(
+    sortPosts(
+      allBlogs.filter((blog) => {
+        return blog.tags && blog.tags.map((_tag) => slug(_tag)).includes(tag);
+      })
+    )
+  );
 
   return (
     <>
