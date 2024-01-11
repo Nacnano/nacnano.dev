@@ -8,6 +8,7 @@ const Logo: FC = () => {
     <>
       <div className="select-none items-center rounded-lg overflow-hidden">
         <Image
+          title={title}
           alt={title}
           src={imgSrc}
           placeholder="blur"

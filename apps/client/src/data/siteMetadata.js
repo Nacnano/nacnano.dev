@@ -2,7 +2,8 @@ const siteMetadata = {
   title: 'Nacnano.dev',
   author: 'Nacnano',
   headerTitle: 'Nacnano',
-  description: 'Blogs written by Nacnano',
+  description:
+    'These are blogs written by Nacnano, a web developer who loves to write about lifestyles. I usually reflect myself on what I encounter in my daily life.',
   language: 'en-us',
   theme: 'system',
   siteUrl: 'https://nacnano.dev',
