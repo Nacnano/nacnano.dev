@@ -6,7 +6,7 @@ const Logo: FC = () => {
   const imgSrc = "/static/images/oong-oong-cropped.jpg";
   return (
     <>
-      <div className="select-none items-center">
+      <div className="select-none items-center rounded-lg overflow-hidden">
         <Image
           alt={title}
           src={imgSrc}
