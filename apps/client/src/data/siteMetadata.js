@@ -6,7 +6,7 @@ const siteMetadata = {
     'These are blogs written by Nacnano, a web developer who loves to write about lifestyles. I usually reflect myself on what I encounter in my daily life.',
   language: 'en-us',
   theme: 'system',
-  siteUrl: 'https://nacnano.dev',
+  siteUrl: 'https://www.nacnano.dev',
   siteRepo: 'https://github.com/nacnano/nacnano.dev',
   siteLogo: '/static/images/logo.png',
   socialBanner: '/static/images/oong-oong.jpg',
