@@ -9,6 +9,9 @@ import { Authors, Blog } from "contentlayer/generated";
 import { CoreContent } from "pliny/utils/contentlayer";
 import { ReactNode } from "react";
 
+const githubUrl = (path) =>
+  `${siteMetadata.siteRepo}/blob/main/apps/client/src/data/${path}`;
+
 const postDateTemplate: Intl.DateTimeFormatOptions = {
   weekday: "long",
   year: "numeric",
@@ -111,9 +114,11 @@ export default function BlogWithDetail({
                     Discuss on Twitter
                   </CustomLink>
                   {` • `}
-                  <CustomLink href="github.com/TODO">View on GitHub</CustomLink>
+                  <CustomLink href={githubUrl(filePath)}>
+                    View on GitHub
+                  </CustomLink>
                 </div>
-                {/* TODO: Add Comment section */}
+                {/* TODO: Add Comment section using slug*/}
               </div>
               <footer>
                 <div className="divide-gray-200 text-sm font-medium leading-5 dark:divide-gray-700 xl:col-start-1 xl:row-start-2 xl:divide-y">
