@@ -1,5 +1,5 @@
 const siteMetadata = {
-  title: 'Nacnano.dev',
+  title: 'Nacnano - Chotpisit Adunsehawat',
   author: 'Nacnano',
   headerTitle: 'Nacnano',
   description:
