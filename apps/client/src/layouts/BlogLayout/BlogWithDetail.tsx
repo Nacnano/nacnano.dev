@@ -1,6 +1,5 @@
 import Image from "@/components/Image";
 import CustomLink from "@/components/Link";
-import PageTitle from "@/components/PageTitle";
 import ScrollTop from "@/components/ScrollTop";
 import SectionContainer from "@/components/SectionContainer";
 import Tag from "@/components/Tag";
@@ -58,7 +57,9 @@ export default function BlogWithDetail({
                   </div>
                 </dl>
                 <div>
-                  <PageTitle>{title}</PageTitle>
+                  <h1 className="text-3xl font-extrabold leading-9 tracking-tight text-gray-900 dark:text-gray-100 sm:text-4xl sm:leading-10 md:text-5xl md:leading-14">
+                    {title}
+                  </h1>
                 </div>
               </div>
             </header>
