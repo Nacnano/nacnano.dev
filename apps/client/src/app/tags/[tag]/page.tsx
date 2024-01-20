@@ -1,6 +1,6 @@
 import { genPageMetaData } from "@/app/seo";
 import ListLayout from "@/layouts/ListLayout";
-import { Blog, allBlogs } from "contentlayer/generated";
+import { allBlogs } from "contentlayer/generated";
 import { allCoreContent, sortPosts } from "pliny/utils/contentlayer";
 import { slug } from "github-slugger";
 import tagData from "app/tag-data.json";
