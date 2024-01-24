@@ -3,7 +3,7 @@ import { FC } from "react";
 
 const Logo: FC = () => {
   const title = "nacnano-logo";
-  const imgSrc = "/static/images/oong-oong-cropped.jpg";
+  const imgSrc = "/static/images/logo.png";
   return (
     <>
       <div className="select-none items-center rounded-lg overflow-hidden">
