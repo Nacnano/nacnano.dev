@@ -14,6 +14,13 @@ const projectsData = [
     href: "https://github.com/Nacnano/predicting-and-comparing-learners-interest-in-note-taking-from-multimedia-using-a-machine-learning-",
   },
   {
+    title: "CU Intania Open House 2024",
+    description:
+      "A website for Open House event at Faculty of Engineering, Chulalongkorn university used by over 9,000 students. Designed and developed its workshop reservation features using NextJS for both frontend and backend and Firestore for its database",
+    imgSrc: "/static/images/cu-intania-openhouse-2024.png",
+    href: "https://oph.chula.engineering/",
+  },
+  {
     title: "MWIT29 Archive (WIP)",
     description:
       "A website for archiving memorable information from my high school by allowing the students to edit their data using NextJS with MongoDB and Google Cloud Storage (Working in Process)",
