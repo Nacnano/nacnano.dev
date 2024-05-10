@@ -12,7 +12,7 @@ export default function Page() {
           Object.entries(links).map(([key, link]) => (
             <CustomLink
               key={key}
-              className="text-blue-300 hover:text-blue-600 text-lg"
+              className="text-blue-300 text-lg hover:text-blue-600 "
               href={link}
             >
               {key}
