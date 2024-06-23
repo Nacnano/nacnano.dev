@@ -1,7 +1,7 @@
 import Image from "@/components/Image";
 import CustomLink from "@/components/Link";
 
-const Card = ({ title, description, imgSrc, href }) => {
+const ProjectCard = ({ title, description, imgSrc, href }) => {
   return (
     <>
       <div className="md max-w-[544px] p-4 md:w-1/2">
@@ -66,4 +66,4 @@ const Card = ({ title, description, imgSrc, href }) => {
   );
 };
 
-export default Card;
+export default ProjectCard;
