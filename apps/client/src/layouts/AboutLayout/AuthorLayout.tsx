@@ -3,6 +3,8 @@ import { Authors } from "contentlayer/generated";
 import Image from "@/components/Image";
 import SocialIcon from "@/components/social-icons";
 import siteMetadata from "@/data/siteMetadata";
+import Timeline from "./Timeline";
+import { timelineItems } from "@/data/timelineData";
 
 interface Props {
   children: React.ReactNode;
@@ -51,6 +53,11 @@ export default function AuthorLayout({ children, content }: Props) {
             {children}
           </div>
         </div>
+        <h2 className="text-2xl font-bold leading-8 tracking-tight mt-8 text-center">
+          My Journey
+        </h2>
+        <Timeline timelineItems={timelineItems} />
+        <div></div>
       </div>
     </>
   );
