@@ -18,7 +18,7 @@ const Timeline: React.FC<TimelineProps> = ({ timelineItems }) => {
       {timelineItems.map((item, index) => (
         <div key={index} className="flex items-center w-full mb-8">
           <div className="w-1/2 pr-8 text-right">
-            <div className="text-sm font-semibold text-gray-500">
+            <div className="text-md font-semibold text-gray-500">
               {item.date}
             </div>
           </div>
