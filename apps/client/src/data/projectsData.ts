@@ -7,6 +7,13 @@ const projectsData = [
     href: "https://cugetrekt.vercel.app/",
   },
   {
+    title: "CU Get Reg",
+    description:
+      "Thinc's open source project to provide courses data to Chulalongkorn students and plan their enrollments. Contributed by developing its Backoffice backend service using NestJS and GraphQL for managing over 700 reviews and 500 elective courses with over 15,000 maximum users per week.",
+    imgSrc: "/static/images/cugetreg-logo.png",
+    href: "https://cugetreg.com",
+  },
+  {
     title: "Computer Science Project",
     description:
       "Usage of MASK R-CNN model for Image Segmentation and Random Forest model for Factor Identification to analyse multimedia effects on students' learning efficiency",
