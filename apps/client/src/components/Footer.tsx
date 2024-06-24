@@ -19,18 +19,12 @@ const Footer = () => {
           <SocialIcon kind="linkedin" href={siteMetadata.linkedin} size={6} />
           <SocialIcon kind="twitter" href={siteMetadata.twitter} size={6} />
         </div>
-        <div className="mb-2 flex space-x-2 text-sm text-gray-500 dark:text-gray-400">
-          <div>{siteMetadata.author}</div>
-          <div>{` • `}</div>
-          <div>{`© ${new Date().getFullYear()}`}</div>
-          <div>{` • `}</div>
+        <div className="mb-10 flex md:space-x-2 text-sm align-middle text-gray-500 dark:text-gray-400">
+          {/* <div>{siteMetadata.author}</div> */}
+          {/* <div>{` • `}</div> */}
           <CustomLink href="/">{siteMetadata.title}</CustomLink>
-        </div>
-        <div className="mb-8 text-sm text-gray-500 dark:text-gray-400">
-          Based on{" "}
-          <CustomLink href="https://github.com/timlrx/tailwind-nextjs-starter-blog">
-            Tailwind Nextjs Theme
-          </CustomLink>
+          {/* <div>{` • `}</div> */}
+          <div>{`© ${new Date().getFullYear()}`}</div>
         </div>
       </div>
     </footer>
