@@ -53,11 +53,15 @@ export default function AuthorLayout({ children, content }: Props) {
             {children}
           </div>
         </div>
+      </div>
+      <div>
         <h2 className="text-2xl font-bold leading-8 tracking-tight mt-8 text-center">
-          My Journey
+          Now
         </h2>
         <Timeline timelineItems={timelineItems} />
-        <div></div>
+        <h2 className="text-2xl font-bold leading-8 tracking-tight text-center">
+          Start
+        </h2>
       </div>
     </>
   );
