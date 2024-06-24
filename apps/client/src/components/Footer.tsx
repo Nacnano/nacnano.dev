@@ -20,10 +20,7 @@ const Footer = () => {
           <SocialIcon kind="twitter" href={siteMetadata.twitter} size={6} />
         </div>
         <div className="mb-10 flex md:space-x-2 text-sm align-middle text-gray-500 dark:text-gray-400">
-          {/* <div>{siteMetadata.author}</div> */}
-          {/* <div>{` • `}</div> */}
           <CustomLink href="/">{siteMetadata.title}</CustomLink>
-          {/* <div>{` • `}</div> */}
           <div>{`© ${new Date().getFullYear()}`}</div>
         </div>
       </div>
