@@ -1,14 +1,14 @@
 export const timelineItems = [
   {
-    date: "2023 - Present",
-    title: "Senior Developer",
-    location: "Tech Company",
-    description: "Working on exciting projects in the tech industry.",
+    date: "June, 2024 - Present",
+    title: "Software Engineer Intern",
+    location: "Agoda",
+    description: "Intern goes brrrrr",
   },
   {
-    date: "2020 - 2023",
-    title: "Mid-level Developer",
-    location: "Another Tech Company",
-    description: "Developed various web applications and services.",
+    date: "2022 - Present",
+    title: "Computer Engineering Student",
+    location: "Chulalongkorn University",
+    description: "4.00 GPAX (3 semesters) ayyy",
   },
 ];
