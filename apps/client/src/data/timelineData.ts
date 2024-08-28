@@ -1,6 +1,12 @@
 export const timelineItems = [
   {
-    date: "June, 2024 - Present",
+    date: "August, 2024 - Present",
+    title: "Software Engineer Part-time Intern",
+    location: "Agoda",
+    description: "Still doing pew pew",
+  },
+  {
+    date: "June, 2024 - August, 2024",
     title: "Software Engineer Intern",
     location: "Agoda",
     description:
@@ -25,7 +31,7 @@ export const timelineItems = [
     title: "Computer Engineering",
     location: "Chulalongkorn University",
     description:
-      "4.00 GPA for 3 semesters, TA for software development courses.",
+      "4.00 GPA for 4 semesters, TA for software development courses.",
   },
   {
     date: "2019 - 2022",
