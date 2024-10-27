@@ -12,6 +12,8 @@ import { usePathname } from "next/navigation";
 import tagData from "@/app/tag-data.json";
 import { slug } from "github-slugger";
 
+const TAGS_SHOW_AMOUNT: number = 5;
+
 interface PaginationProps {
   currentPage: number;
   totalPages: number;
@@ -30,6 +32,7 @@ export default function ListLayout({
   pagination,
 }: Props) {
   const [searchValue, setSearchValue] = useState("");
+  const [showMore, setShowMore] = useState(false); // Add state for "show more"
 
   const pathname = usePathname();
   const tagCounts = tagData as Record<string, number>;
@@ -45,6 +48,10 @@ export default function ListLayout({
     initialDisplayBlogs.length > 0 && !searchValue
       ? initialDisplayBlogs
       : filteredBlogs;
+
+  const tagsToShow = showMore
+    ? sortedTags
+    : sortedTags.slice(0, TAGS_SHOW_AMOUNT);
 
   return (
     <>
@@ -93,31 +100,37 @@ export default function ListLayout({
               </CustomLink>
             )}
             <ul className="flex flex-wrap">
-              {sortedTags.map((t) => {
-                return (
-                  <li key={t} className="my-3">
-                    {pathname.split("/tags/")[1] === slug(t) ? (
-                      <h3 className="inline px-3 py-2 text-sm font-bold uppercase text-primary-500">
-                        {`${t} (${tagCounts[t]})`}
-                      </h3>
-                    ) : (
-                      <CustomLink
-                        href={`/tags/${slug(t)}`}
-                        className="px-3 py-2 text-sm font-medium uppercase text-gray-500 hover:text-primary-500 dark:text-gray-300 dark:hover:text-primary-500"
-                        aria-label={`View posts tagged ${t}`}
-                      >
-                        {`${t} (${tagCounts[t]})`}
-                      </CustomLink>
-                    )}
-                  </li>
-                );
-              })}
+              {tagsToShow.map((t) => (
+                <li key={t} className="my-3">
+                  {pathname.split("/tags/")[1] === slug(t) ? (
+                    <h3 className="inline px-3 py-2 text-sm font-bold uppercase text-primary-500">
+                      {`${t} (${tagCounts[t]})`}
+                    </h3>
+                  ) : (
+                    <CustomLink
+                      href={`/tags/${slug(t)}`}
+                      className="inline px-3 py-2 text-sm font-medium uppercase text-gray-500 hover:text-primary-500 dark:text-gray-300 dark:hover:text-primary-500"
+                      aria-label={`View posts tagged ${t}`}
+                    >
+                      {`${t} (${tagCounts[t]})`}
+                    </CustomLink>
+                  )}
+                </li>
+              ))}
+              <li className="my-3">
+                <div
+                  onClick={() => setShowMore(!showMore)}
+                  className="inline px-3 py-2 text-sm font-medium text-primary-500 hover:text-gray-500 hover: cursor-pointer dark:text-primary-500 dark:hover:text-gray-300"
+                >
+                  {showMore ? "Show less tags" : "Show all tags"}
+                </div>
+              </li>
             </ul>
           </div>
         </div>
         <ul>
           {!displayBlogs.length && (
-            <div className="  py-4 text-2xl font-medium leading-8 tracking-tight">
+            <div className="py-4 text-2xl font-medium leading-8 tracking-tight">
               No blog found.
             </div>
           )}
@@ -126,9 +139,9 @@ export default function ListLayout({
 
             return (
               <li key={path} className="py-4">
-                <article className=" space-y-2 xl:grid xl:grid-cols-4 xl:items-baseline xl:space-y-0">
+                <article className="space-y-2 xl:grid xl:grid-cols-4 xl:items-baseline xl:space-y-0">
                   <dl className="flex flex-wrap items-center">
-                    <dt className="sr-only"> Published on </dt>
+                    <dt className="sr-only">Published on</dt>
                     <dd className="text-base font-medium leading-6 text-gray-500 dark:text-gray-400">
                       <time className="text-lg mr-3" dateTime={date}>
                         {formatDate(date, siteMetadata.locale)}
