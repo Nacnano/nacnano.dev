@@ -1,3 +1,5 @@
+import { description } from "./siteMetadata";
+
 export const timelineItems = [
   {
     date: "Starting August - December, 2025",
@@ -11,6 +13,13 @@ export const timelineItems = [
     location:
       "Japan Advanced Institute of Science and Technology (JAIST), Nomi, Japan",
     description: "Upcoming internship focusing on AI research.",
+  },
+  {
+    date: "May, 2025 - Present",
+    title: "Software Engineer, Part Time",
+    location: "Ayasan Holding, Remote",
+    description:
+      "maintaining and developing new features for the Ayasan website using NextJS, React, and NodeJS. Implementing new features and fixing bugs in the Ayasan mobile app using React Native.",
   },
   {
     date: "November, 2024 - June, 2025",
@@ -72,6 +81,7 @@ export const timelineItems = [
     date: "2016 - 2019",
     title: "Secondary School",
     location: "Suankularb Wittayalai School, Thailand",
-    description: "GPA 3.56. Playing Football all day",
+    description:
+      "GPA 3.56. Played Football all day. Started coding for the first time",
   },
 ];
