@@ -1,63 +1,77 @@
 export const timelineItems = [
   {
-    date: "August, 2024 - Present",
-    title: "Software Engineer Part-time Intern",
-    location: "Agoda",
-    description: "Still doing pew pew",
+    date: "Starting August - December, 2025",
+    title: "Incoming AI Technology Risk Analyst, Intern",
+    location: "SCBX, Bangkok, Thailand",
+    description: "Upcoming internship focusing on AI technology risk.",
   },
   {
-    date: "June, 2024 - August, 2024",
-    title: "Software Engineer Intern",
-    location: "Agoda",
-    description:
-      "Migrating backend services to Kotlin. Developing internal tool using React for account data management.",
+    date: "Starting June - August, 2025",
+    title: "Incoming AI Researcher, Intern",
+    location:
+      "Japan Advanced Institute of Science and Technology (JAIST), Nomi, Japan",
+    description: "Upcoming internship focusing on AI research.",
   },
   {
-    date: "June, 2023 - August, 2023",
-    title: "Full Stack Developer Intern",
-    location: "Wang Data Market",
+    date: "November, 2024 - June, 2025",
+    title: "Data Engineer, Part Time",
+    location: "People's Party, Bangkok, Thailand",
     description:
-      "Implemented form features with React and API endpoints with ExpressJS",
+      "Implementing and deploying RAG LLM, creating data pipelines with Google BigQuery using Apache Airflow, and integrating data using Krayin CRM.",
   },
   {
-    date: "March, 2022 - August, 2022",
-    title: "Full Stack Developer and Data Scientist Intern",
-    location: "MonkeyEveryday",
+    date: "June - November, 2024",
+    title: "Software Engineer, Intern",
+    location: "Agoda, Bangkok, Thailand",
     description:
-      "Developed TCAS Ranking algorithm. Conducted data analysis with PostgreSQL. Automated user data updates using Cypress. Maintained websites with VueJS and Firebase.",
+      "Migrated .NET and Scala internal tool to Kotlin. Integrated OPA and Okta Oauth2 Proxy for authorization.",
   },
   {
-    date: "2022 - Present",
-    title: "Computer Engineering",
-    location: "Chulalongkorn University",
+    date: "August, 2022 - Present",
+    title: "Full Stack Developer, Part Time",
+    location: "MonkeyEveryday, Bangkok, Thailand",
     description:
-      "4.00 GPA for 4 semesters, TA for software development courses.",
+      "Maintained websites using NextJS, VueJS, NestJS with GraphQL and Prisma.",
+  },
+  {
+    date: "June - August, 2023",
+    title: "Full Stack Developer, Intern",
+    location: "Wang Data Market, Bangkok, Thailand",
+    description:
+      "Implemented various input types for its form feature using React and creating new API endpoints using ExpressJS. Designed and developed new base structures for an upcoming main AI feature.",
+  },
+  {
+    date: "March - August, 2022",
+    title: "Full Stack Developer and Data Analyst, Intern",
+    location: "MonkeyEveryday, Bangkok, Thailand",
+    description:
+      "Designed, implemented, and maintained the TCAS Ranking service. Automated bots for updating user data and implemented e2e tests using Selenium and Cypress. Queried MySQL and PostgreSQL databases for data analysis.",
+  },
+  {
+    date: "2022 - Present (Expected Graduation: June 2026)",
+    title: "B.Eng. Computer Engineering",
+    location: "Chulalongkorn University, Thailand",
+    description:
+      "Achieved 3.98 GPA for 5 semesters. Teaching Assistant: Computer Engineering Essentials (Backend Course).",
   },
   {
     date: "2019 - 2022",
     title: "High School",
-    location: "Mahidol Wittayanusorn School",
+    location: "Mahidol Wittayanusorn School, Thailand",
     description:
-      "4.00 GPA, participated in exchange programs and competitions.",
+      "GPA 4.00. Participated in many high school exchange programs, international symposiums, and competitions.",
   },
   {
     date: "2019 - 2022",
-    title: "Computer Olympiad",
+    title: "Computer Olympiad Camp",
     location: "Kasetsart University and Mahidol Wittayanusorn School",
     description:
-      "Qualified for POSN Computer Olympiad second camp. Placed first reserved for the 17th Thailand Olympiad in Informatics",
+      "Qualified to the POSN Computer Olympiad camp at Kasetsart University (2019) and Mahidol Wittayanusorn School (2020, 2021).",
   },
   {
     date: "2016 - 2019",
-    title: "Middle School",
-    location: "Suankularb Wittayalai School",
-    description: "3.56 GPA.",
-  },
-
-  {
-    date: "2013 - 2016",
-    title: "Primary School",
-    location: "Anuban Samut Sakhon School",
-    description: "3.97 GPA.",
+    title: "Secondary School",
+    location: "Suankularb Wittayalai School, Thailand",
+    description: "GPA 3.56. Playing Football all day",
   },
 ];
