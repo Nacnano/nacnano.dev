@@ -3,23 +3,24 @@ import { description } from "./siteMetadata";
 export const timelineItems = [
   {
     date: "Starting August - December, 2025",
-    title: "Incoming AI Technology Risk Analyst, Intern",
+    title: "AI Technology Risk Analyst, Intern",
     location: "SCBX, Bangkok, Thailand",
-    description: "Upcoming internship focusing on AI technology risk.",
+    description: "Internship focusing on AI technology risk.",
   },
   {
     date: "Starting June - August, 2025",
-    title: "Incoming AI Researcher, Intern",
+    title: "AI Researcher, Intern",
     location:
       "Japan Advanced Institute of Science and Technology (JAIST), Nomi, Japan",
-    description: "Upcoming internship focusing on AI research.",
+    description:
+      "AI Safety and Alignment research under joint supervision of JAIST and Chulalongkorn University related to mechanistic interpretability of large language models for chain of thought reasoning and randomness in LLMs",
   },
   {
     date: "May, 2025 - Present",
     title: "Software Engineer, Part Time",
     location: "Ayasan Holding, Remote",
     description:
-      "maintaining and developing new features for the Ayasan website using NextJS, React, and NodeJS. Implementing new features and fixing bugs in the Ayasan mobile app using React Native.",
+      "Maintaining and developing new features for the Ayasan website using NextJS, React, and NodeJS. Implementing new features and fixing bugs in the Ayasan mobile app using React Native.",
   },
   {
     date: "November, 2024 - June, 2025",
