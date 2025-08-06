@@ -13,7 +13,7 @@ export const timelineItems = [
     location:
       "Japan Advanced Institute of Science and Technology (JAIST), Nomi, Japan",
     description:
-      "AI Safety and Alignment research under joint supervision of JAIST and Chulalongkorn University related to mechanistic interpretability of large language models for chain of thought reasoning and randomness in LLMs",
+      "Conducted AI Safety and Alignment research under joint supervision of JAIST and Chulalongkorn University related to mechanistic interpretability of large language models for chain of thought reasoning and randomness in LLMs",
   },
   {
     date: "May, 2025 - Present",
