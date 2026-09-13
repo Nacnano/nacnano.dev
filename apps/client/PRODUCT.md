@@ -39,7 +39,7 @@ The author writes infrequently and the site should say so plainly rather than im
 
 ## Capabilities and Constraints
 
-- Next.js 14 App Router, TypeScript, Tailwind CSS 3, contentlayer + MDX, `pliny` utilities, `next-themes`. pnpm + turbo monorepo; this app is `apps/client`.
+- Next.js 14 App Router, TypeScript, Tailwind CSS 3, contentlayer + MDX, `pliny` utilities, `next-themes`. Bun workspaces + turbo monorepo; this app is `apps/client`.
 - Statically generated; no backend, no database, no auth, no comments.
 - Existing routes: `/`, `/blogs`, `/blogs/[...slug]`, `/blogs/page/[page]`, `/tags`, `/tags/[tag]`, `/projects`, `/about`, `/link`, `/link/[link]`.
 - Dark mode is complete and correct across every surface; `theme-provider` defaults to `system`. This is a working asset to preserve.
