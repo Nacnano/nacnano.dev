@@ -14,6 +14,13 @@ bun run dev       # from the repo root, or `bun run dev` in apps/client
 
 Bun is required: `curl -fsSL https://bun.sh/install | bash`
 
+> **Keep `bun.lock` at `lockfileVersion: 1`.** Vercel's build image ships Bun
+> 1.3.x, which cannot parse the `lockfileVersion: 2` file that Bun >= 1.4
+> writes — it fails to read it, silently resolves everything fresh, and the
+> deploy stops being reproducible. Both 1.3.x and 1.4.x read a v1 lockfile and
+> neither rewrites it, so regenerate with `bunx bun@1.3.14 install` (or any
+> 1.3.x) if the lockfile ever needs rebuilding from scratch.
+
 ## Build
 
 ```bash
