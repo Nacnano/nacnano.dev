@@ -3,18 +3,21 @@
 Personal site and essay archive for Chotpisit Adunsehawat.
 
 Next.js 14 (App Router) · TypeScript · Tailwind CSS · Contentlayer + MDX.
+Bun workspaces + Turborepo.
 
 ## Develop
 
 ```bash
-pnpm install
-pnpm dev          # from the repo root, or `pnpm dev` in apps/client
+bun install
+bun run dev       # from the repo root, or `bun run dev` in apps/client
 ```
+
+Bun is required: `curl -fsSL https://bun.sh/install | bash`
 
 ## Build
 
 ```bash
-pnpm build        # next build + RSS/sitemap postbuild
+bun run build     # next build + RSS/sitemap postbuild
 ```
 
 ## Content

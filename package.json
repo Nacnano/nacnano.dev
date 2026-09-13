@@ -1,5 +1,14 @@
 {
+  "name": "nacnano.dev",
   "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "packageManager": "bun@1.4.2",
+  "engines": {
+    "node": "22.x"
+  },
   "scripts": {
     "build": "turbo run build",
     "dev": "turbo run dev",
@@ -13,9 +22,11 @@
     "prettier": "^2.8.8",
     "turbo": "^1.11.2"
   },
-  "packageManager": "pnpm@9.15.9",
-  "name": "nacnano.dev",
-  "engines": {
-    "node": "22.x"
-  }
+  "trustedDependencies": [
+    "esbuild",
+    "contentlayer",
+    "@contentlayer/core",
+    "protobufjs",
+    "core-js-pure"
+  ]
 }
