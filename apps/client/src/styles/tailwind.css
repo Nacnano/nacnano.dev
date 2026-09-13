@@ -2,6 +2,86 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+  :root {
+    --ring: theme('colors.accent.600');
+    --selection-bg: theme('colors.accent.100');
+    --selection-fg: theme('colors.accent.900');
+    color-scheme: light;
+  }
+
+  .dark {
+    --ring: theme('colors.accent.300');
+    --selection-bg: theme('colors.accent.900');
+    --selection-fg: theme('colors.accent.50');
+    color-scheme: dark;
+  }
+
+  /* Browser surfaces belong to the design system, not to the UA. */
+  ::selection {
+    background-color: var(--selection-bg);
+    color: var(--selection-fg);
+  }
+
+  html {
+    scrollbar-color: theme('colors.zinc.300') transparent;
+  }
+
+  .dark html,
+  .dark body {
+    scrollbar-color: theme('colors.zinc.700') transparent;
+  }
+
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background-color: theme('colors.zinc.300');
+    border: 3px solid transparent;
+    border-radius: 9999px;
+    background-clip: content-box;
+  }
+
+  .dark ::-webkit-scrollbar-thumb {
+    background-color: theme('colors.zinc.700');
+  }
+
+  input,
+  textarea {
+    caret-color: var(--ring);
+  }
+
+  /* One focus treatment, everywhere, keyboard-only. */
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+
+  /* Dates, reading times and figures line up in columns. */
+  time,
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+@layer components {
+  /* Each essay closes on one earned line, written as `#### ...` in MDX.
+     It is a closing statement, not a section heading: space and the weight
+     step attach it to the essay's ending, with no rule and no label. */
+  .prose .takeaway {
+    @apply mt-10 text-lg font-medium leading-8 text-zinc-900 dark:text-zinc-50;
+    letter-spacing: -0.011em;
+  }
+
+}
+
 .task-list-item::before {
   @apply hidden;
 }
@@ -11,15 +91,11 @@
 }
 
 .footnotes {
-  @apply mt-12 border-t border-gray-200 pt-8 dark:border-gray-700;
+  @apply mt-12 border-t border-zinc-200 pt-8 dark:border-zinc-800;
 }
 
 .data-footnote-backref {
   @apply no-underline;
-}
-
-.csl-entry {
-  @apply my-5;
 }
 
 /* https://stackoverflow.com/questions/61083813/how-to-avoid-internal-autofill-selected-style-to-be-applied */
@@ -30,4 +106,15 @@ input:-webkit-autofill:focus {
 
 .katex-display {
   overflow: auto hidden;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

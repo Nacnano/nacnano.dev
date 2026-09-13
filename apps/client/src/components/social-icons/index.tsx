@@ -18,13 +18,23 @@ const components = {
   mastodon: Mastodon,
 };
 
+// Screen readers announce the service, not the raw URL.
+const labels: Record<keyof typeof components, string> = {
+  mail: "Email",
+  github: "GitHub",
+  facebook: "Facebook",
+  youtube: "YouTube",
+  linkedin: "LinkedIn",
+  twitter: "X",
+  mastodon: "Mastodon",
+};
+
 type SocialIconProps = {
   kind: keyof typeof components;
   href: string | undefined;
-  size?: number;
 };
 
-const SocialIcon = ({ kind, href, size = 8 }: SocialIconProps) => {
+const SocialIcon = ({ kind, href }: SocialIconProps) => {
   if (
     !href ||
     (kind === "mail" &&
@@ -36,15 +46,15 @@ const SocialIcon = ({ kind, href, size = 8 }: SocialIconProps) => {
 
   return (
     <a
-      className="text-sm text-gray-500 transition hover:text-gray-600"
+      className="-m-2 flex h-11 w-11 items-center justify-center rounded text-zinc-500 transition-colors hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
       target="_blank"
-      rel="noopener noreferer"
+      rel="noopener noreferrer"
       href={href}
     >
-      <span className="sr-only">{href}</span>
-      <SocialSvg
-        className={`fill-current text-gray-700 hover:text-primary-500 dark:text-gray-200 dark:hover:text-primary-400 h-${size} w-${size}`}
-      />
+      <span className="sr-only">{labels[kind]}</span>
+      {/* Static classes only: a template-literal size would be invisible to
+          Tailwind's scanner. */}
+      <SocialSvg className="h-5 w-5 fill-current" />
     </a>
   );
 };

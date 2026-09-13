@@ -77,6 +77,18 @@ module.exports = () => {
         }
       ]
     },
+    // The blog index duplicated the home page and the tag index led to
+    // single-post dead ends. Both are gone; their URLs are kept alive.
+    async redirects () {
+      return [
+        { source: '/blogs', destination: '/', permanent: true },
+        { source: '/blogs/page/:page', destination: '/', permanent: true },
+        { source: '/tags', destination: '/', permanent: true },
+        { source: '/tags/:tag', destination: '/', permanent: true },
+        { source: '/tags/:tag/feed.xml', destination: '/feed.xml', permanent: true },
+        { source: '/blog/:slug', destination: '/blogs/:slug', permanent: true }
+      ]
+    },
     webpack: (config, options) => {
       config.module.rules.push({
         test: /\.svg$/,

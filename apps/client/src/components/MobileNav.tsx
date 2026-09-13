@@ -2,81 +2,124 @@
 
 import headerNavLinks from "@/data/headerNavLinks";
 import CustomLink from "./Link";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 const MobileNav = () => {
-  const [navShow, setNavShow] = useState(false);
+  const [open, setOpen] = useState(false);
+  const panelRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
 
-  const onToggleNav = () => {
-    setNavShow((status) => {
-      if (status) {
-        document.body.style.overflow = "auto";
-      } else {
-        document.body.style.overflow = "hidden";
+  useEffect(() => {
+    document.body.style.overflow = open ? "hidden" : "";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [open]);
+
+  useEffect(() => {
+    if (!open) return;
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setOpen(false);
+        triggerRef.current?.focus();
+        return;
       }
-      return !status;
-    });
-  };
+      if (event.key !== "Tab") return;
+
+      const focusable = panelRef.current?.querySelectorAll<HTMLElement>(
+        'a[href], button:not([disabled])'
+      );
+      if (!focusable?.length) return;
+
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+
+    document.addEventListener("keydown", onKeyDown);
+    panelRef.current?.querySelector<HTMLElement>("button, a")?.focus();
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [open]);
 
   return (
     <>
       <button
-        aria-label="Toggle Menu"
-        onClick={onToggleNav}
-        className="sm:hidden"
+        ref={triggerRef}
+        type="button"
+        aria-label="Open menu"
+        aria-expanded={open}
+        onClick={() => setOpen(true)}
+        className="-mr-2 flex h-11 w-11 items-center justify-center rounded text-zinc-700 hover:text-zinc-900 dark:text-zinc-300 dark:hover:text-zinc-100 sm:hidden"
       >
         <svg
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 20 20"
-          fill="currentColor"
-          className="h-8 w-8 text-gray-900 dark:text-gray-100"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+          className="h-5 w-5"
+          aria-hidden="true"
         >
-          <path
-            fillRule="evenodd"
-            d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 15a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z"
-            clipRule="evenodd"
-          />
+          <path d="M4 7h16M4 12h16M4 17h16" />
         </svg>
       </button>
-      <div
-        className={`fixed left-0 top-0 z-10 h-full w-full transform bg-white opacity-90 duration-300 ease-in-out dark:bg-gray-950 dark:opacity-[0.98] ${
-          navShow ? "translate-x-0" : "translate-x-full"
-        }`}
-      >
-        <div className="flex justify-end">
-          <button
-            className="mr-8 mt-11 h-8 w-8"
-            aria-label="Toggle Menu"
-            onClick={onToggleNav}
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 20 20"
-              fill="currentColor"
-              className="text-gray-900 dark:text-gray-100"
-            >
-              <path
-                fillRule="evenodd"
-                d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                clipRule="evenodd"
-              />
-            </svg>
-          </button>
-        </div>
-        <nav className="fixed mt-8 h-full">
-          {headerNavLinks.map((link) => (
-            <div key={link.title} className="px-12 py-4">
-              <CustomLink
-                href={link.href}
-                onClick={onToggleNav}
-                className="text-2xl font-bold tracking-widest text-gray-900 dark:text-gray-100"
+
+      {/* The closed panel is removed from the DOM, so its links never sit in
+          the tab order behind the page. */}
+      {open && (
+        <div
+          ref={panelRef}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Site menu"
+          className="fixed inset-0 z-50 bg-white sm:hidden dark:bg-zinc-950"
+        >
+          <div className="mx-auto flex h-full max-w-3xl flex-col px-5">
+            <div className="flex justify-end py-5">
+              <button
+                type="button"
+                aria-label="Close menu"
+                onClick={() => {
+                  setOpen(false);
+                  triggerRef.current?.focus();
+                }}
+                className="-mr-2 flex h-11 w-11 items-center justify-center rounded text-zinc-700 hover:text-zinc-900 dark:text-zinc-300 dark:hover:text-zinc-100"
               >
-                {link.title}
-              </CustomLink>
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  className="h-5 w-5"
+                  aria-hidden="true"
+                >
+                  <path d="M6 6l12 12M18 6L6 18" />
+                </svg>
+              </button>
             </div>
-          ))}
-        </nav>
-      </div>
+            <nav className="flex flex-col divide-y divide-zinc-200 dark:divide-zinc-800">
+              {headerNavLinks.map((link) => (
+                <CustomLink
+                  key={link.title}
+                  href={link.href}
+                  onClick={() => setOpen(false)}
+                  className="py-4 text-lg font-medium tracking-[-0.011em] text-zinc-900 dark:text-zinc-100"
+                >
+                  {link.title}
+                </CustomLink>
+              ))}
+            </nav>
+          </div>
+        </div>
+      )}
     </>
   );
 };

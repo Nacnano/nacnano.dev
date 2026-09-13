@@ -1,36 +1,41 @@
 const projectsData = [
   {
-    title: "CU Get Rekt",
-    description:
-      "Thinc's 10 days project for making student's withdrawals and resignations more efficient and easier by using its automated pdf generator and score prediction features. My role was designing, developing, deploying, and maintaining its backend using Nestjs and Prisma.",
-    imgSrc: "/static/images/cugetrekt.png",
-    href: "https://cugetrekt.vercel.app/",
-  },
-  {
-    title: "CU Get Reg",
-    description:
-      "Thinc's open source project to provide courses data to Chulalongkorn students and plan their enrollments. Contributed by developing its Backoffice backend service using NestJS and GraphQL for managing over 700 reviews and 500 elective courses with over 15,000 maximum users per week.",
-    imgSrc: "/static/images/cugetreg-logo.png",
-    href: "https://cugetreg.com",
-  },
-  {
-    title: "Computer Science Project",
-    description:
-      "Usage of MASK R-CNN model for Image Segmentation and Random Forest model for Factor Identification to analyse multimedia effects on students' learning efficiency",
-    imgSrc: "/static/images/computer-project.png",
-    href: "https://github.com/Nacnano/predicting-and-comparing-learners-interest-in-note-taking-from-multimedia-using-a-machine-learning-",
-  },
-  {
     title: "CU Intania Open House 2024",
     description:
-      "A website for Open House event at Faculty of Engineering, Chulalongkorn university used by over 9,000 students. Designed and developed its workshop reservation features using NextJS for both frontend and backend and Firestore for its database",
+      "The event site for the Faculty of Engineering open house at Chulalongkorn, used by over 9,000 students. I designed and built the workshop reservation feature.",
+    stack: ["Next.js", "Firestore"],
     imgSrc: "/static/images/cu-intania-openhouse-2024.png",
     href: "https://oph.chula.engineering/",
   },
   {
-    title: "MWIT29 Archive (WIP)",
+    title: "CU Get Reg",
     description:
-      "A website for archiving memorable information from my high school by allowing the students to edit their data using NextJS with MongoDB and Google Cloud Storage (Working in Process)",
+      "An open-source course planner for Chulalongkorn students. I built the backoffice service that manages more than 700 reviews and 500 elective courses, serving up to 15,000 users a week.",
+    stack: ["NestJS", "GraphQL", "Prisma"],
+    imgSrc: "/static/images/cugetreg-logo.png",
+    href: "https://cugetreg.com",
+  },
+  {
+    title: "CU Get Rekt",
+    description:
+      "A ten-day project making student withdrawals and resignations less painful, through an automated PDF generator and score prediction. I designed, built, deployed and maintained the backend.",
+    stack: ["NestJS", "Prisma"],
+    imgSrc: "/static/images/cugetrekt.png",
+    href: "https://cugetrekt.vercel.app/",
+  },
+  {
+    title: "Learner Interest in Multimedia Note-Taking",
+    description:
+      "A research project using Mask R-CNN for image segmentation and a random forest for factor identification, analysing how multimedia affects students' learning efficiency.",
+    stack: ["Python", "Mask R-CNN", "Random Forest"],
+    imgSrc: "/static/images/computer-project.png",
+    href: "https://github.com/Nacnano/predicting-and-comparing-learners-interest-in-note-taking-from-multimedia-using-a-machine-learning-",
+  },
+  {
+    title: "MWIT29 Archive",
+    description:
+      "An archive of my high school cohort, letting students edit their own records. Still in progress.",
+    stack: ["Next.js", "MongoDB", "Google Cloud Storage"],
     imgSrc: "/static/images/mwit29-archive.png",
     href: "https://mwit29-archive.vercel.app/",
   },
