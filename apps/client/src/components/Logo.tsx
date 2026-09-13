@@ -1,26 +1,16 @@
 import Image from "@/components/Image";
 import { FC } from "react";
 
-const Logo: FC = () => {
-  const title = "nacnano-logo";
-  const imgSrc = "/static/images/logo.png";
-  return (
-    <>
-      <div className="select-none items-center rounded-lg overflow-hidden">
-        <Image
-          title={title}
-          alt={title}
-          src={imgSrc}
-          placeholder="blur"
-          blurDataURL={imgSrc}
-          width="0"
-          height="0"
-          sizes="100vw"
-          className="w-auto h-12"
-        />
-      </div>
-    </>
-  );
-};
+const Logo: FC = () => (
+  <Image
+    src="/static/images/logo.png"
+    alt=""
+    aria-hidden="true"
+    width={36}
+    height={36}
+    className="h-9 w-9 rounded object-cover"
+    priority
+  />
+);
 
 export default Logo;

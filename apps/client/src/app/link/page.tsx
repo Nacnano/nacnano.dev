@@ -1,24 +1,51 @@
 import links from "./links.json";
 import CustomLink from "@/components/Link";
+import { genPageMetaData } from "@/app/seo";
+
+export const metadata = genPageMetaData({
+  title: "Links",
+  description: "Shared links and files.",
+  robots: { index: false, follow: false },
+});
 
 export default function Page() {
+  const entries = Object.entries(links ?? {});
+
   return (
-    <>
-      <h1 className="flex flex-col justify-center items-center font-bold text-xl pb-5">
-        All Links
+    <div className="py-12 sm:py-16">
+      <h1 className="text-[1.75rem] font-semibold leading-[1.2] tracking-[-0.022em] text-zinc-900 sm:text-[2.125rem] dark:text-zinc-100">
+        Links
       </h1>
-      <div className="flex flex-row justify-center items-center flex-wrap gap-5 ">
-        {links &&
-          Object.entries(links).map(([key, link]) => (
-            <CustomLink
-              key={key}
-              className="text-blue-300 text-lg hover:text-blue-600 "
-              href={link}
-            >
-              {key}
-            </CustomLink>
+      {entries.length === 0 ? (
+        <p className="mt-4 text-[0.9375rem] text-zinc-600 dark:text-zinc-400">
+          Nothing shared right now.
+        </p>
+      ) : (
+        <ul className="mt-8 divide-y divide-zinc-200 border-t border-zinc-200 dark:divide-zinc-800 dark:border-zinc-800">
+          {entries.map(([key, link]) => (
+            <li key={key}>
+              <CustomLink
+                href={link as string}
+                className="flex items-center justify-between gap-4 py-4 text-[0.9375rem] font-medium text-zinc-900 transition-colors hover:text-accent-600 dark:text-zinc-100 dark:hover:text-accent-300"
+              >
+                {key}
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="h-3.5 w-3.5 shrink-0 text-zinc-400 dark:text-zinc-500"
+                  aria-hidden="true"
+                >
+                  <path d="M7 17 17 7M9 7h8v8" />
+                </svg>
+              </CustomLink>
+            </li>
           ))}
-      </div>
-    </>
+        </ul>
+      )}
+    </div>
   );
 }

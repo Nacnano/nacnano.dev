@@ -1,25 +1,28 @@
 import CustomLink from "@/components/Link";
+import siteMetadata from "@/data/siteMetadata";
 
 export default function NotFound() {
   return (
-    <div className="flex flex-col items-start justify-start md:mt-24 md:flex-row md:items-center md:justify-center md:space-x-6">
-      <div className="space-x-2 pb-8 pt-6 md:space-y-5">
-        <h1 className="text-6xl font-extrabold leading-9 tracking-tight text-gray-900 dark:text-gray-100 md:border-r-2 md:px-6 md:text-8xl md:leading-14">
-          404
-        </h1>
-      </div>
-      <div className="max-w-md">
-        <p className="mb-4 text-xl font-bold leading-normal md:text-2xl">
-          Sorry, page not found
-        </p>
-        <p className="">Do you want me to create this page?</p>
-
-        <p className="mb-8">Feel free to contact me!</p>
+    <div className="py-24 sm:py-32">
+      <h1 className="text-[1.75rem] font-semibold leading-[1.2] tracking-[-0.022em] text-zinc-900 sm:text-[2.125rem] dark:text-zinc-100">
+        Nothing here
+      </h1>
+      <p className="mt-4 max-w-measure text-[1.0625rem] leading-[1.75] text-zinc-600 dark:text-zinc-400">
+        Either the link is stale or I moved something and forgot to leave a
+        note. If you were after something in particular, just ask me.
+      </p>
+      <div className="mt-7 flex flex-wrap gap-2">
         <CustomLink
           href="/"
-          className="focus:shadow-outline-blue inline rounded-lg border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium leading-5 text-white shadow transition-colors duration-150 hover:bg-blue-700 focus:outline-none dark:hover:bg-blue-500"
+          className="rounded bg-zinc-900 px-3.5 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-700 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300"
         >
-          Go back to Homepage
+          Back to the writing
+        </CustomLink>
+        <CustomLink
+          href={`mailto:${siteMetadata.email}`}
+          className="rounded border border-zinc-200 px-3.5 py-2 text-sm font-medium text-zinc-700 transition-colors hover:border-zinc-300 hover:text-zinc-900 dark:border-zinc-800 dark:text-zinc-300 dark:hover:border-zinc-700 dark:hover:text-zinc-100"
+        >
+          Email me
         </CustomLink>
       </div>
     </div>

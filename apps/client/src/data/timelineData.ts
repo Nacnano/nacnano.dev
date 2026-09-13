@@ -1,88 +1,126 @@
-import { description } from "./siteMetadata";
+/**
+ * Reconciled against https://resume.nacnano.dev (the canonical CV) on
+ * 2026-09-13. Every date, title and employer here matches it — the wording is
+ * deliberately casual, but the facts are not negotiable. Keep them in sync.
+ *
+ * Locations are only recorded where they are actually known — do not invent.
+ */
 
-export const timelineItems = [
+export type TimelineItem = {
+  period: string;
+  /** Sort key: the entry's start date, ISO. */
+  start: string;
+  title: string;
+  organisation: string;
+  location?: string;
+  description?: string;
+};
+
+export const workItems: TimelineItem[] = [
   {
-    date: "Starting August - December, 2025",
-    title: "AI Technology Risk Analyst, Intern",
-    location: "SCBX, Bangkok, Thailand",
-    description: "Internship focusing on AI technology risk.",
+    period: "Jan – Apr 2026",
+    start: "2026-01-01",
+    title: "Data Scientist, Intern",
+    organisation: "SCB",
+    description:
+      "Poked at FOMC statements with NLP to see whether the market's mood was hiding in the wording.",
   },
   {
-    date: "Starting June - August, 2025",
+    period: "Jan – Mar 2026",
+    start: "2026-01-01",
+    title: "AI Engineer, Part Time",
+    organisation: "QuanXAI",
+    description:
+      "A LangChain chatbot, and a fraud-detection proof of concept that mostly taught me how messy real data is.",
+  },
+  {
+    period: "Aug – Dec 2025",
+    start: "2025-08-01",
+    title: "AI Researcher and Technology Risk, Intern",
+    organisation: "SCBX",
+    location: "Bangkok",
+    description:
+      "Stock-market prediction research, and a stretch spent trying to talk a cybersecurity chatbot into misbehaving.",
+  },
+  {
+    period: "Jun – Aug 2025",
+    start: "2025-06-01",
     title: "AI Researcher, Intern",
-    location:
-      "Japan Advanced Institute of Science and Technology (JAIST), Nomi, Japan",
+    organisation: "JAIST",
+    location: "Nomi, Japan",
     description:
-      "Conducted AI Safety and Alignment research under joint supervision of JAIST and Chulalongkorn University related to mechanistic interpretability of large language models for chain of thought reasoning and randomness in LLMs",
+      "Tried to work out what language models are actually doing when they 'reason'. Came away with more questions than answers.",
   },
   {
-    date: "May, 2025 - Present",
+    period: "May – Jul 2025",
+    start: "2025-05-01",
     title: "Software Engineer, Part Time",
-    location: "Ayasan Holding, Remote",
+    organisation: "Ayasan Holding",
+    location: "Remote",
     description:
-      "Maintaining and developing new features for the Ayasan website using NextJS, React, and NodeJS. Implementing new features and fixing bugs in the Ayasan mobile app using React Native.",
+      "Shipped features across the web apps and the React Native app.",
   },
   {
-    date: "November, 2024 - June, 2025",
+    period: "Nov 2024 – Jun 2025",
+    start: "2024-11-01",
     title: "Data Engineer, Part Time",
-    location: "People's Party, Bangkok, Thailand",
+    organisation: "People's Party",
+    location: "Bangkok",
     description:
-      "Implementing and deploying RAG LLM, creating data pipelines with Google BigQuery using Apache Airflow, and integrating data using Krayin CRM.",
+      "Built data pipelines and got a retrieval chatbot running on top of them.",
   },
   {
-    date: "June - November, 2024",
+    period: "Jun – Nov 2024",
+    start: "2024-06-01",
     title: "Software Engineer, Intern",
-    location: "Agoda, Bangkok, Thailand",
+    organisation: "Agoda",
+    location: "Bangkok",
     description:
-      "Migrated .NET and Scala internal tool to Kotlin. Integrated OPA and Okta Oauth2 Proxy for authorization.",
+      "Moved an internal tool off .NET and Scala onto Kotlin, and wired up the authorization behind it.",
   },
   {
-    date: "August, 2022 - Present",
-    title: "Full Stack Developer, Part Time",
-    location: "MonkeyEveryday, Bangkok, Thailand",
+    period: "Mar 2022 – Dec 2025",
+    start: "2022-03-01",
+    title: "Software Engineer and Data Analyst, Part Time",
+    organisation: "MonkeyEveryday",
+    location: "Bangkok",
     description:
-      "Maintained websites using NextJS, VueJS, NestJS with GraphQL and Prisma.",
+      "Looked after a university-admissions simulator that a lot of anxious students refreshed every year. Nearly four years of it.",
   },
   {
-    date: "June - August, 2023",
+    period: "Jun – Aug 2023",
+    start: "2023-06-01",
     title: "Full Stack Developer, Intern",
-    location: "Wang Data Market, Bangkok, Thailand",
+    organisation: "Wang Data Market",
+    location: "Bangkok",
     description:
-      "Implemented various input types for its form feature using React and creating new API endpoints using ExpressJS. Designed and developed new base structures for an upcoming main AI feature.",
+      "Form inputs in React, endpoints in Express. My first proper look at someone else's codebase.",
+  },
+];
+
+export const educationItems: TimelineItem[] = [
+  {
+    period: "2022 – 2026",
+    start: "2022-08-01",
+    title: "Computer Engineering",
+    organisation: "Chulalongkorn University",
+    location: "Bangkok",
+    description:
+      "Also TA'd the backend course, which taught me considerably more than sitting in it did.",
   },
   {
-    date: "March - August, 2022",
-    title: "Full Stack Developer and Data Analyst, Intern",
-    location: "MonkeyEveryday, Bangkok, Thailand",
+    period: "2019 – 2022",
+    start: "2019-05-01",
+    title: "High school",
+    organisation: "Mahidol Wittayanusorn School",
     description:
-      "Designed, implemented, and maintained the TCAS Ranking service. Automated bots for updating user data and implemented e2e tests using Selenium and Cypress. Queried MySQL and PostgreSQL databases for data analysis.",
+      "A boarding school for science kids. Went on a few exchanges and entered more competitions than I won.",
   },
   {
-    date: "2022 - Present (Expected Graduation: June 2026)",
-    title: "B.Eng. Computer Engineering",
-    location: "Chulalongkorn University, Thailand",
-    description:
-      "Achieved 3.98 GPA for 5 semesters. Teaching Assistant: Computer Engineering Essentials (Backend Course).",
-  },
-  {
-    date: "2019 - 2022",
-    title: "High School",
-    location: "Mahidol Wittayanusorn School, Thailand",
-    description:
-      "GPA 4.00. Participated in many high school exchange programs, international symposiums, and competitions.",
-  },
-  {
-    date: "2019 - 2022",
-    title: "Computer Olympiad Camp",
-    location: "Kasetsart University and Mahidol Wittayanusorn School",
-    description:
-      "Qualified to the POSN Computer Olympiad camp at Kasetsart University (2019) and Mahidol Wittayanusorn School (2020, 2021).",
-  },
-  {
-    date: "2016 - 2019",
-    title: "Secondary School",
-    location: "Suankularb Wittayalai School, Thailand",
-    description:
-      "GPA 3.56. Played Football all day. Started coding for the first time",
+    period: "2016 – 2019",
+    start: "2016-05-01",
+    title: "Secondary school",
+    organisation: "Suankularb Wittayalai School",
+    description: "Played football all day. Wrote my first line of code somewhere in between.",
   },
 ];

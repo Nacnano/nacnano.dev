@@ -1,69 +1,58 @@
 import Image from "@/components/Image";
 import CustomLink from "@/components/Link";
 
-const ProjectCard = ({ title, description, imgSrc, href }) => {
-  return (
-    <>
-      <div className="md max-w-[544px] p-4 md:w-1/2">
-        <div
-          className={`${
-            imgSrc && "h-full"
-          }  overflow-hidden rounded-md border-2 border-gray-200 border-opacity-60 dark:border-gray-700`}
-        >
-          {imgSrc &&
-            (href ? (
-              <CustomLink
-                href={href}
-                aria-label={`Link to ${title}`}
-                className="object-cover object-center md:h-36 lg:h-48"
-              >
-                <Image
-                  src={imgSrc}
-                  alt={title}
-                  placeholder="blur"
-                  blurDataURL={imgSrc}
-                  width={544}
-                  height={306}
-                />
-              </CustomLink>
-            ) : (
-              <Image
-                src={imgSrc}
-                alt={title}
-                placeholder="blur"
-                blurDataURL={imgSrc}
-                width={544}
-                height={306}
-                className="object-cover object-center md:h-36 lg:h-48"
-              />
-            ))}
-          <div className="p-6">
-            <h2 className="mb-3 text-2xl font-bold leading-8 tracking-tight">
-              {href ? (
-                <CustomLink href={href} aria-label={`Link to ${title}`}>
-                  {title}
-                </CustomLink>
-              ) : (
-                title
-              )}
-            </h2>
-            <p className="prose dark:prose-invert mb-3 max-w-none text-gray-500 dark:text-gray-400">
-              {description}
-            </p>
-            {href && (
-              <CustomLink
-                href={href}
-                aria-label={`Link to ${title}`}
-                className="text-base font-medium leading-6 text-primary-500 hover:text-primary-600 dark:hover:text-primary-400"
-              >
-                Learn more &rarr;
-              </CustomLink>
-            )}
-          </div>
-        </div>
+interface Props {
+  title: string;
+  description: string;
+  imgSrc: string;
+  href?: string;
+  stack?: string[];
+}
+
+const ProjectCard = ({ title, description, imgSrc, href, stack }: Props) => (
+  <article className="group relative flex flex-col gap-4 py-7 sm:flex-row sm:gap-7">
+    {imgSrc && (
+      <div className="shrink-0 self-start overflow-hidden rounded border border-zinc-200 sm:w-44 dark:border-zinc-800">
+        <Image
+          src={imgSrc}
+          alt=""
+          aria-hidden="true"
+          width={352}
+          height={198}
+          sizes="(min-width: 640px) 176px, 100vw"
+          // The crop belongs on the image, not on the anchor around it.
+          className="h-40 w-full bg-zinc-50 object-contain sm:h-24 dark:bg-zinc-900"
+        />
       </div>
-    </>
-  );
-};
+    )}
+    <div className="min-w-0">
+      <h3 className="text-[1.0625rem] font-semibold leading-7 tracking-[-0.011em] text-zinc-900 transition-colors group-hover:text-accent-600 dark:text-zinc-100 dark:group-hover:text-accent-300">
+        {href ? (
+          <CustomLink href={href} className="rounded">
+            <span className="absolute inset-0" aria-hidden="true" />
+            {title}
+          </CustomLink>
+        ) : (
+          title
+        )}
+      </h3>
+      <p className="mt-1.5 max-w-measure text-[0.9375rem] leading-7 text-zinc-600 dark:text-zinc-400">
+        {description}
+      </p>
+      {stack && stack.length > 0 && (
+        <ul className="mt-2.5 flex flex-wrap gap-x-3 gap-y-1">
+          {stack.map((tech) => (
+            <li
+              key={tech}
+              className="text-xs uppercase tracking-[0.08em] text-zinc-500 dark:text-zinc-400"
+            >
+              {tech}
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  </article>
+);
 
 export default ProjectCard;

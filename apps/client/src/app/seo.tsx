@@ -14,21 +14,28 @@ export function genPageMetaData({
   image,
   ...rest
 }: PageSEOProps): Metadata {
+  // Every caller without a description used to ship the literal string
+  // "undefined | ..." into the share card.
+  const resolvedDescription = description ?? siteMetadata.description;
+  const images = image ? [image] : [siteMetadata.socialBanner];
+
   return {
     title,
+    description: resolvedDescription,
     openGraph: {
-      title: `${title} | ${siteMetadata.title}`,
-      description: `${description} | ${siteMetadata.description}`,
+      title: `${title} · ${siteMetadata.author}`,
+      description: resolvedDescription,
       url: "./",
       siteName: siteMetadata.title,
-      images: image ? [image] : siteMetadata.socialBanner,
+      images,
       locale: "en_US",
       type: "website",
     },
     twitter: {
-      title: `${title} | ${siteMetadata.title}`,
+      title: `${title} · ${siteMetadata.author}`,
+      description: resolvedDescription,
       card: "summary_large_image",
-      images: image ? [image] : siteMetadata.socialBanner,
+      images,
     },
     ...rest,
   };

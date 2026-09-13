@@ -8,17 +8,13 @@ import {
   sortPosts,
 } from "pliny/utils/contentlayer";
 
-import {
-  BlogSimple,
-  BlogWithBanner,
-  BlogWithDetail,
-} from "@/layouts/BlogLayout";
+import { BlogWithDetail } from "@/layouts/BlogLayout";
 import { MDXLayoutRenderer } from "pliny/mdx-components";
 import { components } from "@/components/MDXComponents";
 import siteMetadata from "@/data/siteMetadata";
 
 const defaultLayout = "BlogWithDetail";
-const layouts = { BlogSimple, BlogWithDetail, BlogWithBanner };
+const layouts = { BlogWithDetail };
 
 export async function generateMetadata({
   params,
@@ -88,8 +84,9 @@ export default async function Page({ params }: { params: { slug: string[] } }) {
   const blog = allBlogs.find((blog) => blog.slug === slug) as Blog;
   const mainContent = coreContent(blog);
 
-  const prev = blogs[blogIndex - 1];
-  const next = blogs[blogIndex + 1];
+  // sortPosts is newest-first, so the entry before this one is the newer post.
+  const newer = blogs[blogIndex - 1];
+  const older = blogs[blogIndex + 1];
 
   const authors = blog?.authors || ["default"];
   const authorDetails = authors.map((author) => {
@@ -103,7 +100,7 @@ export default async function Page({ params }: { params: { slug: string[] } }) {
     return { "@type": "Person", name: author.name };
   });
 
-  const Layout = layouts[blog?.layout || defaultLayout];
+  const Layout = layouts[blog?.layout] || layouts[defaultLayout];
   return (
     <>
       <script
@@ -113,8 +110,8 @@ export default async function Page({ params }: { params: { slug: string[] } }) {
       <Layout
         content={mainContent}
         authors={authorDetails}
-        next={next}
-        prev={prev}
+        newer={newer}
+        older={older}
       >
         <MDXLayoutRenderer
           code={blog.body.code}

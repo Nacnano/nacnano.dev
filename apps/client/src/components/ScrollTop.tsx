@@ -5,47 +5,37 @@ import { useEffect, useState } from "react";
 const ScrollTop = () => {
   const [show, setShow] = useState(false);
 
-  const handleScrollTop = () => {
-    window.scrollTo({ top: 0 });
-  };
-
   useEffect(() => {
-    const handleWindowScroll = () => {
-      if (window.scrollY > 100) {
-        setShow(true);
-      } else {
-        setShow(false);
-      }
-    };
-
-    window.addEventListener("scroll", handleWindowScroll);
-    return () => {
-      window.removeEventListener("scroll", handleWindowScroll);
-    };
+    const onScroll = () => setShow(window.scrollY > 400);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  if (!show) return null;
+
   return (
-    <>
-      <div
-        className={`fixed bottom-8 right-8 flex-col hidden gap-3 ${
-          show ? "md:flex" : "md:hidden"
-        }`}
+    <button
+      type="button"
+      aria-label="Scroll to top"
+      onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+      // Available on touch too: a long essay left mobile readers with no way
+      // back to the navigation.
+      className="fixed bottom-5 right-5 z-40 flex h-11 w-11 items-center justify-center rounded-full border border-zinc-200 bg-white/90 text-zinc-600 shadow-raise backdrop-blur transition-colors hover:text-zinc-900 dark:border-zinc-800 dark:bg-zinc-900/90 dark:text-zinc-300 dark:hover:text-zinc-100"
+    >
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className="h-4 w-4"
+        aria-hidden="true"
       >
-        <button
-          aria-label="Scroll To Top"
-          onClick={handleScrollTop}
-          className="rounded-full bg-gray-200 p-2 text-gray-500 transition-all hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-400 dark:hover:bg-gray-600"
-        >
-          <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-            <path
-              fillRule="evenodd"
-              d="M3.293 9.707a1 1 0 010-1.414l6-6a1 1 0 011.414 0l6 6a1 1 0 01-1.414 1.414L11 5.414V17a1 1 0 11-2 0V5.414L4.707 9.707a1 1 0 01-1.414 0z"
-              clipRule="evenodd"
-            />
-          </svg>
-        </button>
-      </div>
-    </>
+        <path d="M12 19V5M5 12l7-7 7 7" />
+      </svg>
+    </button>
   );
 };
 

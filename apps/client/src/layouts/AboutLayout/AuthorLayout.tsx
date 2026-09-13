@@ -2,9 +2,10 @@ import React from "react";
 import { Authors } from "contentlayer/generated";
 import Image from "@/components/Image";
 import SocialIcon from "@/components/social-icons";
+import CustomLink from "@/components/Link";
 import siteMetadata from "@/data/siteMetadata";
 import Timeline from "./Timeline";
-import { timelineItems } from "@/data/timelineData";
+import { workItems, educationItems } from "@/data/timelineData";
 
 interface Props {
   children: React.ReactNode;
@@ -12,57 +13,79 @@ interface Props {
 }
 
 export default function AuthorLayout({ children, content }: Props) {
-  const { name, occupation, company, avatar } = content;
+  const { name, avatar } = content;
 
   return (
-    <>
-      <div className="divide-y divide-gray-200 dark:divide-gray-700">
-        <div className="space-y-2 pb-8 pt-6 md:space-y-5">
-          <h1 className="text-3xl font-extrabold leading-9 tracking-tight text-gray-900 dark:text-gray-100 sm:text-4xl sm:leading-10 md:text-6xl md:leading-14">
-            About
+    <div className="py-12 sm:py-16">
+      <header className="flex flex-col gap-5 sm:flex-row sm:items-center sm:gap-7">
+        {avatar && (
+          <Image
+            src={avatar}
+            alt=""
+            aria-hidden="true"
+            width={80}
+            height={80}
+            className="h-20 w-20 shrink-0 rounded-full object-cover transition-transform duration-300 ease-out hover:-rotate-6 hover:scale-105 motion-reduce:transition-none motion-reduce:hover:rotate-0 motion-reduce:hover:scale-100"
+          />
+        )}
+        <div className="min-w-0">
+          <h1 className="text-[1.75rem] font-semibold leading-[1.2] tracking-[-0.022em] text-zinc-900 sm:text-[2.125rem] dark:text-zinc-100">
+            {name}
           </h1>
+          <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
+            Goes by Nac
+          </p>
         </div>
-        <div className="items-start space-y-2 xl:grid xl:grid-cols-3 xl:gap-x-8 xl:space-y-0">
-          <div className="flex flex-col items-center space-x-2 pt-8">
-            {avatar && (
-              <Image
-                src={avatar}
-                alt="avatar"
-                placeholder="blur"
-                blurDataURL={avatar}
-                width={192}
-                height={192}
-                className="h-48 w-48 rounded-full"
-              />
-            )}
-            <h3 className="pb-2 pt-4 text-2xl font-bold leading-8 tracking-tight">
-              {name}
-            </h3>
-            <div className="text-gray-500 dark:text-gray-400">{occupation}</div>
-            <div className="text-gray-500 dark:text-gray-400"> {company}</div>
-            <div className="flex space-x-3 pt-6">
-              <SocialIcon kind="mail" href={`mailto:${siteMetadata.email}`} />
-              <SocialIcon kind="github" href={siteMetadata.github} />
-              <SocialIcon kind="facebook" href={siteMetadata.facebook} />
-              <SocialIcon kind="youtube" href={siteMetadata.youtube} />
-              <SocialIcon kind="linkedin" href={siteMetadata.linkedin} />
-              <SocialIcon kind="twitter" href={siteMetadata.twitter} />
-            </div>
-          </div>
-          <div className="prose max-w-none py-8 dark:prose-invert xl:col-span-2">
-            {children}
-          </div>
+      </header>
+
+      <div className="prose prose-zinc mt-9 max-w-measure dark:prose-invert">
+        {children}
+      </div>
+
+      {/* A hairline aside, not a card — the system uses rules for this. */}
+      <p className="mt-8 max-w-measure border-l border-zinc-300 pl-4 text-[0.9375rem] leading-7 text-zinc-600 dark:border-zinc-700 dark:text-zinc-400">
+        {siteMetadata.now}
+      </p>
+
+      <div className="mt-6 flex flex-wrap items-center gap-x-5 gap-y-3">
+        <div className="flex items-center gap-4">
+          <SocialIcon kind="github" href={siteMetadata.github} />
+          <SocialIcon kind="linkedin" href={siteMetadata.linkedin} />
+          <SocialIcon kind="mail" href={`mailto:${siteMetadata.email}`} />
         </div>
+        <CustomLink
+          href={siteMetadata.resume}
+          className="rounded text-sm text-zinc-500 underline decoration-zinc-300 underline-offset-4 transition-colors hover:text-accent-600 hover:decoration-accent-600 dark:text-zinc-400 dark:decoration-zinc-700 dark:hover:text-accent-300 dark:hover:decoration-accent-300"
+        >
+          The formal version, if you need it
+        </CustomLink>
       </div>
-      <div>
-        <h2 className="text-2xl font-bold leading-8 tracking-tight mt-8 text-center">
-          Now
+
+      <section
+        aria-labelledby="work"
+        className="mt-14 border-t border-zinc-200 pt-8 dark:border-zinc-800"
+      >
+        <h2
+          id="work"
+          className="mb-2 text-base font-semibold tracking-[-0.011em] text-zinc-900 dark:text-zinc-100"
+        >
+          Things I&rsquo;ve done
         </h2>
-        <Timeline timelineItems={timelineItems} />
-        <h2 className="text-2xl font-bold leading-8 tracking-tight text-center">
-          Start
+        <Timeline items={workItems} initialCount={4} moreLabel="older ones" />
+      </section>
+
+      <section
+        aria-labelledby="school"
+        className="mt-14 border-t border-zinc-200 pt-8 dark:border-zinc-800"
+      >
+        <h2
+          id="school"
+          className="mb-2 text-base font-semibold tracking-[-0.011em] text-zinc-900 dark:text-zinc-100"
+        >
+          School
         </h2>
-      </div>
-    </>
+        <Timeline items={educationItems} />
+      </section>
+    </div>
   );
 }

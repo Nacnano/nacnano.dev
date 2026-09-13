@@ -1,31 +1,34 @@
 import siteMetadata from "@/data/siteMetadata";
-import Link from "@/components/Link";
 import SocialIcon from "@/components/social-icons";
 import CustomLink from "@/components/Link";
 
-const Footer = () => {
-  return (
-    <footer>
-      <div className="flex flex-col mt-16 items-center">
-        <div className="mb-3 flex space-x-4">
-          <SocialIcon
-            kind="mail"
-            href={`mailto:${siteMetadata.email}`}
-            size={6}
-          />
-          <SocialIcon kind="github" href={siteMetadata.github} size={6} />
-          <SocialIcon kind="facebook" href={siteMetadata.facebook} size={6} />
-          <SocialIcon kind="youtube" href={siteMetadata.youtube} size={6} />
-          <SocialIcon kind="linkedin" href={siteMetadata.linkedin} size={6} />
-          <SocialIcon kind="twitter" href={siteMetadata.twitter} size={6} />
-        </div>
-        <div className="mb-10 flex md:space-x-2 text-sm align-middle text-gray-500 dark:text-gray-400">
-          <CustomLink href="/">{siteMetadata.title}</CustomLink>
-          <div>{`© ${new Date().getFullYear()}`}</div>
-        </div>
+const Footer = () => (
+  <footer className="mt-20 border-t border-zinc-200 py-8 dark:border-zinc-800">
+    <div className="flex flex-col-reverse gap-6 sm:flex-row sm:items-center sm:justify-between">
+      <p className="text-sm text-zinc-500 dark:text-zinc-400">
+        © {new Date().getFullYear()} {siteMetadata.author} ·{" "}
+        <CustomLink
+          href="/feed.xml"
+          className="rounded underline decoration-zinc-300 underline-offset-4 transition-colors hover:text-accent-600 hover:decoration-accent-600 dark:decoration-zinc-700 dark:hover:text-accent-300 dark:hover:decoration-accent-300"
+        >
+          RSS
+        </CustomLink>{" "}
+        ·{" "}
+        <CustomLink
+          href={siteMetadata.siteRepo}
+          className="rounded underline decoration-zinc-300 underline-offset-4 transition-colors hover:text-accent-600 hover:decoration-accent-600 dark:decoration-zinc-700 dark:hover:text-accent-300 dark:hover:decoration-accent-300"
+        >
+          Source
+        </CustomLink>
+      </p>
+      <div className="flex items-center gap-4">
+        <SocialIcon kind="github" href={siteMetadata.github} />
+        <SocialIcon kind="linkedin" href={siteMetadata.linkedin} />
+        <SocialIcon kind="twitter" href={siteMetadata.twitter} />
+        <SocialIcon kind="mail" href={`mailto:${siteMetadata.email}`} />
       </div>
-    </footer>
-  );
-};
+    </div>
+  </footer>
+);
 
 export default Footer;

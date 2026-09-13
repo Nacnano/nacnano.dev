@@ -42,3 +42,8 @@ yarn-error.log*
 
 # Contentlayer
 .contentlayer
+tag-data.json
+
+# Impeccable review captures are build artifacts
+.impeccable/review/
+.impeccable/questions/

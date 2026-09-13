@@ -2,34 +2,28 @@ import projectsData from "@/data/projectsData";
 import { genPageMetaData } from "@/app/seo";
 import ProjectCard from "./ProjectCard";
 
-export const metadata = genPageMetaData({ title: "Projects" });
+export const metadata = genPageMetaData({
+  title: "Projects",
+  description:
+    "A few things Nac has built — student tools, an open-source course planner, and a research project or two.",
+});
 
 export default function Projects() {
   return (
-    <>
-      <div className="divide-y divide-gray-200 dark:divide-gray-700">
-        <div className="space-y-2 pb-8 pt-6 md:space-y-5">
-          <h1 className="text-3xl font-extrabold leading-9 tracking-tight text-gray-900 dark:text-gray-100 sm:text-4xl sm:leading-10 md:text-6xl md:leading-14">
-            Projects
-          </h1>
-          <p className="text-lg leading-7 text-gray-500 dark:text-gray-400">
-            Examples of somethings I have done or contributed to
-          </p>
-        </div>
-        <div className="container py-12">
-          <div className="-m-4 flex flex-wrap">
-            {projectsData.map((project) => (
-              <ProjectCard
-                key={project.title}
-                title={project.title}
-                description={project.description}
-                imgSrc={project.imgSrc}
-                href={project.href}
-              />
-            ))}
-          </div>
-        </div>
+    <div className="py-12 sm:py-16">
+      <h1 className="text-[1.75rem] font-semibold leading-[1.2] tracking-[-0.022em] text-zinc-900 sm:text-[2.125rem] dark:text-zinc-100">
+        Things I&rsquo;ve made
+      </h1>
+      <p className="mt-4 max-w-measure text-[1.0625rem] leading-[1.75] text-zinc-600 dark:text-zinc-400">
+        Mostly built with other people, mostly for students. A few are still
+        running.
+      </p>
+
+      <div className="mt-8 divide-y divide-zinc-200 border-t border-zinc-200 dark:divide-zinc-800 dark:border-zinc-800">
+        {projectsData.map((project) => (
+          <ProjectCard key={project.title} {...project} />
+        ))}
       </div>
-    </>
+    </div>
   );
 }

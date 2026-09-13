@@ -1,19 +1,14 @@
-import { slug } from "github-slugger";
-import CustomLink from "./Link";
-
-interface Props {
-  text: string;
-}
-
-const Tag = ({ text }: Props) => {
-  return (
-    <CustomLink
-      href={`/tags/${slug(text)}`}
-      className="mr-3 text-sm font-medium uppercase text-primary-500 hover:text-primary-600 dark:hover:text-primary-400"
-    >
-      {text.split(" ").join("-")}
-    </CustomLink>
-  );
-};
+/**
+ * Tags are descriptive metadata, not navigation: with five essays the tag
+ * index was ten labels, nine of them leading to a single post. They render as
+ * quiet labels so the information survives without the dead ends.
+ */
+const Tag = ({ text }: { text: string }) => (
+  // A separator keeps adjacent tags from reading as one phrase
+  // ("TEACHING REFLECTION").
+  <li className="text-xs uppercase tracking-[0.08em] text-zinc-500 before:mr-3 before:text-zinc-300 before:content-['·'] first:before:hidden dark:text-zinc-400 dark:before:text-zinc-700">
+    {text}
+  </li>
+);
 
 export default Tag;

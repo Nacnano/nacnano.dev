@@ -1,21 +1,11 @@
-const headerNavLinks = [
-  {
-    href: "/",
-    title: "Home",
-  },
-  {
-    href: "/blogs",
-    title: "Blogs",
-  },
-  { href: "/tags", title: "Tags" },
-  {
-    href: "/projects",
-    title: "Projects",
-  },
-  {
-    href: "/about",
-    title: "About",
-  },
+const headerNavLinks: {
+  href: string;
+  title: string;
+  external?: boolean;
+}[] = [
+  { href: "/", title: "Writing" },
+  { href: "/projects", title: "Projects" },
+  { href: "/about", title: "About" },
 ];
 
 export default headerNavLinks;

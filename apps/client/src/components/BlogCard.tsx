@@ -1,65 +1,37 @@
 import { formatDate } from "pliny/utils/formatDate";
 import CustomLink from "./Link";
 import siteMetadata from "@/data/siteMetadata";
-import Tag from "./Tag";
+import { CoreContent } from "pliny/utils/contentlayer";
 import { Blog } from "contentlayer/generated";
 
-interface BlogCardPropsType {
-  post: Blog;
-}
-
-export default function BlogCard({ post }: BlogCardPropsType) {
-  const { slug, date, title, summary, tags, readingTime } = post;
+export default function BlogCard({ post }: { post: CoreContent<Blog> }) {
+  const { slug, date, title, summary, readingTime } = post;
 
   return (
-    <article>
-      <div className="space-y-2 xl:grid xl:grid-cols-4 xl:items-baseline xl:space-y-0">
-        <dl className="flex flex-wrap items-center">
-          <dt className="sr-only">Published on</dt>
-          <dd className="text-base font-medium leading-6 text-gray-500 dark:text-gray-400">
-            <time className="text-lg mr-3" dateTime={date}>
-              {formatDate(date, siteMetadata.locale)}
-            </time>
+    <article className="group relative py-7">
+      <div className="flex flex-col gap-2 sm:flex-row sm:gap-8">
+        <dl className="sm:w-36 sm:shrink-0 sm:pt-1">
+          <dt className="sr-only">Published</dt>
+          <dd className="font-mono text-xs uppercase tracking-[0.08em] text-zinc-500 dark:text-zinc-400">
+            <time dateTime={date}>{formatDate(date, siteMetadata.locale)}</time>
           </dd>
-          <span className="text-base text-gray-400 dark:text-gray-500">
-            {readingTime.text}
-          </span>
         </dl>
-        <div className="space-y-5 xl:col-span-3">
-          <div className="space-y-6">
-            <div>
-              <h2 className="text-2xl font-bold leading-8 tracking-tight">
-                <CustomLink
-                  href={`/blogs/${slug}`}
-                  className="text-gray-900 dark:text-gray-100"
-                >
-                  {title}
-                </CustomLink>
-              </h2>
-              <div className="flex flex-wrap">
-                {tags.map((tag) => (
-                  <Tag key={tag} text={tag} />
-                ))}
-              </div>
-            </div>
-            <div>
-              <CustomLink
-                href={`/blogs/${slug}`}
-                className="prose max-w-none text-gray-500 dark:text-gray-400"
-              >
-                {summary}
-              </CustomLink>
-            </div>
-          </div>
-          <div className="text-base font-medium leading-6">
-            <CustomLink
-              href={`/blogs/${slug}`}
-              className="text-primary-500 hover:text-primary-600 dark:hover:text-primary-400"
-              aria-label={`Read more: "${title}"`}
-            >
-              Read more &rarr;
+
+        <div className="min-w-0">
+          <h3 className="text-[1.0625rem] font-semibold leading-7 tracking-[-0.011em] text-zinc-900 transition-colors group-hover:text-accent-600 dark:text-zinc-100 dark:group-hover:text-accent-300">
+            <CustomLink href={`/blogs/${slug}`} className="rounded">
+              {/* Stretched link: the whole row is the target, with one
+                  accessible name and no nested anchors. */}
+              <span className="absolute inset-0" aria-hidden="true" />
+              {title}
             </CustomLink>
-          </div>
+          </h3>
+          <p className="mt-1.5 text-[0.9375rem] leading-7 text-zinc-600 dark:text-zinc-400">
+            {summary}
+          </p>
+          <p className="mt-2 font-mono text-xs text-zinc-500 dark:text-zinc-400">
+            {readingTime.text}
+          </p>
         </div>
       </div>
     </article>
