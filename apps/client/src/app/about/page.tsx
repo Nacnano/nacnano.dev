@@ -7,7 +7,7 @@ import AuthorLayout from "@/layouts/AboutLayout/AuthorLayout";
 export const metadata = genPageMetaData({
   title: "About",
   description:
-    "Chotpisit Adunsehawat — computer engineer working across software, data and AI research. Work history, education, and how to reach me.",
+    "A bit about Nac — what I've worked on, where I went to school, and how to get hold of me.",
 });
 
 export default function About() {

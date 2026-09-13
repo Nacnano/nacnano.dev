@@ -205,8 +205,7 @@ A neutral zinc scale carrying one blue accent, paired light-and-dark at every ro
 
 ### Hierarchy
 
-- **Display** (600, 2rem → 2.75rem at ≥640px, 1.15, -0.022em): The author's name on the home page. Used exactly once per site, in the first viewport, at a size that makes whose site this is unmissable before anything else is read.
-- **Headline** (600, 1.75rem → 2.125rem at ≥640px, 1.2, -0.022em): The `h1` of every non-home route — essay title, Projects, About, 404. One per page, never repeated inside a page.
+- **Headline** (600, 1.75rem → 2.125rem at ≥640px, 1.2, -0.022em): The `h1` of every route, home included — the greeting, essay titles, Projects, About, 404. One per page, never repeated inside a page. There is deliberately no larger display step: the home page greets rather than announces, and the author's photo, not the type size, does the introducing.
 - **Title** (600, 1rem, -0.011em): Section headings — Writing, Work, Education. Deliberately close to body size; a section heading earns its rank from the hairline above it and the space around it, not from scale.
 - **Item Title** (600, 1.0625rem, 1.75rem line, -0.011em): The clickable title in a list row — essay, project, adjacent-essay link. The only text in a row that changes color on hover.
 - **Lead** (400, 1.0625rem, 1.75): The positioning paragraph under a display or headline. One per page, capped at the measure.

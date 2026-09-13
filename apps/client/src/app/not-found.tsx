@@ -5,18 +5,18 @@ export default function NotFound() {
   return (
     <div className="py-24 sm:py-32">
       <h1 className="text-[1.75rem] font-semibold leading-[1.2] tracking-[-0.022em] text-zinc-900 sm:text-[2.125rem] dark:text-zinc-100">
-        This page doesn&rsquo;t exist
+        Nothing here
       </h1>
       <p className="mt-4 max-w-measure text-[1.0625rem] leading-[1.75] text-zinc-600 dark:text-zinc-400">
-        The link may be out of date, or the page may have moved. If you were
-        looking for something specific, tell me and I&rsquo;ll point you to it.
+        Either the link is stale or I moved something and forgot to leave a
+        note. If you were after something in particular, just ask me.
       </p>
       <div className="mt-7 flex flex-wrap gap-2">
         <CustomLink
           href="/"
           className="rounded bg-zinc-900 px-3.5 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-700 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300"
         >
-          All essays
+          Back to the writing
         </CustomLink>
         <CustomLink
           href={`mailto:${siteMetadata.email}`}

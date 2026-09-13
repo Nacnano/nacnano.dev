@@ -1,12 +1,13 @@
 const siteMetadata = {
-  title: 'Chotpisit Adunsehawat',
+  title: 'Nac · Chotpisit Adunsehawat',
   author: 'Chotpisit Adunsehawat',
-  headerTitle: 'Chotpisit Adunsehawat',
-  shortName: 'Nacnano',
+  headerTitle: 'Nac',
+  shortName: 'Nac',
+  greeting: "Hi, I'm Nac",
   description:
-    'Computer engineer working across software, data and AI research. I write occasional personal essays about what I get wrong and what I learn from it.',
-  // Shown on the home page and in the header, so it stays honest about status.
-  status: 'Graduated 2026 · open to work',
+    "I build things on the internet and write about the bits I got wrong, which is usually the interesting part.",
+  // Casual, and easy to change. Shown on the About page, not the front door.
+  now: 'Currently in Bangkok, looking for my next thing, and slowly working through a list of half-written drafts.',
   language: 'en-us',
   theme: 'system',
   siteUrl: 'https://www.nacnano.dev',

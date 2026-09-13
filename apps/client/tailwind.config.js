@@ -43,6 +43,17 @@ module.exports = {
       maxWidth: {
         measure: '68ch'
       },
+      // One authored entrance, used on the home introduction only.
+      // The reduced-motion block in tailwind.css collapses it to nothing.
+      keyframes: {
+        rise: {
+          '0%': { opacity: '0', transform: 'translateY(8px)' },
+          '100%': { opacity: '1', transform: 'none' }
+        }
+      },
+      animation: {
+        rise: 'rise 500ms cubic-bezier(0.16, 1, 0.3, 1) both'
+      },
       borderRadius: {
         DEFAULT: '4px',
         md: '6px',

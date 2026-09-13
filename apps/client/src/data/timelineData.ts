@@ -1,8 +1,7 @@
 /**
  * Reconciled against https://resume.nacnano.dev (the canonical CV) on
- * 2026-09-13. The previous version of this file disagreed with the résumé on
- * GPA, omitted the SCB and QuanXAI roles, mislabelled the SCBX title, and
- * marked two ended roles as "Present". The résumé wins; keep them in sync.
+ * 2026-09-13. Every date, title and employer here matches it — the wording is
+ * deliberately casual, but the facts are not negotiable. Keep them in sync.
  *
  * Locations are only recorded where they are actually known — do not invent.
  */
@@ -15,7 +14,6 @@ export type TimelineItem = {
   organisation: string;
   location?: string;
   description?: string;
-  current?: boolean;
 };
 
 export const workItems: TimelineItem[] = [
@@ -25,7 +23,7 @@ export const workItems: TimelineItem[] = [
     title: "Data Scientist, Intern",
     organisation: "SCB",
     description:
-      "NLP research on FOMC market sentiment analysis.",
+      "Poked at FOMC statements with NLP to see whether the market's mood was hiding in the wording.",
   },
   {
     period: "Jan – Mar 2026",
@@ -33,25 +31,25 @@ export const workItems: TimelineItem[] = [
     title: "AI Engineer, Part Time",
     organisation: "QuanXAI",
     description:
-      "LangChain chatbot development and a machine-learning fraud detection proof of concept.",
+      "A LangChain chatbot, and a fraud-detection proof of concept that mostly taught me how messy real data is.",
   },
   {
     period: "Aug – Dec 2025",
     start: "2025-08-01",
     title: "AI Researcher and Technology Risk, Intern",
     organisation: "SCBX",
-    location: "Bangkok, Thailand",
+    location: "Bangkok",
     description:
-      "Stock market prediction research and cybersecurity chatbot testing.",
+      "Stock-market prediction research, and a stretch spent trying to talk a cybersecurity chatbot into misbehaving.",
   },
   {
     period: "Jun – Aug 2025",
     start: "2025-06-01",
     title: "AI Researcher, Intern",
-    organisation: "Japan Advanced Institute of Science and Technology",
+    organisation: "JAIST",
     location: "Nomi, Japan",
     description:
-      "AI safety and alignment research on the mechanistic interpretability of chain-of-thought reasoning and randomness in large language models.",
+      "Tried to work out what language models are actually doing when they 'reason'. Came away with more questions than answers.",
   },
   {
     period: "May – Jul 2025",
@@ -60,43 +58,43 @@ export const workItems: TimelineItem[] = [
     organisation: "Ayasan Holding",
     location: "Remote",
     description:
-      "Feature development across the Next.js and Nuxt.js web apps and the React Native mobile app.",
+      "Shipped features across the web apps and the React Native app.",
   },
   {
     period: "Nov 2024 – Jun 2025",
     start: "2024-11-01",
     title: "Data Engineer, Part Time",
     organisation: "People's Party",
-    location: "Bangkok, Thailand",
+    location: "Bangkok",
     description:
-      "Deployed a RAG LLM, built BigQuery pipelines with Apache Airflow, and integrated data through Krayin CRM.",
+      "Built data pipelines and got a retrieval chatbot running on top of them.",
   },
   {
     period: "Jun – Nov 2024",
     start: "2024-06-01",
     title: "Software Engineer, Intern",
     organisation: "Agoda",
-    location: "Bangkok, Thailand",
+    location: "Bangkok",
     description:
-      "Migrated a .NET and Scala internal tool to Kotlin, and integrated OPA and Okta OAuth2 Proxy for authorization.",
+      "Moved an internal tool off .NET and Scala onto Kotlin, and wired up the authorization behind it.",
   },
   {
     period: "Mar 2022 – Dec 2025",
     start: "2022-03-01",
     title: "Software Engineer and Data Analyst, Part Time",
     organisation: "MonkeyEveryday",
-    location: "Bangkok, Thailand",
+    location: "Bangkok",
     description:
-      "Built and maintained the TCAS simulation service used by over 40,000 people, across Next.js, Vue.js and NestJS.",
+      "Looked after a university-admissions simulator that a lot of anxious students refreshed every year. Nearly four years of it.",
   },
   {
     period: "Jun – Aug 2023",
     start: "2023-06-01",
     title: "Full Stack Developer, Intern",
     organisation: "Wang Data Market",
-    location: "Bangkok, Thailand",
+    location: "Bangkok",
     description:
-      "Implemented form input types in React and new Express.js API endpoints.",
+      "Form inputs in React, endpoints in Express. My first proper look at someone else's codebase.",
   },
 ];
 
@@ -104,27 +102,25 @@ export const educationItems: TimelineItem[] = [
   {
     period: "2022 – 2026",
     start: "2022-08-01",
-    title: "B.Eng. Computer Engineering",
+    title: "Computer Engineering",
     organisation: "Chulalongkorn University",
-    location: "Bangkok, Thailand",
+    location: "Bangkok",
     description:
-      "GPA 3.93/4.00. Teaching assistant for Computer Engineering Essentials (backend).",
+      "Also TA'd the backend course, which taught me considerably more than sitting in it did.",
   },
   {
     period: "2019 – 2022",
     start: "2019-05-01",
-    title: "High School",
+    title: "High school",
     organisation: "Mahidol Wittayanusorn School",
-    location: "Thailand",
     description:
-      "GPA 4.00. Exchange programmes, international symposiums, and the POSN Computer Olympiad camps.",
+      "A boarding school for science kids. Went on a few exchanges and entered more competitions than I won.",
   },
   {
     period: "2016 – 2019",
     start: "2016-05-01",
-    title: "Secondary School",
+    title: "Secondary school",
     organisation: "Suankularb Wittayalai School",
-    location: "Thailand",
-    description: "GPA 3.56. Played football all day. Started coding.",
+    description: "Played football all day. Wrote my first line of code somewhere in between.",
   },
 ];

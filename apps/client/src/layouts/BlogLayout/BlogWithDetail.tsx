@@ -109,20 +109,20 @@ export default function BlogWithDetail({
             <span className="font-medium text-zinc-900 dark:text-zinc-100">
               {siteMetadata.author}
             </span>
-            . {siteMetadata.description}
+            , who goes by Nac. {siteMetadata.description}
           </p>
           <div className="mt-4 flex flex-wrap gap-2">
             <CustomLink
               href="/"
               className="rounded border border-zinc-200 px-3 py-1.5 text-sm font-medium text-zinc-700 transition-colors hover:border-zinc-300 hover:text-zinc-900 dark:border-zinc-800 dark:text-zinc-300 dark:hover:border-zinc-700 dark:hover:text-zinc-100"
             >
-              All essays
+              More writing
             </CustomLink>
             <CustomLink
-              href={siteMetadata.resume}
+              href="/about"
               className="rounded border border-zinc-200 px-3 py-1.5 text-sm font-medium text-zinc-700 transition-colors hover:border-zinc-300 hover:text-zinc-900 dark:border-zinc-800 dark:text-zinc-300 dark:hover:border-zinc-700 dark:hover:text-zinc-100"
             >
-              Résumé
+              About me
             </CustomLink>
           </div>
         </aside>
