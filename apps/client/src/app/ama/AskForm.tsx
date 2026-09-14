@@ -5,33 +5,28 @@ import { askQuestion } from "./actions";
 import type { AskFailure, AskState } from "@/lib/amaInbox";
 
 /**
- * The ask box: a real `<form>` bound to a server action, so it still submits
- * with JavaScript off. `useActionState` is the whole of the enhancement — it
- * gives the pending flag and the returned state without the component ever
- * owning a `fetch`.
+ * The ask box. A real `<form>` bound to a server action, so it still submits
+ * with JavaScript off; `useActionState` only adds the pending flag and the
+ * returned state, so the component never owns a `fetch`.
  *
- * Two things this deliberately does NOT do. It does not imply publication: a
- * question goes to a private inbox and only a written answer ever reaches the
- * page, and the copy says so rather than letting the asker infer otherwise. And
- * it does not fail silently — every outcome, including the ones that are the
- * site's fault, is announced in an `aria-live` region, because a submit button
- * that appears to do nothing is the usual way a form like this breaks.
+ * The copy says a question goes to a private inbox, because it does. Every
+ * outcome lands in an `aria-live` region, including the site's own failures: a
+ * submit button that appears to do nothing is how a form like this usually
+ * breaks.
  */
 
 const initialState: AskState = { status: "idle" };
 
 /** Every failure the action can return has copy. `Record<AskFailure, ...>` is
- *  what makes that a compile error rather than a blank live region. */
+ *  what makes a missing one a compile error rather than a blank live region. */
 function failureCopy(reason: AskFailure, retryAfterMinutes: number): string {
   const copy: Record<AskFailure, string> = {
-    empty: "Type a question first — the box is empty.",
-    too_long: "That's longer than the box accepts. Trim it and try again.",
-    contact_too_long: "That contact detail is too long. Shorten it and try again.",
-    rate_limited: `That's a few questions in a short window. Try again in ${retryAfterMinutes} minutes, or send it over email.`,
-    unavailable:
-      "The question box isn't reachable right now. Email works and reaches the same person.",
-    failed:
-      "Something broke on my side and the question didn't send. Email is the fallback.",
+    empty: "The box is empty. Type something first.",
+    too_long: "That's too long for the box. Trim it a bit.",
+    contact_too_long: "That's too long for the contact field.",
+    rate_limited: `That's a lot of questions at once. Try again in ${retryAfterMinutes} minutes, or just email me.`,
+    unavailable: "The box isn't working right now. Email still reaches me.",
+    failed: "Something broke on my end and it didn't send. Email still works.",
   };
   return copy[reason];
 }
@@ -68,21 +63,20 @@ export default function AskForm({
     if (state.status === "sent") formRef.current?.reset();
   }, [state]);
 
+  // No visible heading: the `h1` above already says "Ask me anything", and a
+  // second one would just say it twice. The section is still named for anyone
+  // navigating by landmark.
   return (
-    <section className="mt-10 border-t border-zinc-200 pt-8 dark:border-zinc-800">
-      <h2 className="text-base font-semibold tracking-[-0.011em] text-zinc-900 dark:text-zinc-100">
-        Ask a question
-      </h2>
+    <section aria-label="Ask a question" className="mt-8">
       <p
         id={hintId}
-        className="max-w-measure mt-2 text-[0.9375rem] leading-7 text-zinc-600 dark:text-zinc-400"
+        className="max-w-measure text-[0.9375rem] leading-7 text-zinc-600 dark:text-zinc-400"
       >
-        This goes to a private inbox, not to the page. Most questions get a short reply;
-        the ones worth reading get written up here. Questions are kept for {retentionDays}{" "}
-        days and then deleted.
+        Goes to a private inbox. Nothing you write shows up here unless I write an answer
+        for it. Questions are deleted after {retentionDays} days.
       </p>
 
-      <form ref={formRef} action={formAction} className="max-w-measure mt-6">
+      <form ref={formRef} action={formAction} className="max-w-measure mt-5">
         <label
           htmlFor={questionId}
           className="block text-xs uppercase tracking-[0.08em] text-zinc-500 dark:text-zinc-400"
@@ -168,12 +162,12 @@ export default function AskForm({
         */}
         <p
           aria-live="polite"
-          className="mt-4 min-h-[1.75rem] text-[0.9375rem] leading-7 text-zinc-600 dark:text-zinc-400"
+          className="mt-3 min-h-[1.75rem] text-[0.9375rem] leading-7 text-zinc-600 dark:text-zinc-400"
         >
           {pending
-            ? "Sending your question…"
+            ? "Sending…"
             : state.status === "sent"
-              ? "Sent. Answered questions get published on this page; most get a private reply instead."
+              ? "Sent, thanks. If I write an answer it turns up on this page."
               : state.status === "error"
                 ? failureCopy(state.reason, retryAfterMinutes)
                 : ""}

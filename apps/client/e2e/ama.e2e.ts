@@ -30,7 +30,7 @@ test("every answer has a distinctly-named permalink pointing at a real anchor", 
 }) => {
   await page.goto("/ama");
 
-  const permalinks = page.locator('h2 a[href^="#"]');
+  const permalinks = page.locator('h3 a[href^="#"]');
   const count = await permalinks.count();
   expect(count, "the page should publish at least one answer").toBeGreaterThan(0);
 
@@ -58,7 +58,7 @@ test("the ask box has a real label and states what happens to a question", async
   const question = page.getByLabel("Your question");
   await expect(question).toBeVisible();
   await expect(page.getByRole("button", { name: "Send question" })).toBeVisible();
-  await expect(page.getByText(/private inbox, not to the page/i)).toBeVisible();
+  await expect(page.getByText(/goes to a private inbox/i)).toBeVisible();
 });
 
 test("a submission with no store configured says so instead of faking success", async ({
@@ -72,6 +72,6 @@ test("a submission with no store configured says so instead of faking success", 
   // The result lands in the live region — the same node a screen reader is
   // already watching — and never claims the question was sent.
   const live = page.locator('[aria-live="polite"]');
-  await expect(live).toContainText(/isn't reachable right now/i);
-  await expect(live).not.toContainText(/Sent\./);
+  await expect(live).toContainText(/isn't working right now/i);
+  await expect(live).not.toContainText(/^Sent/);
 });
