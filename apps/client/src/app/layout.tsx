@@ -9,7 +9,6 @@ import { ThemeProviders } from "./theme-provider";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import VisitTracker from "@/components/VisitTracker";
-import { isActivityLive } from "@/lib/activity";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -114,7 +113,7 @@ export default function RootLayout({
       </head>
       <body className="bg-white font-sans text-zinc-900 antialiased dark:bg-zinc-950 dark:text-zinc-100">
         <div dangerouslySetInnerHTML={{ __html: `<!--${directionContract}-->` }} />
-        <VisitTracker live={isActivityLive()} />
+        <VisitTracker />
         <ThemeProviders>
           <a
             href="#main"

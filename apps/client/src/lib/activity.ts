@@ -206,12 +206,22 @@ export function buildFeedPayload(
  * Live mode is on only when the site has been pointed at a Redis instance.
  * The page computes this on the server and hands the answer to the client as a
  * plain boolean, so no server-only env ever reaches the browser bundle. When
- * this is false every surface falls back to the static seed and the page stays
- * a genuinely static site.
+ * this is false nothing is polled or recorded and the page stays a genuinely
+ * static site.
  */
 export function isActivityLive(): boolean {
   return (
     process.env.UPSTASH_REDIS_REST_URL !== undefined &&
     process.env.UPSTASH_REDIS_REST_TOKEN !== undefined
   );
+}
+
+/**
+ * The sample seed is a local-dev convenience only. On any Vercel deployment —
+ * preview or production — the feed must show real visits or an honest empty
+ * state, never fabricated traffic. `VERCEL` is set on every Vercel build, so
+ * this is false there and the seed is suppressed; locally it is true.
+ */
+export function shouldUseSeed(): boolean {
+  return process.env.VERCEL === undefined;
 }
