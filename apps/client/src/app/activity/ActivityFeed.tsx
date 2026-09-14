@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import CustomLink from "@/components/Link";
 import { useMounted } from "@/lib/useMounted";
+import { useInView } from "@/lib/useInView";
 import { formatDate } from "@/lib/formatDate";
 import {
   aggregateByCountry,
@@ -33,17 +34,28 @@ const AGGREGATE_WINDOW = 200;
 
 // The globe is a WebGL canvas that only ever draws on the client, so its cobe
 // code is deferred; a sized placeholder keeps the sticky column from shifting.
-// Follow-up: it still downloads on first paint even though it's below the fold
-// on mobile — gating this behind an IntersectionObserver would cut LCP further.
+// It is additionally gated behind an IntersectionObserver (see `useInView`), so
+// the chunk isn't even requested until the globe nears the viewport — the win
+// for below-the-fold mobile, while on desktop it is visible immediately and
+// loads as before.
 const ActivityGlobe = dynamic(() => import("./ActivityGlobe"), {
   ssr: false,
-  loading: () => (
-    <div
-      aria-hidden="true"
-      className="h-full w-full rounded-full border border-zinc-200 dark:border-zinc-800"
-    />
-  ),
 });
+
+/** The reserved, sized box the globe draws into — present before and while the
+ *  cobe chunk streams in, so mounting the canvas never shifts layout. */
+function GlobeShell({ children }: { children?: React.ReactNode }) {
+  return (
+    <div className="aspect-square w-full" aria-busy={!children}>
+      {children ?? (
+        <div
+          aria-hidden="true"
+          className="h-full w-full rounded-full border border-zinc-200 dark:border-zinc-800"
+        />
+      )}
+    </div>
+  );
+}
 
 function locationLabel(visit: VisitEvent): string {
   const country = visit.countryCode
@@ -90,6 +102,11 @@ export default function ActivityFeed({
   // appear once hydrated; the first paint (server and first client render) is
   // identical because `mounted` is false in both.
   const mounted = useMounted();
+
+  // Defer the WebGL globe (and its cobe chunk) until its column is near the
+  // viewport. The sized placeholder in the shell reserves the space, so the
+  // later mount never shifts layout; on desktop the column is visible at once.
+  const [globeRef, globeInView] = useInView<HTMLElement>("240px 0px");
 
   // Guards so a slow/duplicate response can never reorder the list.
   const loadingMoreRef = useRef(false);
@@ -177,12 +194,13 @@ export default function ActivityFeed({
   return (
     <div className="flex flex-col gap-10 lg:flex-row lg:items-start lg:gap-14">
       <section
+        ref={globeRef}
         aria-label="Site visits around the world"
         className="mx-auto w-full max-w-[22rem] shrink-0 lg:sticky lg:top-8"
       >
-        <div className="aspect-square w-full">
-          <ActivityGlobe markers={markers} />
-        </div>
+        <GlobeShell>
+          {globeInView ? <ActivityGlobe markers={markers} /> : null}
+        </GlobeShell>
         {countries.length > 0 ? (
           <ul
             aria-label="Most-visited countries"
