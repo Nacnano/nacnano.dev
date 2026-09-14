@@ -10,6 +10,7 @@ import {
   blogStructuredData,
   getAuthor,
   getBlog,
+  jsonLdScriptProps,
   publishedBlogs,
   type Author,
 } from "@/lib/content";
@@ -95,10 +96,7 @@ export default async function Page({ params }: RouteParams) {
 
   return (
     <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
+      <script {...jsonLdScriptProps(jsonLd)} />
       {/*
         `resolveLayout` returns one of a fixed, module-level map — it does not
         create a component during render, so the "created during render" rule is

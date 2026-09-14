@@ -1,5 +1,12 @@
 import { describe, it, expect } from "bun:test";
-import { allBlogs, publishedBlogs, getBlog, blogStructuredData } from "./content";
+import {
+  allBlogs,
+  blogStructuredData,
+  getBlog,
+  jsonLdScriptProps,
+  publishedBlogs,
+  type Blog,
+} from "./content";
 import siteMetadata from "@/data/siteMetadata";
 
 /**
@@ -54,5 +61,39 @@ describe("content loader", () => {
     expect(jsonLd.headline).toBe(post.title);
     expect(jsonLd.url).toContain(`/blogs/${post.slug}`);
     expect(jsonLd.author).toEqual([{ "@type": "Person", name: "Nacnano" }]);
+  });
+});
+
+describe("jsonLdScriptProps", () => {
+  // The whole point of the helper is that a specific byte sequence never reaches
+  // the output — so assert it directly, on a fixture rather than the live MDX
+  // corpus: this test is about string escaping, not disk reads, and a literal
+  // keeps it hermetic (no load-bearing cast on a possibly-empty blogs dir).
+  const post: Blog = {
+    slug: "escape-me",
+    path: "blogs/escape-me",
+    filePath: "blogs/escape-me.mdx",
+    title: "A </script><img onerror=x> title",
+    date: "2026-09-14T00:00:00.000Z",
+    tags: [],
+    readingTime: { text: "1 min", minutes: 1, time: 1000, words: 1 },
+    body: "",
+  };
+  const payload = blogStructuredData(post, ["N"]);
+  const html = jsonLdScriptProps(payload).dangerouslySetInnerHTML.__html;
+
+  it("sets the ld+json script type", () => {
+    expect(jsonLdScriptProps({}).type).toBe("application/ld+json");
+  });
+
+  it("never emits a closing script tag", () => {
+    expect(html).not.toContain("</script>");
+    expect(html.toLowerCase()).not.toContain("<img");
+  });
+
+  it("is lossless — the escaped output parses back to the original data", () => {
+    // This is the claim in the code comment that nothing else checks: escaping
+    // `<` must not corrupt the structured data Google reads.
+    expect(JSON.parse(html).headline).toBe("A </script><img onerror=x> title");
   });
 });

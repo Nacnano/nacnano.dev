@@ -161,3 +161,26 @@ export function blogStructuredData(blog: Blog, authorNames: string[]) {
     author: authorNames.map((name) => ({ "@type": "Person", name })),
   };
 }
+
+/**
+ * Props for an inline JSON-LD `<script>`, ready to spread:
+ * `<script {...jsonLdScriptProps(blogStructuredData(...))} />`.
+ *
+ * Centralised here (rather than stringifying at each call site) so the
+ * `<` escape can never be forgotten when a second block — an `Organization`,
+ * a `BreadcrumbList` — is added. The escape stops a closing script tag inside
+ * a string value from ending the element early and injecting markup; it is
+ * lossless because that escape is itself valid JSON and parses back to the
+ * original character (Google's Rich Results test included sees identical data).
+ */
+export function jsonLdScriptProps(data: unknown): {
+  type: "application/ld+json";
+  dangerouslySetInnerHTML: { __html: string };
+} {
+  return {
+    type: "application/ld+json",
+    dangerouslySetInnerHTML: {
+      __html: JSON.stringify(data).replace(/</g, "\\u003c"),
+    },
+  };
+}
