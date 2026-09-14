@@ -1,5 +1,6 @@
 import { genPageMetaData } from "@/app/seo";
 import { isActivityLive } from "@/lib/activity";
+import { STREAM_MAXLEN } from "@/lib/activityRedis";
 import { loadInitialFeed } from "@/lib/activityServer";
 import ActivityFeed from "./ActivityFeed";
 
@@ -25,8 +26,11 @@ export default async function Activity() {
         Activity
       </h1>
       <p className="mt-4 max-w-measure text-[1.0625rem] leading-[1.75] text-zinc-600 dark:text-zinc-400">
-        A public record of people visiting this site. No cookies, no personal
-        data — just roughly where in the world each visit came from.
+        A public record of visits to this site. No cookies, and no IP address is
+        stored — only the country, the city, and a coordinate rounded to roughly
+        ten kilometres or less that Vercel derives from each request. We keep the
+        most recent {STREAM_MAXLEN.toLocaleString("en-US")} visits, and anything
+        older than six months rolls off.
       </p>
 
       {initial.status === "error" ? (
