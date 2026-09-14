@@ -1,5 +1,5 @@
 import siteMetadata from "@/data/siteMetadata";
-import { Metadata } from "next";
+import type { Metadata } from "next";
 
 /**
  * Per-page SEO helper. `title`/`description`/`image` build the share card; any
