@@ -115,7 +115,10 @@ export function requireStringArray(
   field: string,
   file: string
 ): string[] | undefined {
-  if (value === undefined) return undefined;
+  // A bare YAML key (`tags:` with nothing after it) parses to `null` — treat it
+  // as absent, the same way an omitted key is, so "empty vs missing" is one
+  // deliberate behaviour rather than an accident of which validator checks null.
+  if (value === undefined || value === null) return undefined;
   // `.every` with a type predicate narrows to `string[]`; a `.some(!== string)`
   // guard would leave `value` as `any[]`.
   if (
@@ -133,8 +136,10 @@ export function requireBooleanOrUndefined(
   file: string
 ): boolean | undefined {
   // `draft` is the field whose failure mode is publishing something you didn't
-  // mean to (a quoted `draft: 'true'` is truthy-but-not-true). Refuse to guess.
-  if (value === undefined) return undefined;
+  // mean to (a quoted `draft: 'true'` is truthy-but-not-true). Refuse to guess on
+  // anything that isn't a real boolean — but a bare `draft:` (null) is treated as
+  // absent, consistent with every other optional field.
+  if (value === undefined || value === null) return undefined;
   if (typeof value !== "boolean") {
     throw new Error(
       `blogs/${file}: \`${field}\` must be an unquoted boolean (true/false), got ${describe(value)}`
@@ -190,7 +195,7 @@ function toBlog({ file, raw }: { file: string; raw: string }): Blog {
     title: requireNonEmptyString(data.title, "title", file),
     date: requireIsoDate(data.date, "date", file),
     lastmod:
-      data.lastmod === undefined
+      data.lastmod === undefined || data.lastmod === null
         ? undefined
         : requireIsoDate(data.lastmod, "lastmod", file),
     summary: requireOptionalString(data.summary, "summary", file),

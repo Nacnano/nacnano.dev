@@ -70,7 +70,6 @@ describe("content loader", () => {
   });
 });
 
-<<<<<<< HEAD
 describe("jsonLdScriptProps", () => {
   // The whole point of the helper is that a specific byte sequence never reaches
   // the output — so assert it directly, on a fixture rather than the live MDX
@@ -102,7 +101,9 @@ describe("jsonLdScriptProps", () => {
     // This is the claim in the code comment that nothing else checks: escaping
     // `<` must not corrupt the structured data Google reads.
     expect(JSON.parse(html).headline).toBe("A </script><img onerror=x> title");
-=======
+  });
+});
+
 /**
  * The reject branches, exercised directly (no disk). These are the validations
  * the PR exists to add — the happy corpus already parsed fine before it, so
@@ -165,6 +166,17 @@ describe("frontmatter validators", () => {
       /must be one of/
     );
     expect(() => requireKnownLayout(42, "layout", "x.mdx")).toThrow(/must be one of/);
->>>>>>> 39728ec (fix(content): close the gap between the title and the behaviour)
+  });
+
+  it("treats a bare YAML key (null) as absent for optional fields, consistently", () => {
+    // `tags:` / `draft:` / `summary:` / `layout:` with nothing after them parse
+    // to null. Every optional field now reads that as "not provided" rather than
+    // some treating it as absent and others failing the build.
+    expect(requireStringArray(null, "tags", "x.mdx")).toBeUndefined();
+    expect(requireBooleanOrUndefined(null, "draft", "x.mdx")).toBeUndefined();
+    expect(requireOptionalString(null, "summary", "x.mdx")).toBeUndefined();
+    expect(requireKnownLayout(null, "layout", "x.mdx")).toBeUndefined();
+    // A required field still rejects it — null is not a date.
+    expect(() => requireIsoDate(null, "date", "x.mdx")).toThrow(/must be a date/);
   });
 });

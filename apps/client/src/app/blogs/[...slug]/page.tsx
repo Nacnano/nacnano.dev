@@ -14,9 +14,13 @@ import {
   publishedBlogs,
   type Author,
 } from "@/lib/content";
+import { type LayoutName } from "@/lib/blogLayouts";
 
-const layouts = { BlogWithDetail } as const;
-type LayoutName = keyof typeof layouts;
+// The component map is keyed by the same `LayoutName` the content loader
+// validates against, so the registry holds itself to the PR's own rule: add a
+// name to `LAYOUT_NAMES` without a component here (or vice-versa) is a compile
+// error, not a "keep in sync" comment.
+const layouts: Record<LayoutName, typeof BlogWithDetail> = { BlogWithDetail };
 
 const defaultLayout: LayoutName = "BlogWithDetail";
 
