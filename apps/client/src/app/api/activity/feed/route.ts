@@ -1,30 +1,33 @@
 import { NextResponse } from "next/server";
-import { buildFeedPayload, isActivityLive } from "@/lib/activity";
+import {
+  buildFeedPayload,
+  isActivityLive,
+  shouldUseSeed,
+} from "@/lib/activity";
 import { readActivityFeed } from "@/lib/activityRedis";
-import { seedActivityEvents } from "@/data/activityData";
+import { seedVisits } from "@/data/activityData";
 
-// The feed reflects recent events, so it is never baked into the static build;
+// The feed reflects recent visits, so it is never baked into the static build;
 // the client polls this route while a tab is open.
 export const dynamic = "force-dynamic";
 
 export async function GET() {
-  if (!isActivityLive()) {
-    return NextResponse.json(buildFeedPayload(seedActivityEvents, seedActivityEvents.length));
+  if (isActivityLive()) {
+    try {
+      // Return whatever the store actually holds, including an honest empty
+      // result. Never substitute the seed here: on a real deployment a blank
+      // globe is the truth, not a bug to paper over.
+      const payload = await readActivityFeed();
+      return NextResponse.json(payload);
+    } catch {
+      return NextResponse.json({ visits: [], count: 0 });
+    }
   }
 
-  try {
-    const payload = await readActivityFeed();
-    // An empty live store (fresh instance, nothing recorded yet) still reads
-    // better as the seed than as a blank page.
-    if (payload.events.length === 0) {
-      return NextResponse.json(
-        buildFeedPayload(seedActivityEvents, seedActivityEvents.length)
-      );
-    }
-    return NextResponse.json(payload);
-  } catch {
-    return NextResponse.json(
-      buildFeedPayload(seedActivityEvents, seedActivityEvents.length)
-    );
+  // No store configured. Sample data is a local-dev aid only; on Vercel (where
+  // there is simply no Redis wired up yet) show the empty state instead.
+  if (shouldUseSeed()) {
+    return NextResponse.json(buildFeedPayload(seedVisits, seedVisits.length));
   }
+  return NextResponse.json({ visits: [], count: 0 });
 }

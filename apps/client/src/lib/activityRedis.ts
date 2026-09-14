@@ -1,5 +1,5 @@
 /**
- * The Redis-backed store behind a live activity feed.
+ * The Redis-backed store behind the live site-visit feed.
  *
  * This is the only module that talks to Upstash, and the whole of it is behind
  * an env gate: with no credentials configured the client is never constructed,
@@ -7,20 +7,13 @@
  * rather than stored. That keeps the site a plain static deploy until someone
  * points it at a real instance.
  *
- * The store is a capped Redis stream plus a counter. Events are written as
+ * The store is a capped Redis stream plus a counter. Visits are written as
  * JSON; the newest `MAXLEN` are what the public feed reads back.
  */
 
 import { Redis } from "@upstash/redis";
-import {
-  buildFeedPayload,
-  sortEventsDesc,
-} from "./activity";
-import type {
-  ActivityEvent,
-  ActivityFeedPayload,
-  ActivityKind,
-} from "./activityTypes";
+import { buildFeedPayload, sortVisitsDesc } from "./activity";
+import type { VisitEvent, VisitFeedPayload } from "./activityTypes";
 
 const STREAM_KEY = "activity:stream";
 const COUNT_KEY = "activity:count";
@@ -50,28 +43,25 @@ export function getActivityClient(): Redis | null {
   return cachedClient;
 }
 
-function isActivityEvent(value: unknown): value is ActivityEvent {
+function isVisitEvent(value: unknown): value is VisitEvent {
   if (!value || typeof value !== "object") return false;
   const record = value as Record<string, unknown>;
   return (
     typeof record.id === "string" &&
     typeof record.ts === "string" &&
-    typeof record.kind === "string" &&
-    typeof record.summary === "string"
+    typeof record.page === "string"
   );
 }
 
 /**
- * Pull the newest `limit` events plus the running count.
+ * Pull the newest `limit` visits plus the running total.
  *
  * Upstash hands a stream back as id→field pairs, but the exact shape differs
  * between the REST deserializer (an object keyed by id) and the raw reply (an
  * array of [id, flat-fields]). Both are normalised here so a change in the
  * client library or runtime cannot silently blank the feed.
  */
-export async function readActivityFeed(
-  limit = 60
-): Promise<ActivityFeedPayload> {
+export async function readActivityFeed(limit = 120): Promise<VisitFeedPayload> {
   const client = getActivityClient();
   if (!client) return buildFeedPayload([], 0);
 
@@ -80,24 +70,22 @@ export async function readActivityFeed(
     client.get<number>(COUNT_KEY),
   ]);
 
-  const events: ActivityEvent[] = [];
+  const visits: VisitEvent[] = [];
   for (const fields of normaliseEntries(entries)) {
     const raw = fields.data;
     if (typeof raw !== "string") continue;
     try {
       const parsed: unknown = JSON.parse(raw);
-      if (isActivityEvent(parsed)) events.push(parsed);
+      if (isVisitEvent(parsed)) visits.push(parsed);
     } catch {
       // A malformed entry must not take the whole feed down.
     }
   }
 
-  return buildFeedPayload(events, count ?? events.length);
+  return buildFeedPayload(visits, count ?? visits.length);
 }
 
-function normaliseEntries(
-  entries: unknown
-): Record<string, string>[] {
+function normaliseEntries(entries: unknown): Record<string, string>[] {
   const collected: Record<string, string>[] = [];
   if (Array.isArray(entries)) {
     // [id, [field, value, field, value, ...]] or already [id, { field: value }]
@@ -125,18 +113,14 @@ function normaliseEntries(
   return collected;
 }
 
-export function visitEvent(input: VisitInput): ActivityEvent {
-  const city = input.city?.trim();
-  const where = city ? ` from ${city}` : "";
+export function visitEvent(input: VisitInput): VisitEvent {
   return {
     id: crypto.randomUUID(),
     ts: new Date().toISOString(),
-    kind: "visit" satisfies ActivityKind,
-    summary: `visited ${input.title?.trim() || input.path}${where}`,
-    source: "nacnano.dev",
-    href: input.path,
+    page: input.path,
+    title: input.title?.trim() || undefined,
     countryCode: input.countryCode,
-    city,
+    city: input.city?.trim() || undefined,
     lat: input.lat,
     lng: input.lng,
   };
@@ -156,13 +140,13 @@ export async function recordVisit(input: VisitInput): Promise<boolean> {
   return true;
 }
 
-/** Merges live events over the static seed, newest first, de-duplicated. */
+/** Merges live visits over the static seed, newest first, de-duplicated. */
 export function mergeFeed(
-  live: readonly ActivityEvent[],
-  seed: readonly ActivityEvent[]
-): ActivityEvent[] {
-  if (live.length === 0) return sortEventsDesc(seed);
+  live: readonly VisitEvent[],
+  seed: readonly VisitEvent[]
+): VisitEvent[] {
+  if (live.length === 0) return sortVisitsDesc(seed);
   const seen = new Set(live.map((event) => event.id));
   const fallback = seed.filter((event) => !seen.has(event.id));
-  return sortEventsDesc([...live, ...fallback]);
+  return sortVisitsDesc([...live, ...fallback]);
 }
