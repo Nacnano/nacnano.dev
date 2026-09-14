@@ -40,10 +40,11 @@ yarn-error.log*
 .vercel
 
 
-# Contentlayer
-.contentlayer
 tag-data.json
 
 # Impeccable review captures are build artifacts
 .impeccable/review/
 .impeccable/questions/
+
+# TypeScript incremental build info
+*.tsbuildinfo

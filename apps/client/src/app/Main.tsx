@@ -2,8 +2,7 @@ import siteMetadata from "@/data/siteMetadata";
 import CustomLink from "@/components/Link";
 import BlogCard from "@/components/BlogCard";
 import Image from "@/components/Image";
-import { CoreContent } from "pliny/utils/contentlayer";
-import { Blog } from "contentlayer/generated";
+import type { Blog } from "@/lib/content";
 
 // All the same weight on purpose — nothing here is trying to sell you anything.
 const links = [
@@ -12,7 +11,7 @@ const links = [
   { href: "/about", title: "More about me" },
 ];
 
-const Main = ({ posts }: { posts: CoreContent<Blog>[] }) => (
+const Main = ({ posts }: { posts: Blog[] }) => (
   <>
     <section className="animate-rise py-14 sm:py-20">
       <div className="flex items-center gap-4">
