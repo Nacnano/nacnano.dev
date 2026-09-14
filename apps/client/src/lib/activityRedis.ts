@@ -169,7 +169,7 @@ export async function readActivityFeed(
     // A full page implies older entries likely remain; a short/empty page ends
     // the walk. The last (oldest) id is the cursor for the next older page.
     hasMore: ordered.length === limit,
-    nextCursor: ordered.length ? ordered[ordered.length - 1].cursor ?? null : null,
+    nextCursor: ordered.at(-1)?.cursor ?? null,
   };
 }
 

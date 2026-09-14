@@ -45,7 +45,7 @@ describe("groupByDay", () => {
       visit({ id: "3", ts: "2026-09-12T12:00:00.000Z" }),
     ]);
     expect(days.map((d) => d.day)).toEqual(["2026-09-14", "2026-09-12"]);
-    expect(days[0].visits.map((v) => v.id)).toEqual(["1", "2"]);
+    expect(days[0]?.visits.map((v) => v.id)).toEqual(["1", "2"]);
   });
 
   it("returns nothing for an empty feed", () => {
