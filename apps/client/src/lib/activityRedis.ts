@@ -72,33 +72,43 @@ export async function readActivityFeed(limit = 120): Promise<VisitFeedPayload> {
 
   const visits: VisitEvent[] = [];
   for (const fields of normaliseEntries(entries)) {
-    const raw = fields.data;
-    if (typeof raw !== "string") continue;
-    try {
-      const parsed: unknown = JSON.parse(raw);
-      if (isVisitEvent(parsed)) visits.push(parsed);
-    } catch {
-      // A malformed entry must not take the whole feed down.
-    }
+    // Upstash's stream deserializer runs JSON.parse on every field value, so
+    // `data` normally arrives as the parsed object; if a client/runtime returns
+    // the raw wire value instead, it is a JSON string. Accept both.
+    const visit = coerceVisit(fields.data);
+    if (visit) visits.push(visit);
   }
 
   return buildFeedPayload(visits, count ?? visits.length);
 }
 
-function normaliseEntries(entries: unknown): Record<string, string>[] {
-  const collected: Record<string, string>[] = [];
+export function coerceVisit(raw: unknown): VisitEvent | null {
+  const candidate =
+    typeof raw === "string"
+      ? (() => {
+          try {
+            return JSON.parse(raw) as unknown;
+          } catch {
+            return null;
+          }
+        })()
+      : raw;
+  return isVisitEvent(candidate) ? candidate : null;
+}
+
+export function normaliseEntries(entries: unknown): Record<string, unknown>[] {  const collected: Record<string, unknown>[] = [];
   if (Array.isArray(entries)) {
     // [id, [field, value, field, value, ...]] or already [id, { field: value }]
     for (const entry of entries) {
       const pair = Array.isArray(entry) ? entry[1] : entry;
       if (Array.isArray(pair)) {
-        const record: Record<string, string> = {};
+        const record: Record<string, unknown> = {};
         for (let i = 0; i + 1 < pair.length; i += 2) {
-          record[String(pair[i])] = String(pair[i + 1]);
+          record[String(pair[i])] = pair[i + 1];
         }
         collected.push(record);
       } else if (pair && typeof pair === "object") {
-        collected.push(pair as Record<string, string>);
+        collected.push(pair as Record<string, unknown>);
       }
     }
     return collected;
@@ -106,7 +116,7 @@ function normaliseEntries(entries: unknown): Record<string, string>[] {
   if (entries && typeof entries === "object") {
     for (const value of Object.values(entries as Record<string, unknown>)) {
       if (value && typeof value === "object") {
-        collected.push(value as Record<string, string>);
+        collected.push(value as Record<string, unknown>);
       }
     }
   }
