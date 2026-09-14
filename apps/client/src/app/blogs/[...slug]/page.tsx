@@ -101,6 +101,12 @@ export default async function Page({ params }: RouteParams) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
+      {/*
+        `resolveLayout` returns one of a fixed, module-level map — it does not
+        create a component during render, so the "created during render" rule is
+        a false positive here. The layout registry is resolved per request.
+      */}
+      {/* eslint-disable-next-line react-hooks/static-components */}
       <Layout content={post} authors={authors} newer={newer} older={older}>
         <Mdx source={post.body} />
       </Layout>
