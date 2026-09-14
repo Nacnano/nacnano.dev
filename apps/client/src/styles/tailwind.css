@@ -80,6 +80,31 @@
     letter-spacing: -0.011em;
   }
 
+  /* The one form-field material (DESIGN.md ▸ Inputs / Fields): the outline
+     button's hairline border, the single 4px radius, a transparent ground and
+     Reading Ink text. `@tailwindcss/forms` gives fields a blue ring of their
+     own and blanks the outline to make room for it — both are undone below, so
+     the global keyboard-only ring stays the site's only focus treatment. The
+     `:focus` selectors carry the same specificity as the plugin's and are
+     emitted after them, which is what makes the override land. */
+  .field {
+    @apply w-full rounded border border-zinc-200 bg-transparent px-3 py-2 text-[0.9375rem] leading-7 text-zinc-700 transition-colors dark:border-zinc-800 dark:text-zinc-300;
+  }
+
+  .field:focus {
+    box-shadow: none;
+    border-color: theme('colors.zinc.300');
+  }
+
+  .dark .field:focus {
+    border-color: theme('colors.zinc.700');
+  }
+
+  .field:focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
+
 }
 
 .task-list-item::before {

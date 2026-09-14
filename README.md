@@ -68,9 +68,12 @@ Essay frontmatter needs `title`, `date` and `summary`; set `draft: true` to
 hide one. Each essay closes on a single `#### ...` line, which renders as the
 takeaway block rather than a heading.
 
-The `/ama` answers are authored content, not an inbox: write one up in
-`amaData.ts` when a question deserves a public answer, and set `draft: true` to
-hide one without deleting it. The answers are MDX.
+The `/ama` answers are authored content. The ask box on that page writes to a
+private Redis inbox that no page and no route ever reads back — read it with
+`bun run ama:inbox` (in `apps/client`), then write the ones worth answering into
+`amaData.ts` by hand. Set `draft: true` to hide an answer without deleting it.
+The answers are MDX. Submissions expire from the inbox after 90 days; the box
+itself is inert unless `UPSTASH_REDIS_REST_*` is configured, and says so.
 
 `timelineData.ts` must stay in sync with <https://resume.nacnano.dev>, which is
 the source of truth for roles and dates.

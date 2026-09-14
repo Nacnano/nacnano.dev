@@ -1,15 +1,19 @@
 /**
  * Answered questions, in the author's own voice — the /ama surface.
  *
- * This is authored content, not an inbox: the site ships no form, so questions
- * arrive over email / X and only the ones worth a public answer get written up
- * here. `answer` is MDX and runs through the same prose pipeline as an essay,
- * so a link or an inline code span renders exactly as it would in a post.
+ * This is a curated list, not an inbox. The ask box on /ama writes to a private
+ * Redis inbox (`lib/amaInbox.ts`); nothing submitted there is ever rendered.
+ * An answer appears below only once it has been read, judged worth a public
+ * reply, written up, and added here by hand.
  *
- * The entries below are STARTERS written from facts already on the site (the
- * résumé, the projects, the stack this repo actually runs on) plus the
- * author's plain-language views. Replace them with real Q&A as it comes in —
- * do not leave placeholder opinions sitting in the author's mouth.
+ * `answer` is MDX and runs through the same prose pipeline as an essay, so a
+ * link or an inline code span renders exactly as it would in a post.
+ *
+ * Every entry is the author's own words about facts that are already on the
+ * site. `PRODUCT.md` applies in full: nothing here may be fabricated — not the
+ * claim, not the date it was written, and not the attribution of who asked.
+ * If there is no real answer to add, the correct state of this array is empty;
+ * the page has an empty state for exactly that.
  */
 export type AmaEntry = {
   /** Stable slug used as the on-page anchor, e.g. `what-next`. */
@@ -20,7 +24,11 @@ export type AmaEntry = {
   answer: string;
   /** ISO date the answer was written. Orders the list. */
   date: string;
-  /** Who asked, if it should be credited. Omit for an unnamed asker. */
+  /**
+   * Who asked, if they agreed to be credited. Omit for an unnamed asker, which
+   * is the default — an asker is never invented and never inferred from the
+   * inbox metadata.
+   */
   askedBy?: string;
   /** Hide without deleting. */
   draft?: boolean;
@@ -28,48 +36,11 @@ export type AmaEntry = {
 
 const amaData: AmaEntry[] = [
   {
-    slug: "what-next",
-    question: "What are you hoping to work on next?",
-    askedBy: "a recruiter",
-    date: "2026-09-10",
-    answer:
-      "Ideally somewhere between the two things this site keeps failing to separate — the reflective writing and the dense technical CV. In practice that means AI/ML work where I get to ship the thing to real people, not just score it on a benchmark. I care more about who uses it than how it tests.",
-  },
-  {
-    slug: "stack",
-    question: "What stack do you actually enjoy?",
-    askedBy: "via X",
-    date: "2026-09-06",
-    answer:
-      "TypeScript, Next.js and Tailwind on the front — this site is the proof. NestJS and Prisma when there's a real service behind it. Python everywhere the models are. I'd take a boring, well-typed system over a clever one every time, and I'll happily spend the afternoon making a build faster just so the next person doesn't have to.",
-  },
-  {
-    slug: "bilingual",
-    question: "You write in English but you're Thai — which do you think in?",
-    date: "2026-08-28",
-    answer:
-      "Thai, mostly. The site is in English because that's the language most of the people I want to reach read, but I'll drop into Thai when a thing only lands there — some jokes, some apologies, the way you talk to family. The essays code-switch on purpose; I'm not trying to sound like someone else.",
-  },
-  {
-    slug: "how-you-write",
-    question: "How do you end up writing a piece?",
-    date: "2026-08-15",
-    answer:
-      "Something bothers me and I can't let it go. Most drafts die at the point where I have to admit I was the problem. The ones that ship all close on a single line I actually believe — if I can't find that line, the piece wasn't done and it doesn't go up.",
-  },
-  {
-    slug: "proudest-ship",
-    question: "What's the thing you're proudest of shipping?",
-    date: "2026-08-01",
-    answer:
-      "The workshop-booking flow for my faculty's open house — thousands of students hitting one form at once, and it held. Less glamorous than the research but it was used by real people on a real day, and nobody got hurt when it mattered.",
-  },
-  {
     slug: "how-to-reach-you",
     question: "How do I reach you about a role?",
-    date: "2026-07-20",
+    date: "2026-09-14",
     answer:
-      "Email me — the address is in the footer and on [the résumé](https://resume.nacnano.dev), which is the canonical version anyway. A one-paragraph note about what you're building beats a form letter.",
+      "Email is best — there's a mail link in the footer of every page. The box at the bottom of this page reaches me privately too, if a question is easier than an introduction. [The résumé](https://resume.nacnano.dev) is the canonical version of my background; the About page here is a summary kept in sync with it.",
   },
 ];
 
