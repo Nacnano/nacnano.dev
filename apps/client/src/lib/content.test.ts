@@ -5,6 +5,12 @@ import {
   getBlog,
   jsonLdScriptProps,
   publishedBlogs,
+  requireNonEmptyString,
+  requireIsoDate,
+  requireStringArray,
+  requireBooleanOrUndefined,
+  requireOptionalString,
+  requireKnownLayout,
   type Blog,
 } from "./content";
 import siteMetadata from "@/data/siteMetadata";
@@ -64,6 +70,7 @@ describe("content loader", () => {
   });
 });
 
+<<<<<<< HEAD
 describe("jsonLdScriptProps", () => {
   // The whole point of the helper is that a specific byte sequence never reaches
   // the output — so assert it directly, on a fixture rather than the live MDX
@@ -95,5 +102,69 @@ describe("jsonLdScriptProps", () => {
     // This is the claim in the code comment that nothing else checks: escaping
     // `<` must not corrupt the structured data Google reads.
     expect(JSON.parse(html).headline).toBe("A </script><img onerror=x> title");
+=======
+/**
+ * The reject branches, exercised directly (no disk). These are the validations
+ * the PR exists to add — the happy corpus already parsed fine before it, so
+ * without these the new guards would ship entirely untested.
+ */
+describe("frontmatter validators", () => {
+  it("requireNonEmptyString rejects blank and non-strings", () => {
+    expect(requireNonEmptyString("Hello", "title", "x.mdx")).toBe("Hello");
+    expect(() => requireNonEmptyString("", "title", "x.mdx")).toThrow(/non-empty string/);
+    expect(() => requireNonEmptyString(42, "title", "x.mdx")).toThrow(/non-empty string/);
+  });
+
+  it("requireIsoDate accepts Date/string but rejects the number/boolean typos", () => {
+    expect(requireIsoDate("2026-09-14", "date", "x.mdx")).toMatch(/^2026-09-14T/);
+    expect(requireIsoDate(new Date("2026-09-14"), "date", "x.mdx")).toMatch(
+      /^2026-09-14T/
+    );
+    // The whole point: these used to coerce to a bogus 1970 timestamp.
+    expect(() => requireIsoDate(2026, "date", "x.mdx")).toThrow(/must be a date/);
+    expect(() => requireIsoDate(true, "date", "x.mdx")).toThrow(/must be a date/);
+    expect(() => requireIsoDate([], "date", "x.mdx")).toThrow(/must be a date/);
+    // Right type, unparseable value — the value is echoed so the fix is obvious.
+    expect(() => requireIsoDate("not-a-date", "date", "x.mdx")).toThrow(
+      /not a valid date/
+    );
+  });
+
+  it("requireStringArray rejects scalars and foreign elements", () => {
+    expect(requireStringArray(["a", "b"], "tags", "x.mdx")).toEqual(["a", "b"]);
+    expect(requireStringArray(undefined, "tags", "x.mdx")).toBeUndefined();
+    expect(() => requireStringArray("foo", "tags", "x.mdx")).toThrow(/array of strings/);
+    expect(() => requireStringArray(["ok", 1], "tags", "x.mdx")).toThrow(
+      /array of strings/
+    );
+  });
+
+  it("requireBooleanOrUndefined refuses a quoted YAML boolean", () => {
+    expect(requireBooleanOrUndefined(true, "draft", "x.mdx")).toBe(true);
+    expect(requireBooleanOrUndefined(undefined, "draft", "x.mdx")).toBeUndefined();
+    // `draft: 'true'` would otherwise treat the post as published.
+    expect(() => requireBooleanOrUndefined("true", "draft", "x.mdx")).toThrow(/boolean/);
+  });
+
+  it("requireOptionalString rejects a non-string but allows blank/missing", () => {
+    expect(requireOptionalString("hi", "summary", "x.mdx")).toBe("hi");
+    expect(requireOptionalString("", "summary", "x.mdx")).toBeUndefined();
+    expect(requireOptionalString(undefined, "summary", "x.mdx")).toBeUndefined();
+    expect(() => requireOptionalString(42, "summary", "x.mdx")).toThrow(
+      /string when present/
+    );
+  });
+
+  it("requireKnownLayout rejects a typo'd layout name", () => {
+    expect(requireKnownLayout("BlogWithDetail", "layout", "x.mdx")).toBe(
+      "BlogWithDetail"
+    );
+    expect(requireKnownLayout(undefined, "layout", "x.mdx")).toBeUndefined();
+    // `resolveLayout`'s silent default-layout fallback is now a build failure.
+    expect(() => requireKnownLayout("BlogWithDetial", "layout", "x.mdx")).toThrow(
+      /must be one of/
+    );
+    expect(() => requireKnownLayout(42, "layout", "x.mdx")).toThrow(/must be one of/);
+>>>>>>> 39728ec (fix(content): close the gap between the title and the behaviour)
   });
 });
