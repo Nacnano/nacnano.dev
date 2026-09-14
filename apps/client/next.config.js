@@ -66,8 +66,13 @@ const securityHeaders = [
     value: "same-origin",
   },
   // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cross-Origin-Resource-Policy
-  // The natural companion to COOP: no third party embeds our assets, and
-  // `images.remotePatterns` is empty, so same-origin costs nothing here.
+  // The natural companion to COOP: `images.remotePatterns` is empty and no third
+  // party embeds our assets, so same-origin costs nothing here. Scope it before
+  // debugging an image that "won't load" elsewhere six months from now: CORP is
+  // enforced only by *browsers*, so OG/Twitter card fetchers, RSS readers and
+  // unfurlers (all server-side) are unaffected — what it blocks is another site
+  // hotlinking our `/static/` assets in an `<img>`, and any future CDN/image
+  // proxy in front of them. Both are intended.
   {
     key: "Cross-Origin-Resource-Policy",
     value: "same-origin",

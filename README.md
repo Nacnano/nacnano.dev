@@ -30,7 +30,10 @@ bun install
 bun run dev          # all workspaces via turbo
 ```
 
-The site runs at <http://localhost:3000>.
+The site runs at <http://localhost:3000>. To serve a production build
+(`next build` first), use `bun run start`; `bun run serve` is a back-compat
+alias that does the same thing — kept because tooling and muscle memory invoke
+`serve`, not a second way to run the server.
 
 > **Keep `bun.lock` at `lockfileVersion: 1`.** Vercel's build image ships Bun
 > 1.3.x, which cannot parse the `lockfileVersion: 2` file Bun >= 1.4 writes —
