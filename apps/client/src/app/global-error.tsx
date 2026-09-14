@@ -29,8 +29,7 @@ export default function GlobalError({
           alignItems: "center",
           justifyContent: "center",
           padding: "2rem",
-          fontFamily:
-            "ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif",
+          fontFamily: "ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif",
           color: "#18181b",
           background: "#ffffff",
         }}

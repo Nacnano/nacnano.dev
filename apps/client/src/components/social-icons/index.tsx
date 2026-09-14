@@ -1,12 +1,4 @@
-import {
-  Facebook,
-  Github,
-  Linkedin,
-  Mail,
-  Mastodon,
-  Twitter,
-  Youtube,
-} from "./icons";
+import { Facebook, Github, Linkedin, Mail, Mastodon, Twitter, Youtube } from "./icons";
 
 const components = {
   mail: Mail,
@@ -37,8 +29,7 @@ type SocialIconProps = {
 const SocialIcon = ({ kind, href }: SocialIconProps) => {
   if (
     !href ||
-    (kind === "mail" &&
-      !/^mailto:\w+([.-]?\w+)@\w+([.-]?\w+)(.\w{2,3})+$/.test(href))
+    (kind === "mail" && !/^mailto:\w+([.-]?\w+)@\w+([.-]?\w+)(.\w{2,3})+$/.test(href))
   )
     return null;
 

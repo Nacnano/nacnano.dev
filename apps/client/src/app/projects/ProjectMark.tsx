@@ -109,14 +109,7 @@ function Shape({ kind }: { kind: MarkKind }) {
             strokeLinecap="round"
             className={accent}
           />
-          <line
-            x1={94}
-            y1={14}
-            x2={94}
-            y2={78}
-            strokeWidth={1}
-            className={line}
-          />
+          <line x1={94} y1={14} x2={94} y2={78} strokeWidth={1} className={line} />
         </>
       );
     // A court with a net — the tennis ranking model.
@@ -134,15 +127,39 @@ function Shape({ kind }: { kind: MarkKind }) {
           />
           <line x1={88} y1={20} x2={88} y2={78} strokeWidth={1.5} className={accent} />
           <line x1={40} y1={49} x2={136} y2={49} strokeWidth={1} className={line} />
-          <rect x={58} y={34} width={60} height={30} fill="none" strokeWidth={1} className={line} />
+          <rect
+            x={58}
+            y={34}
+            width={60}
+            height={30}
+            fill="none"
+            strokeWidth={1}
+            className={line}
+          />
         </>
       );
     // A registration slip with a torn stub.
     case "ticket":
       return (
         <>
-          <rect x={34} y={26} width={108} height={46} fill="none" strokeWidth={1} className={line} />
-          <line x1={106} y1={26} x2={106} y2={72} strokeWidth={1} strokeDasharray="3 3" className={line} />
+          <rect
+            x={34}
+            y={26}
+            width={108}
+            height={46}
+            fill="none"
+            strokeWidth={1}
+            className={line}
+          />
+          <line
+            x1={106}
+            y1={26}
+            x2={106}
+            y2={72}
+            strokeWidth={1}
+            strokeDasharray="3 3"
+            className={line}
+          />
           {[0, 1, 2].map((i) => (
             <line
               key={i}
@@ -179,10 +196,47 @@ function Shape({ kind }: { kind: MarkKind }) {
     case "segment":
       return (
         <>
-          <rect x={34} y={22} width={108} height={56} fill="none" strokeWidth={1} className={line} />
-          <rect x={46} y={34} width={38} height={30} rx={3} fill="none" strokeWidth={1} strokeDasharray="4 3" className={line} />
-          <rect x={72} y={44} width={44} height={26} rx={3} fill="none" strokeWidth={1.5} className={accent} />
-          <rect x={104} y={30} width={28} height={22} rx={3} fill="none" strokeWidth={1} strokeDasharray="4 3" className={line} />
+          <rect
+            x={34}
+            y={22}
+            width={108}
+            height={56}
+            fill="none"
+            strokeWidth={1}
+            className={line}
+          />
+          <rect
+            x={46}
+            y={34}
+            width={38}
+            height={30}
+            rx={3}
+            fill="none"
+            strokeWidth={1}
+            strokeDasharray="4 3"
+            className={line}
+          />
+          <rect
+            x={72}
+            y={44}
+            width={44}
+            height={26}
+            rx={3}
+            fill="none"
+            strokeWidth={1.5}
+            className={accent}
+          />
+          <rect
+            x={104}
+            y={30}
+            width={28}
+            height={22}
+            rx={3}
+            fill="none"
+            strokeWidth={1}
+            strokeDasharray="4 3"
+            className={line}
+          />
         </>
       );
     // Stacked lesson rows with the current one playing.
@@ -217,7 +271,7 @@ export default function ProjectMark({ kind }: { kind: MarkKind }) {
       role="img"
       aria-hidden="true"
       focusable="false"
-      className="h-40 w-full bg-zinc-50 sm:h-24 dark:bg-zinc-900"
+      className="h-40 w-full bg-zinc-50 dark:bg-zinc-900 sm:h-24"
       preserveAspectRatio="xMidYMid meet"
     >
       <Shape kind={kind} />

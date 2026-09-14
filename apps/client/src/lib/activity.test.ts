@@ -156,14 +156,10 @@ describe("countCountries", () => {
 
 describe("trackedDays", () => {
   it("counts inclusive calendar days", () => {
-    expect(trackedDays("2026-09-12T00:00:00.000Z", "2026-09-14T00:00:00.000Z")).toBe(
-      3
-    );
+    expect(trackedDays("2026-09-12T00:00:00.000Z", "2026-09-14T00:00:00.000Z")).toBe(3);
   });
 
   it("is never below one", () => {
-    expect(trackedDays("2026-09-14T00:00:00.000Z", "2026-09-14T00:00:00.000Z")).toBe(
-      1
-    );
+    expect(trackedDays("2026-09-14T00:00:00.000Z", "2026-09-14T00:00:00.000Z")).toBe(1);
   });
 });

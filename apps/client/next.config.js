@@ -1,4 +1,4 @@
-const isDev = process.env.NODE_ENV !== 'production'
+const isDev = process.env.NODE_ENV !== "production";
 
 // Scoped to what this site actually loads: its own assets, inline styles from
 // Tailwind's runtime theme switch, and nothing third-party. The previous
@@ -11,7 +11,7 @@ const isDev = process.env.NODE_ENV !== 'production'
 // React Refresh needs it.
 const ContentSecurityPolicy = [
   "default-src 'self'",
-  `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ''}`,
+  `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""}`,
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: blob:",
   "font-src 'self' data:",
@@ -20,46 +20,46 @@ const ContentSecurityPolicy = [
   "base-uri 'self'",
   "form-action 'self'",
   "frame-ancestors 'none'",
-  'upgrade-insecure-requests'
-].join('; ')
+  "upgrade-insecure-requests",
+].join("; ");
 
 const securityHeaders = [
   // https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP
   {
-    key: 'Content-Security-Policy',
-    value: ContentSecurityPolicy
+    key: "Content-Security-Policy",
+    value: ContentSecurityPolicy,
   },
   // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Referrer-Policy
   {
-    key: 'Referrer-Policy',
-    value: 'strict-origin-when-cross-origin'
+    key: "Referrer-Policy",
+    value: "strict-origin-when-cross-origin",
   },
   // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Frame-Options
   {
-    key: 'X-Frame-Options',
-    value: 'DENY'
+    key: "X-Frame-Options",
+    value: "DENY",
   },
   // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Content-Type-Options
   {
-    key: 'X-Content-Type-Options',
-    value: 'nosniff'
+    key: "X-Content-Type-Options",
+    value: "nosniff",
   },
   // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-DNS-Prefetch-Control
   {
-    key: 'X-DNS-Prefetch-Control',
-    value: 'on'
+    key: "X-DNS-Prefetch-Control",
+    value: "on",
   },
   // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Strict-Transport-Security
   {
-    key: 'Strict-Transport-Security',
-    value: 'max-age=31536000; includeSubDomains'
+    key: "Strict-Transport-Security",
+    value: "max-age=31536000; includeSubDomains",
   },
   // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Feature-Policy
   {
-    key: 'Permissions-Policy',
-    value: 'camera=(), microphone=(), geolocation=()'
-  }
-]
+    key: "Permissions-Policy",
+    value: "camera=(), microphone=(), geolocation=()",
+  },
+];
 
 /**
  * @type {import('next/dist/next-server/server/config').NextConfig}
@@ -67,30 +67,30 @@ const securityHeaders = [
 module.exports = () => {
   return {
     reactStrictMode: true,
-    pageExtensions: ['ts', 'tsx', 'js', 'jsx', 'md', 'mdx'],
+    pageExtensions: ["ts", "tsx", "js", "jsx", "md", "mdx"],
     images: {
       // All imagery is local; no remote patterns are permitted.
-      remotePatterns: []
+      remotePatterns: [],
     },
-    async headers () {
+    async headers() {
       return [
         {
-          source: '/(.*)',
-          headers: securityHeaders
-        }
-      ]
+          source: "/(.*)",
+          headers: securityHeaders,
+        },
+      ];
     },
     // The blog index duplicated the home page and the tag index led to
     // single-post dead ends. Both are gone; their URLs are kept alive.
-    async redirects () {
+    async redirects() {
       return [
-        { source: '/blogs', destination: '/', permanent: true },
-        { source: '/blogs/page/:page', destination: '/', permanent: true },
-        { source: '/tags', destination: '/', permanent: true },
-        { source: '/tags/:tag', destination: '/', permanent: true },
-        { source: '/tags/:tag/feed.xml', destination: '/feed.xml', permanent: true },
-        { source: '/blog/:slug', destination: '/blogs/:slug', permanent: true }
-      ]
-    }
-  }
-}
+        { source: "/blogs", destination: "/", permanent: true },
+        { source: "/blogs/page/:page", destination: "/", permanent: true },
+        { source: "/tags", destination: "/", permanent: true },
+        { source: "/tags/:tag", destination: "/", permanent: true },
+        { source: "/tags/:tag/feed.xml", destination: "/feed.xml", permanent: true },
+        { source: "/blog/:slug", destination: "/blogs/:slug", permanent: true },
+      ];
+    },
+  };
+};

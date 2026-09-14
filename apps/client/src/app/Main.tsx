@@ -27,7 +27,7 @@ const Main = ({ posts }: { posts: Blog[] }) => (
           className="h-16 w-16 shrink-0 rounded-full object-cover transition-transform duration-300 ease-out hover:-rotate-6 hover:scale-105 motion-reduce:transition-none motion-reduce:hover:rotate-0 motion-reduce:hover:scale-100"
         />
         <div className="min-w-0">
-          <h1 className="text-[1.75rem] font-semibold leading-[1.2] tracking-[-0.022em] text-zinc-900 sm:text-[2.125rem] dark:text-zinc-100">
+          <h1 className="text-[1.75rem] font-semibold leading-[1.2] tracking-[-0.022em] text-zinc-900 dark:text-zinc-100 sm:text-[2.125rem]">
             {siteMetadata.greeting}
           </h1>
           <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
@@ -36,7 +36,7 @@ const Main = ({ posts }: { posts: Blog[] }) => (
         </div>
       </div>
 
-      <p className="mt-6 max-w-measure text-[1.0625rem] leading-[1.75] text-zinc-600 dark:text-zinc-400">
+      <p className="max-w-measure mt-6 text-[1.0625rem] leading-[1.75] text-zinc-600 dark:text-zinc-400">
         {siteMetadata.description}
       </p>
 
@@ -45,7 +45,7 @@ const Main = ({ posts }: { posts: Blog[] }) => (
           <CustomLink
             key={link.title}
             href={link.href}
-            className="rounded border border-zinc-200 px-3.5 py-2 text-sm font-medium text-zinc-700 transition-colors hover:border-zinc-300 hover:text-accent-600 dark:border-zinc-800 dark:text-zinc-300 dark:hover:border-zinc-700 dark:hover:text-accent-300"
+            className="hover:text-accent-600 dark:hover:text-accent-300 rounded border border-zinc-200 px-3.5 py-2 text-sm font-medium text-zinc-700 transition-colors hover:border-zinc-300 dark:border-zinc-800 dark:text-zinc-300 dark:hover:border-zinc-700"
           >
             {link.title}
           </CustomLink>
@@ -64,9 +64,9 @@ const Main = ({ posts }: { posts: Blog[] }) => (
         Writing
       </h2>
 
-      <p className="mt-2 max-w-measure text-[0.9375rem] leading-7 text-zinc-600 dark:text-zinc-400">
-        Mostly things that went sideways and what I made of them afterwards. I
-        write when something is bothering me, so: not often.
+      <p className="max-w-measure mt-2 text-[0.9375rem] leading-7 text-zinc-600 dark:text-zinc-400">
+        Mostly things that went sideways and what I made of them afterwards. I write when
+        something is bothering me, so: not often.
       </p>
 
       <div className="mt-4 divide-y divide-zinc-200 dark:divide-zinc-800">

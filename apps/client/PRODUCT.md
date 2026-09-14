@@ -26,7 +26,7 @@ Success = a recruiter who opens the site on a phone learns who this is and reach
 
 ## Positioning
 
-Personal essays as evidence of how the author thinks, rather than as a technical blog. The writing is reflective and non-technical (missing a scholarship, a dating app, a stranger's family dinner, failing at teaching) while the CV is technical and dense. That tension is the site's actual character and should be designed *for*, not resolved by hiding one side.
+Personal essays as evidence of how the author thinks, rather than as a technical blog. The writing is reflective and non-technical (missing a scholarship, a dating app, a stranger's family dinner, failing at teaching) while the CV is technical and dense. That tension is the site's actual character and should be designed _for_, not resolved by hiding one side.
 
 The author writes infrequently and the site should say so plainly rather than implying an abandoned feed. (Confirmed 2026-09-13: newest post is 2023-12-12, presented under a heading reading "Latest".)
 
@@ -60,11 +60,13 @@ The author writes infrequently and the site should say so plainly rather than im
 ## Evidence on Hand
 
 **Real, in-repo:**
+
 - 5 published essays in `src/data/blogs/`: `disappointed-moment`, `dating-app`, `random-dining`, `towrite-list`, `teaching-failure`.
 - 5 real shipped projects in `src/data/projectsData.ts` with live URLs: CU Get Rekt, CU Get Reg, CU Intania Open House 2024 (used by 9,000+ students), MWIT29 Archive, and a CS research project.
 - Author photo `oong-oong-cropped.jpg`; social profiles for GitHub, LinkedIn, Twitter/X, Facebook, YouTube, Instagram.
 
 **Real, external — `resume.nacnano.dev` (fetched 2026-09-13), canonical:**
+
 - B.Eng. Computer Engineering, Chulalongkorn University. GPA 3.93/4.00 over 7 semesters.
 - Data Scientist Intern, SCB (Jan–Apr 2026) — NLP research on FOMC market sentiment.
 - AI Engineer, Part Time, QuanXAI (Jan–Mar 2026) — LangChain chatbot, ML fraud detection POC.

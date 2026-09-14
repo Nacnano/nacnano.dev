@@ -11,11 +11,7 @@ export function generateStaticParams() {
 
 export const dynamicParams = false;
 
-export default async function Page({
-  params,
-}: {
-  params: Promise<{ link: string }>;
-}) {
+export default async function Page({ params }: { params: Promise<{ link: string }> }) {
   const { link } = await params;
   const target = table[link];
   if (!target) notFound();

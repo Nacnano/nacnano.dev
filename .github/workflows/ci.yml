@@ -16,7 +16,7 @@ permissions:
 
 jobs:
   verify:
-    name: typecheck · lint · test · build
+    name: typecheck · lint · format · test · build
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -34,6 +34,10 @@ jobs:
 
       - name: Install
         run: bun install --frozen-lockfile
+
+      # Cheap, catches the Prettier gate before the slower steps run.
+      - name: Format
+        run: bun run format:check
 
       - name: Typecheck
         run: bun run typecheck

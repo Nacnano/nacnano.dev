@@ -38,9 +38,7 @@ export async function generateMetadata({ params }: RouteParams) {
   if (!blog) return {};
 
   const authors = authorsFor(blog.authors).map((author) => author.name);
-  const imageList = blog.images?.length
-    ? blog.images
-    : [siteMetadata.socialBanner];
+  const imageList = blog.images?.length ? blog.images : [siteMetadata.socialBanner];
   const ogImages = imageList.map((image) => ({
     url: image.startsWith("http") ? image : siteMetadata.siteUrl + image,
   }));

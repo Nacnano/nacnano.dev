@@ -1,0 +1,17 @@
+# Test-runner config for the site workspace (apps/client).
+[test]
+# Report coverage and fail the run if any COVERED file drops below the floor.
+coverage = true
+coverageThreshold = 0.6
+
+# What this floor actually does (learned the hard way — see the review):
+# - Enforced PER FILE, not against the aggregate "All files" row.
+# - Fails SILENTLY: the table still prints with no error text; only the non-zero
+#   exit code signals a file fell under the floor. Trust the exit code.
+# - bun only instruments files a test IMPORTS, so a brand-new untested module
+#   never appears and can't trip this. It guards against REGRESSIONS in
+#   already-covered files; it does not force new files to be tested.
+#
+# The @upstash/redis adapter is exercised by a fake-client unit test
+# (activityRedis-io.test.ts) so it clears the floor for real rather than being
+# waved through an exclusion.

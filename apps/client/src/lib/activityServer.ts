@@ -17,8 +17,7 @@ import type { VisitFeedPayload } from "./activityTypes";
 export const HEAD_LIMIT = 30;
 
 export type InitialFeed =
-  | { status: "ok"; payload: VisitFeedPayload }
-  | { status: "error" };
+  { status: "ok"; payload: VisitFeedPayload } | { status: "error" };
 
 export async function loadInitialFeed(live: boolean): Promise<InitialFeed> {
   if (live) {
@@ -42,5 +41,8 @@ export async function loadInitialFeed(live: boolean): Promise<InitialFeed> {
       },
     };
   }
-  return { status: "ok", payload: { visits: [], count: 0, hasMore: false, nextCursor: null } };
+  return {
+    status: "ok",
+    payload: { visits: [], count: 0, hasMore: false, nextCursor: null },
+  };
 }

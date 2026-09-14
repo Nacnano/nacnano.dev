@@ -1,5 +1,10 @@
 import { describe, expect, it } from "bun:test";
-import { coerceVisit, parseStreamEntries } from "./activityRedis";
+import {
+  coarsenCoordinate,
+  coerceVisit,
+  parseStreamEntries,
+  visitEvent,
+} from "./activityRedis";
 
 const visit = {
   id: "v1",
@@ -45,10 +50,7 @@ describe("parseStreamEntries", () => {
   });
 
   it("reads a single unwrapped entry", () => {
-    const [entry] = parseStreamEntries([
-      "1-0",
-      ["data", JSON.stringify(visit)],
-    ]);
+    const [entry] = parseStreamEntries(["1-0", ["data", JSON.stringify(visit)]]);
     expect(entry).toBeDefined();
     expect(entry!.id).toBe("1-0");
   });
@@ -57,5 +59,40 @@ describe("parseStreamEntries", () => {
     expect(parseStreamEntries([])).toEqual([]);
     expect(parseStreamEntries({})).toEqual([]);
     expect(parseStreamEntries(undefined)).toEqual([]);
+  });
+});
+
+describe("coarsenCoordinate", () => {
+  it("rounds to one decimal place (~10 km)", () => {
+    expect(coarsenCoordinate(13.7563)).toBe(13.8);
+    expect(coarsenCoordinate(100.5018)).toBe(100.5);
+  });
+
+  it("is undefined-safe for missing or non-finite values", () => {
+    expect(coarsenCoordinate(undefined)).toBeUndefined();
+    expect(coarsenCoordinate(Number.NaN)).toBeUndefined();
+  });
+});
+
+describe("visitEvent", () => {
+  it("stamps an id + timestamp and coarsens coordinates", () => {
+    const event = visitEvent({
+      path: "/blogs/x",
+      title: "  Hi  ",
+      lat: 13.7563,
+      lng: 100.5018,
+    });
+    expect(event.id).toMatch(/^[0-9a-f-]{36}$/);
+    expect(event.ts).toMatch(/Z$/);
+    expect(event.page).toBe("/blogs/x");
+    expect(event.title).toBe("Hi");
+    expect(event.lat).toBe(13.8);
+    expect(event.lng).toBe(100.5);
+  });
+
+  it("drops a blank title and keeps missing coordinates absent", () => {
+    const event = visitEvent({ path: "/", title: "   " });
+    expect(event.title).toBeUndefined();
+    expect(event.lat).toBeUndefined();
   });
 });

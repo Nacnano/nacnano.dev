@@ -28,7 +28,7 @@ const MobileNav = () => {
       if (event.key !== "Tab") return;
 
       const focusable = panelRef.current?.querySelectorAll<HTMLElement>(
-        'a[href], button:not([disabled])'
+        "a[href], button:not([disabled])"
       );
       if (!focusable?.length) return;
 
@@ -81,7 +81,7 @@ const MobileNav = () => {
           role="dialog"
           aria-modal="true"
           aria-label="Site menu"
-          className="fixed inset-0 z-50 bg-white sm:hidden dark:bg-zinc-950"
+          className="fixed inset-0 z-50 bg-white dark:bg-zinc-950 sm:hidden"
         >
           <div className="mx-auto flex h-full max-w-3xl flex-col px-5">
             <div className="flex justify-end py-5">

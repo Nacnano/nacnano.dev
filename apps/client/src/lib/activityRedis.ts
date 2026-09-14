@@ -37,18 +37,20 @@ export type VisitInput = {
   lng?: number;
 };
 
-let cachedClient: Redis | null | undefined;
+let cachedClient: Redis | undefined;
 
-/** The configured Upstash client, or null when the app runs in static mode. */
+/**
+ * The configured Upstash client, or null in static mode. Only a constructed
+ * client is cached — the static "no env" case is re-checked each call so a
+ * store configured later (a different runtime, or a test) is picked up rather
+ * than latched off forever.
+ */
 export function getActivityClient(): Redis | null {
-  if (cachedClient !== undefined) return cachedClient;
+  if (cachedClient) return cachedClient;
   const url = process.env.UPSTASH_REDIS_REST_URL;
   const token = process.env.UPSTASH_REDIS_REST_TOKEN;
-  if (!url || !token) {
-    cachedClient = null;
-    return cachedClient;
-  }
-  cachedClient = new Redis({ url, token });
+  if (!url || !token) return null;
+  cachedClient ??= new Redis({ url, token });
   return cachedClient;
 }
 
@@ -63,10 +65,7 @@ function isVisitEvent(value: unknown): value is VisitEvent {
 }
 
 export function coerceVisit(raw: unknown): VisitEvent | null {
-  const candidate =
-    typeof raw === "string"
-      ? safeParse(raw)
-      : raw;
+  const candidate = typeof raw === "string" ? safeParse(raw) : raw;
   return isVisitEvent(candidate) ? candidate : null;
 }
 
@@ -222,12 +221,21 @@ export async function recordVisit(input: VisitInput): Promise<boolean> {
   const oldestAllowed = `${Date.now() - RETENTION_MS}-0`;
 
   const pipeline = client.pipeline();
-  pipeline.xadd(STREAM_KEY, "*", { data: JSON.stringify(event) }, {
-    trim: { type: "MAXLEN", comparison: "~", threshold: STREAM_MAXLEN },
-  });
+  pipeline.xadd(
+    STREAM_KEY,
+    "*",
+    { data: JSON.stringify(event) },
+    {
+      trim: { type: "MAXLEN", comparison: "~", threshold: STREAM_MAXLEN },
+    }
+  );
   pipeline.incr(COUNT_KEY);
   // Drop entries older than the retention window (stream ids are ms-ordered).
-  pipeline.xtrim(STREAM_KEY, { strategy: "MINID", exactness: "~", threshold: oldestAllowed });
+  pipeline.xtrim(STREAM_KEY, {
+    strategy: "MINID",
+    exactness: "~",
+    threshold: oldestAllowed,
+  });
   // Idle clear: if tracking stops entirely, the keys vanish after the window.
   pipeline.expire(STREAM_KEY, RETENTION_SECONDS);
   pipeline.expire(COUNT_KEY, RETENTION_SECONDS);

@@ -21,7 +21,7 @@ const ScrollTop = () => {
       onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
       // Available on touch too: a long essay left mobile readers with no way
       // back to the navigation.
-      className="fixed bottom-5 right-5 z-40 flex h-11 w-11 items-center justify-center rounded-full border border-zinc-200 bg-white/90 text-zinc-600 shadow-raise backdrop-blur transition-colors hover:text-zinc-900 dark:border-zinc-800 dark:bg-zinc-900/90 dark:text-zinc-300 dark:hover:text-zinc-100"
+      className="shadow-raise fixed bottom-5 right-5 z-40 flex h-11 w-11 items-center justify-center rounded-full border border-zinc-200 bg-white/90 text-zinc-600 backdrop-blur transition-colors hover:text-zinc-900 dark:border-zinc-800 dark:bg-zinc-900/90 dark:text-zinc-300 dark:hover:text-zinc-100"
     >
       <svg
         viewBox="0 0 24 24"

@@ -10,15 +10,15 @@ export default function ActivityLoading() {
       className="flex flex-col gap-10 lg:flex-row lg:items-start lg:gap-14"
     >
       <div className="mx-auto w-full max-w-[22rem] shrink-0">
-        <div className="aspect-square w-full motion-safe:animate-pulse rounded-full border border-zinc-200 dark:border-zinc-800" />
+        <div className="aspect-square w-full rounded-full border border-zinc-200 motion-safe:animate-pulse dark:border-zinc-800" />
       </div>
       <div className="min-w-0 flex-1">
-        <div className="h-4 w-2/3 motion-safe:animate-pulse rounded bg-zinc-200 dark:bg-zinc-800" />
+        <div className="h-4 w-2/3 rounded bg-zinc-200 motion-safe:animate-pulse dark:bg-zinc-800" />
         <div className="mt-6 flex gap-10">
           {Array.from({ length: 3 }).map((_, i) => (
             <div
               key={i}
-              className="h-8 w-16 motion-safe:animate-pulse rounded bg-zinc-200 dark:bg-zinc-800"
+              className="h-8 w-16 rounded bg-zinc-200 motion-safe:animate-pulse dark:bg-zinc-800"
             />
           ))}
         </div>
@@ -27,8 +27,8 @@ export default function ActivityLoading() {
               count is unknown until the page resolves. */}
           {Array.from({ length: 6 }).map((_, i) => (
             <div key={i} className="flex items-baseline justify-between gap-4 py-2.5">
-              <div className="h-3.5 w-1/2 motion-safe:animate-pulse rounded bg-zinc-200 dark:bg-zinc-800" />
-              <div className="h-3 w-10 motion-safe:animate-pulse rounded bg-zinc-200 dark:bg-zinc-800" />
+              <div className="h-3.5 w-1/2 rounded bg-zinc-200 motion-safe:animate-pulse dark:bg-zinc-800" />
+              <div className="h-3 w-10 rounded bg-zinc-200 motion-safe:animate-pulse dark:bg-zinc-800" />
             </div>
           ))}
         </div>
