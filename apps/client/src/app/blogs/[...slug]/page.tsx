@@ -12,9 +12,16 @@ import { BlogWithDetail } from "@/layouts/BlogLayout";
 import { MDXLayoutRenderer } from "pliny/mdx-components";
 import { components } from "@/components/MDXComponents";
 import siteMetadata from "@/data/siteMetadata";
+import { getAdjacentPosts } from "@/lib/posts";
 
-const defaultLayout = "BlogWithDetail";
-const layouts = { BlogWithDetail };
+const layouts = { BlogWithDetail } as const;
+type LayoutName = keyof typeof layouts;
+
+const defaultLayout: LayoutName = "BlogWithDetail";
+
+/** Frontmatter `layout` is free-form text, so it is narrowed before use. */
+const resolveLayout = (name: string | undefined) =>
+  name && name in layouts ? layouts[name as LayoutName] : layouts[defaultLayout];
 
 export async function generateMetadata({
   params,
@@ -84,9 +91,7 @@ export default async function Page({ params }: { params: { slug: string[] } }) {
   const blog = allBlogs.find((blog) => blog.slug === slug) as Blog;
   const mainContent = coreContent(blog);
 
-  // sortPosts is newest-first, so the entry before this one is the newer post.
-  const newer = blogs[blogIndex - 1];
-  const older = blogs[blogIndex + 1];
+  const { newer, older } = getAdjacentPosts(blogs, slug);
 
   const authors = blog?.authors || ["default"];
   const authorDetails = authors.map((author) => {
@@ -100,7 +105,7 @@ export default async function Page({ params }: { params: { slug: string[] } }) {
     return { "@type": "Person", name: author.name };
   });
 
-  const Layout = layouts[blog?.layout] || layouts[defaultLayout];
+  const Layout = resolveLayout(blog?.layout);
   return (
     <>
       <script
