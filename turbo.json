@@ -19,6 +19,7 @@
   "globalEnv": [
     "NODE_ENV",
     "VERCEL",
+    "CI",
     "UPSTASH_REDIS_REST_URL",
     "UPSTASH_REDIS_REST_TOKEN",
     "VISIT_IP_SALT",
