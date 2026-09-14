@@ -1,36 +1,39 @@
 import { NextResponse } from "next/server";
-import { isActivityLive } from "@/lib/activity";
+import { isActivityLive, isInternalPath } from "@/lib/activity";
 import { getActivityClient, recordVisit } from "@/lib/activityRedis";
 import { allowVisit, clientIp, RETRY_AFTER_SECONDS } from "@/lib/rateLimit";
 import { captureError } from "@/lib/observability";
+import { resolveVisitTitle } from "@/lib/visitTitles";
 
 // Recording a visit is a side effect on the request path; it is never baked in.
 export const dynamic = "force-dynamic";
 
 const MAX_PATH = 200;
-const MAX_TITLE = 200;
+
+/**
+ * Parse an optional numeric header. `Number(null)` is `0` and `0` is finite, so
+ * a naive `Number.isFinite` check would treat an absent (or empty) Vercel geo
+ * header as latitude/longitude 0 — the "Null Island" off West Africa — and pin
+ * a marker there for every local-dev or non-Vercel request. Absent or blank is
+ * genuinely `undefined`, which leaves the visit geo-less rather than wrong.
+ */
+function parseCoordinate(value: string | null): number | undefined {
+  if (value === null || value.trim() === "") return undefined;
+  const n = Number(value);
+  return Number.isFinite(n) ? n : undefined;
+}
 
 function readGeo(headers: Headers) {
   // Vercel annotates every request with these. Absent elsewhere (local dev),
   // the visit is still recorded, just without a point on the globe.
   const country = headers.get("x-vercel-ip-country") ?? undefined;
   const cityHeader = headers.get("x-vercel-ip-city");
-  const lat = Number(headers.get("x-vercel-ip-latitude"));
-  const lng = Number(headers.get("x-vercel-ip-longitude"));
   return {
     countryCode: country,
     city: cityHeader ? decodeURIComponent(cityHeader) : undefined,
-    lat: Number.isFinite(lat) ? lat : undefined,
-    lng: Number.isFinite(lng) ? lng : undefined,
+    lat: parseCoordinate(headers.get("x-vercel-ip-latitude")),
+    lng: parseCoordinate(headers.get("x-vercel-ip-longitude")),
   };
-}
-
-/** Clamp an optional free-text field to a bounded, trimmed string. */
-function bounded(value: unknown, max: number): string | undefined {
-  if (typeof value !== "string") return undefined;
-  const trimmed = value.trim();
-  if (!trimmed) return undefined;
-  return trimmed.slice(0, max);
 }
 
 export async function POST(request: Request) {
@@ -58,16 +61,28 @@ export async function POST(request: Request) {
   }
 
   const path = (body as { path?: unknown })?.path;
-  const title = bounded((body as { title?: unknown })?.title, MAX_TITLE);
-  // A path is an identifier, not free text: reject anything absent or oversized
-  // rather than writing a truncated, plausible-looking fake into the feed.
-  if (typeof path !== "string" || path.trim().length === 0 || path.length > MAX_PATH) {
+  // A path is an identifier, not free text: it must be a bounded, well-formed
+  // *internal* route. Anything else — absent, oversized, an absolute or
+  // protocol-relative URL — is rejected, so nothing attacker-chosen can be
+  // stored and later rendered as an outbound link in the public feed.
+  if (
+    typeof path !== "string" ||
+    path.trim().length === 0 ||
+    path.length > MAX_PATH ||
+    !isInternalPath(path.trim())
+  ) {
     return NextResponse.json({ ok: false, error: "Invalid path" }, { status: 400 });
   }
 
+  // The title is never taken from the client (it is attacker-chosen text, and a
+  // `document.title` read in an effect can lag a client-side navigation by one
+  // page). We resolve it from our own content, keyed by the validated path.
+  const normalizedPath = path.trim();
+  const title = resolveVisitTitle(normalizedPath);
+
   try {
     const recorded = await recordVisit({
-      path: path.trim(),
+      path: normalizedPath,
       title,
       ...readGeo(request.headers),
     });
