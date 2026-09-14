@@ -18,7 +18,15 @@ import type { VisitEvent, VisitFeedPayload } from "./activityTypes";
 
 const STREAM_KEY = "activity:stream";
 const COUNT_KEY = "activity:count";
-const STREAM_MAXLEN = 1500;
+// How far back detailed visits reach, by count. Exported so the UI can state it
+// without hardcoding a number that could drift from the store.
+export const STREAM_MAXLEN = 1500;
+// A true age ceiling, in addition to the count cap: entries older than this are
+// pruned on every write (XTRIM MINID), and if tracking goes fully dormant the
+// idle EXPIRE clears the keys entirely. Both bound retention; neither depends on
+// the site staying live to keep the age limit honest.
+const RETENTION_SECONDS = 180 * 24 * 60 * 60;
+const RETENTION_MS = RETENTION_SECONDS * 1000;
 
 export type VisitInput = {
   path: string;
@@ -173,6 +181,20 @@ export async function readActivityFeed(
   };
 }
 
+/**
+ * Round a coordinate to one decimal place (~11 km latitude; less for longitude
+ * the further from the equator). The globe needs a city-level hint, not a
+ * precise fix, so stored locations stay coarse by design.
+ *
+ * This applies to NEW writes only. Any full-precision entries already in the
+ * stream roll off naturally via the MAXLEN/MINID trims; for an immediate purge
+ * at deploy, run `DEL activity:stream` once.
+ */
+export function coarsenCoordinate(value: number | undefined): number | undefined {
+  if (typeof value !== "number" || !Number.isFinite(value)) return undefined;
+  return Math.round(value * 10) / 10;
+}
+
 export function visitEvent(input: VisitInput): VisitEvent {
   return {
     id: crypto.randomUUID(),
@@ -181,21 +203,35 @@ export function visitEvent(input: VisitInput): VisitEvent {
     title: input.title?.trim() || undefined,
     countryCode: input.countryCode,
     city: input.city?.trim() || undefined,
-    lat: input.lat,
-    lng: input.lng,
+    lat: coarsenCoordinate(input.lat),
+    lng: coarsenCoordinate(input.lng),
   };
 }
 
-/** Writes a visit to the stream. Returns false when running in static mode. */
+/**
+ * Writes a visit to the stream. Returns false when running in static mode.
+ *
+ * All store mutations ride one pipeline (a single round trip): append with a
+ * count trim, bump the total, apply the age trim, and refresh the idle expiry.
+ */
 export async function recordVisit(input: VisitInput): Promise<boolean> {
   const client = getActivityClient();
   if (!client) return false;
 
   const event = visitEvent(input);
-  await client.xadd(STREAM_KEY, "*", { data: JSON.stringify(event) }, {
+  const oldestAllowed = `${Date.now() - RETENTION_MS}-0`;
+
+  const pipeline = client.pipeline();
+  pipeline.xadd(STREAM_KEY, "*", { data: JSON.stringify(event) }, {
     trim: { type: "MAXLEN", comparison: "~", threshold: STREAM_MAXLEN },
   });
-  await client.incr(COUNT_KEY);
+  pipeline.incr(COUNT_KEY);
+  // Drop entries older than the retention window (stream ids are ms-ordered).
+  pipeline.xtrim(STREAM_KEY, { strategy: "MINID", exactness: "~", threshold: oldestAllowed });
+  // Idle clear: if tracking stops entirely, the keys vanish after the window.
+  pipeline.expire(STREAM_KEY, RETENTION_SECONDS);
+  pipeline.expire(COUNT_KEY, RETENTION_SECONDS);
+  await pipeline.exec();
 
   return true;
 }
