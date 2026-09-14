@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import CustomLink from "@/components/Link";
 import { formatDate } from "@/lib/formatDate";
 import {
@@ -20,15 +20,11 @@ import {
 } from "@/lib/activityTypes";
 import ActivityGlobe from "./ActivityGlobe";
 
-// Poll gently: a couple of seconds is plenty for a feed that updates when
-// someone, somewhere loads this page. Paused while the tab is hidden.
-const POLL_MS = 5000;
+// Poll frequently enough that a fresh visit lands on the globe within a
+// couple of seconds of happening, but pause while the tab is hidden.
+const POLL_MS = 2500;
 const RECENT_LIMIT = 15;
 const TOP_PAGES = 5;
-
-function visitPathname(): string {
-  return `${window.location.pathname}${window.location.search}`;
-}
 
 function locationLabel(visit: VisitEvent): string {
   const country = visit.countryCode
@@ -55,7 +51,6 @@ export default function ActivityFeed({
   // identical because `mounted` is false in both.
   const [mounted, setMounted] = useState(false);
   const [now, setNow] = useState(() => Date.now());
-  const recorded = useRef(false);
 
   const replace = useCallback((payload: VisitFeedPayload) => {
     setVisits(payload.visits);
@@ -97,19 +92,6 @@ export default function ActivityFeed({
       window.clearInterval(id);
     };
   }, [live, replace]);
-
-  // Log this pageview once, and never again, so a re-render or a second mount
-  // does not double-count the same reader.
-  useEffect(() => {
-    if (!live || recorded.current) return;
-    recorded.current = true;
-    void fetch("/api/activity/visit", {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ path: visitPathname(), title: document.title }),
-      keepalive: true,
-    }).catch(() => {});
-  }, [live]);
 
   const markers = useMemo(() => visitMarkers(visits), [visits]);
   const countries = useMemo(() => aggregateByCountry(visits), [visits]);
