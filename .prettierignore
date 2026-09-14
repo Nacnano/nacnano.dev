@@ -5,3 +5,4 @@ bun.lock
 pnpm-lock.yaml
 public/feed.xml
 apps/client/.impeccable
+.context
