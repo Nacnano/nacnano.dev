@@ -20,9 +20,12 @@
     },
     "typecheck": {
       "dependsOn": [
-        "build"
+        "^build"
       ]
     },
     "test": {}
-  }
+  },
+  "globalEnv": [
+    "NODE_ENV"
+  ]
 }

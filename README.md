@@ -4,8 +4,8 @@ Personal site and essay archive for Chotpisit Adunsehawat (Nacnano).
 
 [![CI](https://github.com/Nacnano/nacnano.dev/actions/workflows/ci.yml/badge.svg)](https://github.com/Nacnano/nacnano.dev/actions/workflows/ci.yml)
 
-Next.js 14 (App Router) · TypeScript · Tailwind CSS · Contentlayer + MDX,
-in a Bun workspace driven by Turborepo.
+Next.js 16 (App Router, Turbopack) · React 19 · TypeScript · Tailwind CSS ·
+MDX via next-mdx-remote, in a Bun workspace driven by Turborepo.
 
 ## Layout
 
@@ -45,7 +45,7 @@ These four run in CI on every pull request, and are the same commands locally:
 
 ```bash
 bun run typecheck    # tsc --noEmit, strict
-bun run lint         # next lint (use lint:fix to write)
+bun run lint         # eslint, warnings fail (use lint:fix to write)
 bun run test         # bun test
 bun run build        # next build + RSS postbuild
 ```

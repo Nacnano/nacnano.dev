@@ -1,18 +1,18 @@
 import "@/styles/prism.css";
 
-import { Authors, Blog, allAuthors, allBlogs } from "contentlayer/generated";
 import { notFound } from "next/navigation";
-import {
-  allCoreContent,
-  coreContent,
-  sortPosts,
-} from "pliny/utils/contentlayer";
 
 import { BlogWithDetail } from "@/layouts/BlogLayout";
-import { MDXLayoutRenderer } from "pliny/mdx-components";
-import { components } from "@/components/MDXComponents";
+import Mdx from "@/components/Mdx";
 import siteMetadata from "@/data/siteMetadata";
 import { getAdjacentPosts } from "@/lib/posts";
+import {
+  blogStructuredData,
+  getAuthor,
+  getBlog,
+  publishedBlogs,
+  type Author,
+} from "@/lib/content";
 
 const layouts = { BlogWithDetail } as const;
 type LayoutName = keyof typeof layouts;
@@ -23,33 +23,27 @@ const defaultLayout: LayoutName = "BlogWithDetail";
 const resolveLayout = (name: string | undefined) =>
   name && name in layouts ? layouts[name as LayoutName] : layouts[defaultLayout];
 
-export async function generateMetadata({
-  params,
-}: {
-  params: { slug: string[] };
-}) {
-  const slug = decodeURI(params.slug.join("/"));
-  const blog = allBlogs.find((b) => b.slug === slug);
-  if (!blog) return;
+function authorsFor(slugs: string[] | undefined): Author[] {
+  return (slugs ?? ["default"])
+    .map(getAuthor)
+    .filter((author): author is Author => Boolean(author));
+}
 
-  const authorList = blog.authors || ["default"];
-  const authorDetails = authorList.map((author) => {
-    const authorResults = allAuthors.find((p) => p.slug === author);
-    return coreContent(authorResults as Authors);
-  });
+/** Next 16 passes route params as a Promise. */
+type RouteParams = { params: Promise<{ slug: string[] }> };
 
-  const publishedAt = new Date(blog.date).toISOString();
-  const modifiedAt = new Date(blog.lastmod || blog.date).toISOString();
-  const authors = authorDetails.map((author) => author.name);
-  let imageList = [siteMetadata.socialBanner];
-  if (blog.images) {
-    imageList = typeof blog.images === "string" ? [blog.images] : blog.images;
-  }
-  const ogImages = imageList.map((image) => {
-    return {
-      url: image.includes("http") ? image : siteMetadata.siteUrl + image,
-    };
-  });
+export async function generateMetadata({ params }: RouteParams) {
+  const { slug: segments } = await params;
+  const blog = getBlog(decodeURI(segments.join("/")));
+  if (!blog) return {};
+
+  const authors = authorsFor(blog.authors).map((author) => author.name);
+  const imageList = blog.images?.length
+    ? blog.images
+    : [siteMetadata.socialBanner];
+  const ogImages = imageList.map((image) => ({
+    url: image.startsWith("http") ? image : siteMetadata.siteUrl + image,
+  }));
 
   return {
     title: blog.title,
@@ -59,15 +53,15 @@ export async function generateMetadata({
       description: blog.summary,
       siteName: siteMetadata.title,
       locale: "en_US",
-      type: "article",
-      publishedTime: publishedAt,
-      modifiedTime: modifiedAt,
+      type: "article" as const,
+      publishedTime: blog.date,
+      modifiedTime: blog.lastmod ?? blog.date,
       url: "./",
       images: ogImages,
       authors: authors.length > 0 ? authors : [siteMetadata.author],
     },
     twitter: {
-      card: "summary_large_image",
+      card: "summary_large_image" as const,
       title: blog.title,
       description: blog.summary,
       images: imageList,
@@ -75,54 +69,40 @@ export async function generateMetadata({
   };
 }
 
-export const generateStaticParams = () => {
-  const paths = allBlogs.map((p) => ({ slug: p.slug.split("/") }));
+export function generateStaticParams() {
+  // Drafts are excluded so they are not reachable by URL in production.
+  return publishedBlogs().map((blog) => ({ slug: blog.slug.split("/") }));
+}
 
-  return paths;
-};
+export const dynamicParams = false;
 
-export default async function Page({ params }: { params: { slug: string[] } }) {
-  const slug = decodeURI(params.slug.join("/"));
+export default async function Page({ params }: RouteParams) {
+  const { slug: segments } = await params;
+  const slug = decodeURI(segments.join("/"));
 
-  const blogs = allCoreContent(sortPosts(allBlogs));
-  const blogIndex = blogs.findIndex((blog) => blog.slug === slug);
-  if (blogIndex === -1) return notFound();
+  // Drafts are previewable in development but never reachable in production.
+  const post = getBlog(slug);
+  if (!post || (process.env.NODE_ENV === "production" && post.draft)) {
+    notFound();
+  }
 
-  const blog = allBlogs.find((blog) => blog.slug === slug) as Blog;
-  const mainContent = coreContent(blog);
+  const { newer, older } = getAdjacentPosts(publishedBlogs(), slug);
+  const authors = authorsFor(post.authors);
+  const jsonLd = blogStructuredData(
+    post,
+    authors.map((author) => author.name)
+  );
 
-  const { newer, older } = getAdjacentPosts(blogs, slug);
+  const Layout = resolveLayout(post.layout);
 
-  const authors = blog?.authors || ["default"];
-  const authorDetails = authors.map((author) => {
-    const authorDetail = allAuthors.find((a) => a.slug === author);
-    return coreContent(authorDetail as Authors);
-  });
-
-  const jsonLd = blog.structuredData;
-
-  jsonLd["author"] = authorDetails.map((author) => {
-    return { "@type": "Person", name: author.name };
-  });
-
-  const Layout = resolveLayout(blog?.layout);
   return (
     <>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <Layout
-        content={mainContent}
-        authors={authorDetails}
-        newer={newer}
-        older={older}
-      >
-        <MDXLayoutRenderer
-          code={blog.body.code}
-          components={components}
-          toc={blog.toc}
-        />
+      <Layout content={post} authors={authors} newer={newer} older={older}>
+        <Mdx source={post.body} />
       </Layout>
     </>
   );
