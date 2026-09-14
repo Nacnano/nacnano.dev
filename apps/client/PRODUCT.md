@@ -39,11 +39,11 @@ The author writes infrequently and the site should say so plainly rather than im
 
 ## Capabilities and Constraints
 
-- Next.js 14 App Router, TypeScript, Tailwind CSS 3, contentlayer + MDX, `pliny` utilities, `next-themes`. Bun workspaces + turbo monorepo; this app is `apps/client`.
-- Statically generated; no backend, no database, no auth, no comments.
-- Existing routes: `/`, `/blogs`, `/blogs/[...slug]`, `/blogs/page/[page]`, `/tags`, `/tags/[tag]`, `/projects`, `/about`, `/link`, `/link/[link]`.
+- Next.js 16 App Router (Turbopack), React 19, TypeScript (strict), Tailwind CSS 3, MDX via `next-mdx-remote`, `next-themes`. Bun workspaces + Turborepo monorepo; this app is `apps/client`.
+- Statically generated; no backend, no database, no auth, no comments. (An optional Upstash-backed activity feed is the one runtime data path — see `/activity`.)
+- Existing routes: `/`, `/blogs/[...slug]`, `/projects`, `/activity`, `/about`, `/link`, `/link/[link]`. `/blogs`, `/tags`, `/tags/[tag]` and `/blog/:slug` are permanent redirects (see `next.config.js`).
 - Dark mode is complete and correct across every surface; `theme-provider` defaults to `system`. This is a working asset to preserve.
-- MDX pipeline supports KaTeX math, citations, Prism syntax highlighting, GFM. Currently exercised only by unpublished template posts.
+- MDX pipeline supports GFM, heading anchors/autolinks, and Prism syntax highlighting. Math (KaTeX) and citations were dropped with contentlayer — no published post used them.
 - RSS and sitemap are generated at postbuild. Both currently emit the wrong route prefix (`/blog/` for a `/blogs/` route).
 - **Undecided:** whether `/tags` and `/blogs` survive as routes. Nothing is off-limits (confirmed 2026-09-13).
 

@@ -1,5 +1,5 @@
 import type { MDXComponents } from "mdx/types";
-import Image from "./Image";
+import Image from "next/image";
 import CustomLink from "./Link";
 import TableWrapper from "./TableWrapper";
 

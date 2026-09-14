@@ -10,9 +10,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
     lastModified: post.lastmod || post.date,
   }));
 
+  // The marketing pages have no content date of their own; stamping them with
+  // "today" on every build made the whole sitemap churn. Publish them without a
+  // lastModified rather than a fabricated one.
   const routes = ["", "projects", "activity", "about"].map((route) => ({
     url: `${siteUrl}/${route}`,
-    lastModified: new Date().toISOString().split("T")[0],
   }));
 
   return [...routes, ...blogRoutes];

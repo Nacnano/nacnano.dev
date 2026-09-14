@@ -1,4 +1,4 @@
-import Image from "@/components/Image";
+import Image from "next/image";
 import CustomLink from "@/components/Link";
 import ProjectMark from "./ProjectMark";
 import type { Project } from "@/data/projectsData";
