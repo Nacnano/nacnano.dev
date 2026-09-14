@@ -59,6 +59,24 @@ const securityHeaders = [
     key: "Permissions-Policy",
     value: "camera=(), microphone=(), geolocation=()",
   },
+  // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cross-Origin-Opener-Policy
+  // Isolates this origin's browsing context; a one-line, cost-free hardening.
+  {
+    key: "Cross-Origin-Opener-Policy",
+    value: "same-origin",
+  },
+  // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cross-Origin-Resource-Policy
+  // The natural companion to COOP: `images.remotePatterns` is empty and no third
+  // party embeds our assets, so same-origin costs nothing here. Scope it before
+  // debugging an image that "won't load" elsewhere six months from now: CORP is
+  // enforced only by *browsers*, so OG/Twitter card fetchers, RSS readers and
+  // unfurlers (all server-side) are unaffected — what it blocks is another site
+  // hotlinking our `/static/` assets in an `<img>`, and any future CDN/image
+  // proxy in front of them. Both are intended.
+  {
+    key: "Cross-Origin-Resource-Policy",
+    value: "same-origin",
+  },
 ];
 
 /**
@@ -67,7 +85,12 @@ const securityHeaders = [
 module.exports = () => {
   return {
     reactStrictMode: true,
-    pageExtensions: ["ts", "tsx", "js", "jsx", "md", "mdx"],
+    // We ship a careful CSP; don't then advertise the framework via
+    // `X-Powered-By: Next.js`.
+    poweredByHeader: false,
+    // MDX is compiled through `next-mdx-remote`, not treated as page files, so
+    // `md`/`mdx` never need to be page extensions.
+    pageExtensions: ["ts", "tsx", "js", "jsx"],
     images: {
       // All imagery is local; no remote patterns are permitted.
       remotePatterns: [],
