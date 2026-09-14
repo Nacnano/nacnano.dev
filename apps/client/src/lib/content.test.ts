@@ -66,14 +66,20 @@ describe("content loader", () => {
 
 describe("jsonLdScriptProps", () => {
   // The whole point of the helper is that a specific byte sequence never reaches
-  // the output — so assert it directly, not just via the page render.
-  const payload = blogStructuredData(
-    {
-      ...(allBlogs()[0] as Blog),
-      title: "A </script><img onerror=x> title",
-    },
-    ["N"]
-  );
+  // the output — so assert it directly, on a fixture rather than the live MDX
+  // corpus: this test is about string escaping, not disk reads, and a literal
+  // keeps it hermetic (no load-bearing cast on a possibly-empty blogs dir).
+  const post: Blog = {
+    slug: "escape-me",
+    path: "blogs/escape-me",
+    filePath: "blogs/escape-me.mdx",
+    title: "A </script><img onerror=x> title",
+    date: "2026-09-14T00:00:00.000Z",
+    tags: [],
+    readingTime: { text: "1 min", minutes: 1, time: 1000, words: 1 },
+    body: "",
+  };
+  const payload = blogStructuredData(post, ["N"]);
   const html = jsonLdScriptProps(payload).dangerouslySetInnerHTML.__html;
 
   it("sets the ld+json script type", () => {
