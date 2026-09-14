@@ -19,9 +19,11 @@
   "globalEnv": [
     "NODE_ENV",
     "VERCEL",
+    "VERCEL_GIT_COMMIT_SHA",
     "UPSTASH_REDIS_REST_URL",
     "UPSTASH_REDIS_REST_TOKEN",
     "VISIT_IP_SALT",
-    "ERROR_REPORT_URL"
+    "ERROR_REPORT_URL",
+    "VERIFY_CSP_URL"
   ]
 }

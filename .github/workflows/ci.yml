@@ -66,3 +66,18 @@ jobs:
       # Last, because it is the slowest and the cheap gates should fail first.
       - name: Build
         run: bun run build
+
+      # The CSP allows inline scripts by nonce and by sha256, never by
+      # 'unsafe-inline' — so a page whose inline scripts drift out of the hash
+      # manifest would silently fail to hydrate in production. Serve the build
+      # and assert, per page, that every inline script it emits is allowed by
+      # the policy it was served with.
+      - name: Verify Content-Security-Policy
+        working-directory: apps/client
+        run: |
+          bun run start &
+          for _ in $(seq 1 60); do
+            curl -sf -o /dev/null http://localhost:3000/ && break
+            sleep 1
+          done
+          bun run verify:csp

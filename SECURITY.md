@@ -26,5 +26,37 @@ read path, the rate limiter, or anything that could read or write the store
 beyond normal traffic — please email me directly (above) rather than opening a
 public issue.
 
+## Content-Security-Policy
+
+`script-src` does not allow `'unsafe-inline'`. Because the site is part
+prerendered and part server-rendered, its inline scripts are allowed two ways
+at once, in one header built by `apps/client/src/lib/csp.ts` and sent by
+`apps/client/src/proxy.ts`:
+
+- **A per-request nonce**, which Next stamps onto the bootstrap scripts it
+  emits while server-rendering — `/activity`, an un-prerendered `/link/[link]`,
+  and dev.
+- **`sha256` hashes** of the inline scripts in the prerendered HTML. A nonce
+  can never appear in a page that was built once and served from cache, so
+  those are pinned at build time instead, in
+  `apps/client/src/generated/cspScriptHashes.ts`.
+
+The manifest is generated, but committed, because the proxy that reads it is
+bundled during the build. That makes the build run twice: once to produce the
+HTML, once to bundle the proxy with the resulting hashes, then a check that the
+two passes agree. It is also why `generateBuildId` is pinned to the commit — a
+random build ID is embedded in every page's payload and would make the hashes
+unreproducible.
+
+`style-src` still allows `'unsafe-inline'`: Tailwind's runtime theme switch and
+`next/font` write `style` attributes, which no nonce or hash can reach.
+
+CI serves a production build and asserts, per page, that every inline script it
+emits is allowed by the policy it was served with (`bun run verify:csp`). Run
+it locally against a `bun run start` server when changing anything that emits
+markup.
+
+## Automation
+
 Dependency updates are automated through Dependabot, and CI runs typecheck,
-lint, tests and a production build on every pull request.
+lint, tests, a production build and the CSP check above on every pull request.
