@@ -4,9 +4,11 @@ import type { MarkKind } from "@/app/projects/ProjectMark";
  * Mirrors the Projects section of https://resume.nacnano.dev. Keep the two in
  * sync; the résumé is the source of truth for what exists and when.
  *
- * `href` is only set where the thing is actually still reachable — an event
- * site that has been taken down gets no link rather than a dead one. `repo`
- * is the source, shown alongside `href` when both exist.
+ * `href` is the live site and is only set where the thing is actually still
+ * reachable — an event site that has been taken down gets no link rather than
+ * a dead one. `repo` is the source. A card links to `href` when there is one
+ * and falls back to `repo`, showing a separate "Source" link only when both
+ * exist.
  * `imgSrc` is a real screenshot; `mark` is a drawn diagram for the projects
  * with nothing deployed to capture.
  */
@@ -51,6 +53,7 @@ const projectsData: Project[] = [
     stack: ["Next.js", "Firestore"],
     category: "built",
     imgSrc: "/static/images/cu-intania-openhouse-2024.png",
+    repo: "https://github.com/esc-chula/intania-openhouse-2024",
     note: "The site came down after the event.",
   },
   {
@@ -100,7 +103,7 @@ const projectsData: Project[] = [
     stack: ["Python", "Visual Genome"],
     category: "research",
     mark: "grid",
-    href: "https://github.com/Nacnano/thai-context-llm-benchmark",
+    repo: "https://github.com/Nacnano/thai-context-llm-benchmark",
   },
   {
     title: "Fine-tuning a diffusion language model for Thai summarisation",
@@ -109,7 +112,7 @@ const projectsData: Project[] = [
     stack: ["Python", "LLaDA", "DeepEval"],
     category: "research",
     mark: "denoise",
-    href: "https://github.com/pupipatsk/NanoLLaDA",
+    repo: "https://github.com/pupipatsk/NanoLLaDA",
   },
   {
     title: "Chess move detection from video",
@@ -118,7 +121,7 @@ const projectsData: Project[] = [
     stack: ["Python", "ResNet", "InceptionV3"],
     category: "research",
     mark: "board",
-    href: "https://github.com/athensclub/chess-video-move-detection",
+    repo: "https://github.com/athensclub/chess-video-move-detection",
   },
   {
     title: "Stock return forecasting and portfolio optimisation",
@@ -127,7 +130,7 @@ const projectsData: Project[] = [
     stack: ["Python", "scikit-learn", "Pandas"],
     category: "research",
     mark: "forecast",
-    href: "https://github.com/Nacnano/stock-machine-learning-project",
+    repo: "https://github.com/Nacnano/stock-machine-learning-project",
   },
   {
     title: "Multimedia and how students take notes",
@@ -136,7 +139,7 @@ const projectsData: Project[] = [
     stack: ["Python", "Mask R-CNN", "Random Forest"],
     category: "research",
     mark: "segment",
-    href: "https://github.com/Nacnano/predicting-and-comparing-learners-interest-in-note-taking-from-multimedia-using-a-machine-learning-",
+    repo: "https://github.com/Nacnano/predicting-and-comparing-learners-interest-in-note-taking-from-multimedia-using-a-machine-learning-",
   },
   {
     title: "GFinder",
@@ -145,7 +148,7 @@ const projectsData: Project[] = [
     stack: ["Python", "Pandas"],
     category: "research",
     mark: "court",
-    href: "https://github.com/Nacnano/IMMC-2021",
+    repo: "https://github.com/Nacnano/IMMC-2021",
   },
 ];
 
