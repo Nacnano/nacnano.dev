@@ -26,6 +26,8 @@
     "test": {}
   },
   "globalEnv": [
-    "NODE_ENV"
+    "NODE_ENV",
+    "UPSTASH_REDIS_REST_URL",
+    "UPSTASH_REDIS_REST_TOKEN"
   ]
 }

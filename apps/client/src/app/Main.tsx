@@ -7,6 +7,7 @@ import type { Blog } from "@/lib/content";
 // All the same weight on purpose — nothing here is trying to sell you anything.
 const links = [
   { href: "/projects", title: "Things I've made" },
+  { href: "/activity", title: "Activity" },
   { href: siteMetadata.github, title: "GitHub" },
   { href: "/about", title: "More about me" },
 ];
