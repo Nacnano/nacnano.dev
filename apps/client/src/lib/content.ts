@@ -4,6 +4,7 @@ import matter from "gray-matter";
 import readingTime from "reading-time";
 import siteMetadata from "@/data/siteMetadata";
 import { postUrl } from "@/lib/feed";
+import { LAYOUT_NAMES } from "@/lib/blogLayouts";
 import { publishedOnly, sortByDateDesc } from "@/lib/posts";
 
 /**
@@ -73,29 +74,136 @@ function readMdxDir(dir: string): { file: string; raw: string }[] {
     }));
 }
 
+/**
+ * A missing or malformed field is a hard build failure naming the file and
+ * field — the alternative (silent coercion) turns "this post renders oddly"
+ * into a production mystery. Exported so the reject branches are unit-testable
+ * without touching disk. `typeof value` is surfaced in each message so a 3 a.m.
+ * "why does this post look wrong" becomes a 10-second fix.
+ */
+export function requireNonEmptyString(
+  value: unknown,
+  field: string,
+  file: string
+): string {
+  const str = typeof value === "string" ? value.trim() : "";
+  if (!str) throw new Error(`blogs/${file}: \`${field}\` must be a non-empty string`);
+  return str;
+}
+
+export function requireIsoDate(value: unknown, field: string, file: string): string {
+  // gray-matter yields a `Date` for an unquoted YAML date and a `string` for a
+  // quoted one. Anything else — a bare year (`date: 2026`), a boolean, an array
+  // — is a typo, and would otherwise coerce to a bogus 1970 timestamp that sorts
+  // the post to the bottom of the feed and poisons the RSS `lastBuildDate`.
+  if (!(value instanceof Date) && typeof value !== "string") {
+    throw new Error(
+      `blogs/${file}: \`${field}\` must be a date (string or Date), got ${describe(value)}`
+    );
+  }
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    throw new Error(
+      `blogs/${file}: \`${field}\` is not a valid date (${describe(value)})`
+    );
+  }
+  return date.toISOString();
+}
+
+export function requireStringArray(
+  value: unknown,
+  field: string,
+  file: string
+): string[] | undefined {
+  // A bare YAML key (`tags:` with nothing after it) parses to `null` — treat it
+  // as absent, the same way an omitted key is, so "empty vs missing" is one
+  // deliberate behaviour rather than an accident of which validator checks null.
+  if (value === undefined || value === null) return undefined;
+  // `.every` with a type predicate narrows to `string[]`; a `.some(!== string)`
+  // guard would leave `value` as `any[]`.
+  if (
+    !Array.isArray(value) ||
+    !value.every((item): item is string => typeof item === "string")
+  ) {
+    throw new Error(`blogs/${file}: \`${field}\` must be an array of strings`);
+  }
+  return value;
+}
+
+export function requireBooleanOrUndefined(
+  value: unknown,
+  field: string,
+  file: string
+): boolean | undefined {
+  // `draft` is the field whose failure mode is publishing something you didn't
+  // mean to (a quoted `draft: 'true'` is truthy-but-not-true). Refuse to guess on
+  // anything that isn't a real boolean — but a bare `draft:` (null) is treated as
+  // absent, consistent with every other optional field.
+  if (value === undefined || value === null) return undefined;
+  if (typeof value !== "boolean") {
+    throw new Error(
+      `blogs/${file}: \`${field}\` must be an unquoted boolean (true/false), got ${describe(value)}`
+    );
+  }
+  return value;
+}
+
+export function requireOptionalString(
+  value: unknown,
+  field: string,
+  file: string
+): string | undefined {
+  if (value === undefined || value === null) return undefined;
+  if (typeof value !== "string") {
+    throw new Error(
+      `blogs/${file}: \`${field}\` must be a string when present, got ${describe(value)}`
+    );
+  }
+  return value.trim() || undefined;
+}
+
+export function requireKnownLayout(
+  value: unknown,
+  field: string,
+  file: string
+): string | undefined {
+  if (value === undefined || value === null) return undefined;
+  if (typeof value !== "string" || !(LAYOUT_NAMES as readonly string[]).includes(value)) {
+    throw new Error(
+      `blogs/${file}: \`${field}\` must be one of ${LAYOUT_NAMES.join(", ")}, got ${describe(value)}`
+    );
+  }
+  return value;
+}
+
+/** Short, safe rendering of an offending value for an error message. */
+function describe(value: unknown): string {
+  if (value === null) return "null";
+  if (Array.isArray(value)) return "an array";
+  if (typeof value === "object") return "an object";
+  return `${typeof value} (${String(value)})`;
+}
+
 function toBlog({ file, raw }: { file: string; raw: string }): Blog {
   const { data, content } = matter(raw);
   const slug = file.replace(/\.mdx$/, "");
-
-  if (!data.title || !data.date) {
-    throw new Error(`blogs/${file} is missing required frontmatter (title, date)`);
-  }
 
   return {
     slug,
     path: `blogs/${slug}`,
     filePath: `blogs/${file}`,
-    title: String(data.title),
-    // Frontmatter dates parse to Date objects; normalise to ISO strings so
-    // every consumer gets one type.
-    date: new Date(data.date).toISOString(),
-    lastmod: data.lastmod ? new Date(data.lastmod).toISOString() : undefined,
-    summary: data.summary ? String(data.summary) : undefined,
-    tags: Array.isArray(data.tags) ? data.tags.map(String) : [],
-    draft: data.draft === true,
-    images: Array.isArray(data.images) ? data.images.map(String) : undefined,
-    authors: Array.isArray(data.authors) ? data.authors.map(String) : undefined,
-    layout: data.layout ? String(data.layout) : undefined,
+    title: requireNonEmptyString(data.title, "title", file),
+    date: requireIsoDate(data.date, "date", file),
+    lastmod:
+      data.lastmod === undefined || data.lastmod === null
+        ? undefined
+        : requireIsoDate(data.lastmod, "lastmod", file),
+    summary: requireOptionalString(data.summary, "summary", file),
+    tags: requireStringArray(data.tags, "tags", file) ?? [],
+    draft: requireBooleanOrUndefined(data.draft, "draft", file) ?? false,
+    images: requireStringArray(data.images, "images", file),
+    authors: requireStringArray(data.authors, "authors", file),
+    layout: requireKnownLayout(data.layout, "layout", file),
     readingTime: readingTime(content),
     body: content,
   };
