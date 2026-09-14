@@ -1,5 +1,8 @@
 "use client";
 
+import { useEffect } from "react";
+import { captureError } from "@/lib/observability";
+
 /**
  * Catches failures in the root layout itself, where `error.tsx` cannot run.
  * It replaces <html>, so it carries its own minimal styling rather than
@@ -12,6 +15,10 @@ export default function GlobalError({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  useEffect(() => {
+    captureError(error, { scope: "global-error", digest: error.digest });
+  }, [error]);
+
   return (
     <html lang="en">
       <body

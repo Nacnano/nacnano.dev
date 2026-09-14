@@ -1,16 +1,7 @@
 import { genPageMetaData } from "@/app/seo";
-import {
-  buildFeedPayload,
-  isActivityLive,
-  shouldUseSeed,
-} from "@/lib/activity";
-import { readActivityFeed } from "@/lib/activityRedis";
-import { seedVisits } from "@/data/activityData";
+import { isActivityLive } from "@/lib/activity";
+import { loadInitialFeed } from "@/lib/activityServer";
 import ActivityFeed from "./ActivityFeed";
-
-// One page of visits up front; the client pages older ones as the reader
-// scrolls. Keep in sync with the route's default.
-const HEAD_LIMIT = 30;
 
 // The feed reflects live visits, so it is rendered per request rather than
 // baked at build. This also means the "show seed or not" decision is made with
@@ -24,31 +15,9 @@ export const metadata = genPageMetaData({
     "A live feed of visits to nacnano.dev — who has been here, from where, and what they read.",
 });
 
-async function getInitialFeed(live: boolean) {
-  // Live: read the real store up front so the first paint is genuine, not the
-  // sample. A failed read is an honest empty feed, never a fabricated one.
-  if (live) {
-    try {
-      return await readActivityFeed(HEAD_LIMIT);
-    } catch {
-      return { visits: [], count: 0, hasMore: false, nextCursor: null };
-    }
-  }
-  // Store-less local dev still gets the sample; any Vercel deploy (where this
-  // runs without Redis configured) shows the empty state instead.
-  if (shouldUseSeed()) {
-    return {
-      ...buildFeedPayload(seedVisits, seedVisits.length),
-      hasMore: false,
-      nextCursor: null,
-    };
-  }
-  return { visits: [], count: 0, hasMore: false, nextCursor: null };
-}
-
 export default async function Activity() {
   const live = isActivityLive();
-  const { visits, count, hasMore, nextCursor } = await getInitialFeed(live);
+  const initial = await loadInitialFeed(live);
 
   return (
     <div className="py-12 sm:py-16">
@@ -60,15 +29,24 @@ export default async function Activity() {
         data — just roughly where in the world each visit came from.
       </p>
 
-      <div className="mt-12">
-        <ActivityFeed
-          initialVisits={visits}
-          initialCount={count}
-          initialHasMore={hasMore ?? false}
-          initialCursor={nextCursor ?? null}
-          live={live}
-        />
-      </div>
+      {initial.status === "error" ? (
+        <div className="mt-12">
+          <p className="max-w-measure text-[1.0625rem] leading-[1.75] text-zinc-600 dark:text-zinc-400">
+            The live feed is unavailable right now — that&rsquo;s a problem on my
+            side, not yours. Please check back in a moment.
+          </p>
+        </div>
+      ) : (
+        <div className="mt-12">
+          <ActivityFeed
+            initialVisits={initial.payload.visits}
+            initialCount={initial.payload.count}
+            initialHasMore={initial.payload.hasMore ?? false}
+            initialCursor={initial.payload.nextCursor ?? null}
+            live={live}
+          />
+        </div>
+      )}
     </div>
   );
 }

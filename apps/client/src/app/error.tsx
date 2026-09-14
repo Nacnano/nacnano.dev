@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import CustomLink from "@/components/Link";
+import { captureError } from "@/lib/observability";
 import siteMetadata from "@/data/siteMetadata";
 
 /**
@@ -17,8 +18,7 @@ export default function Error({
   reset: () => void;
 }) {
   useEffect(() => {
-    // No error reporting service is wired up; the console is the only sink.
-    console.error(error);
+    captureError(error, { scope: "route-error", digest: error.digest });
   }, [error]);
 
   return (
