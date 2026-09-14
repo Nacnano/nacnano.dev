@@ -36,5 +36,5 @@ yarn-error.log*
 .vercel
 
 
-# Contentlayer
-.contentlayer
+# Impeccable design-tool artifacts (generated critique + scratch config)
+.impeccable/

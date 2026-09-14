@@ -1,7 +1,7 @@
 import siteMetadata from "@/data/siteMetadata";
 import CustomLink from "@/components/Link";
 import BlogCard from "@/components/BlogCard";
-import Image from "@/components/Image";
+import Image from "next/image";
 import type { Blog } from "@/lib/content";
 
 // All the same weight on purpose — nothing here is trying to sell you anything.

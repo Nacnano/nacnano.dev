@@ -28,8 +28,6 @@
   },
   "trustedDependencies": [
     "esbuild",
-    "contentlayer",
-    "@contentlayer/core",
     "protobufjs",
     "core-js-pure"
   ]

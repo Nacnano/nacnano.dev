@@ -1,12 +1,16 @@
 import siteMetadata from "@/data/siteMetadata";
 import { Metadata } from "next";
 
-interface PageSEOProps {
+/**
+ * Per-page SEO helper. `title`/`description`/`image` build the share card; any
+ * other `Metadata` field (e.g. `robots`) is passed straight through, which is
+ * why the call signature extends `Metadata` minus the fields set here.
+ */
+type PageSEOProps = {
   title: string;
   description?: string;
   image?: string;
-  [key: string]: any;
-}
+} & Omit<Metadata, "title" | "description" | "openGraph" | "twitter">;
 
 export function genPageMetaData({
   title,

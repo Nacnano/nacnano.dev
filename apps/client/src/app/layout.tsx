@@ -57,23 +57,6 @@ export const metadata: Metadata = {
   },
 };
 
-const directionContract = `
-  THESIS: A working engineer's site where the name, the status and the writing
-  are all legible in one viewport. It refuses the template arrangement it
-  replaced: a page headed "Latest" that never said whose site it was.
-  OWN-WORLD: Neutral zinc ground, one blue accent (600 light / 300 dark), hairline
-  rules instead of cards, one elevation step, Inter for prose and system mono for
-  dates and figures. Tabular numerals in every metadata rail.
-  STORY: A visitor learns who this is, that he is open to work, and that the
-  essays are how he thinks — then reads one.
-  FIRST VIEWPORT: Name at display size, a one-line status, a two-sentence
-  positioning paragraph, then Résumé / Projects / GitHub as the first links, then
-  the essay list under a hairline rule.
-  FORM: The standing exit — the category standard executed straight, chosen over
-  four dealt worlds. Craft bar: brianlovin.com, rauchg.com. Seed key b5c6a34c.
-  FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review.
-`;
-
 export const viewport: Viewport = {
   themeColor: [
     { media: "(prefers-color-scheme: light)", color: "#ffffff" },
@@ -109,7 +92,6 @@ export default function RootLayout({
         <link rel="alternate" type="application/rss+xml" href="/feed.xml" />
       </head>
       <body className="bg-white font-sans text-zinc-900 antialiased dark:bg-zinc-950 dark:text-zinc-100">
-        <div dangerouslySetInnerHTML={{ __html: `<!--${directionContract}-->` }} />
         <VisitTracker />
         <ThemeProviders>
           <a

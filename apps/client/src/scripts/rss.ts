@@ -29,6 +29,14 @@ export function renderItem(post: FeedPost): string {
 
 export function renderFeed(posts: FeedPost[]): string {
   const site = trimTrailingSlash(siteMetadata.siteUrl);
+  // Newest by value, not by array position — this export may be called with
+  // unsorted input. Guard against an unparseable frontmatter date, which would
+  // otherwise emit the literal string "Invalid Date" and break feed validators.
+  const newestMs = posts.reduce(
+    (max, p) => Math.max(max, new Date(p.date).getTime()),
+    0,
+  );
+  const lastBuild = Number.isFinite(newestMs) && newestMs > 0 ? new Date(newestMs) : new Date();
   return `<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
@@ -38,7 +46,7 @@ export function renderFeed(posts: FeedPost[]): string {
     <language>${siteMetadata.language}</language>
     <managingEditor>${siteMetadata.email} (${siteMetadata.author})</managingEditor>
     <webMaster>${siteMetadata.email} (${siteMetadata.author})</webMaster>
-    <lastBuildDate>${new Date(posts[0]!.date).toUTCString()}</lastBuildDate>
+    <lastBuildDate>${lastBuild.toUTCString()}</lastBuildDate>
     <atom:link href="${site}/feed.xml" rel="self" type="application/rss+xml"/>
     ${posts.map(renderItem).join("")}
   </channel>

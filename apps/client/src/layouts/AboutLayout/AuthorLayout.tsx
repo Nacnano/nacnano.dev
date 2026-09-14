@@ -1,6 +1,6 @@
 import React from "react";
 import type { Author } from "@/lib/content";
-import Image from "@/components/Image";
+import Image from "next/image";
 import SocialIcon from "@/components/social-icons";
 import CustomLink from "@/components/Link";
 import siteMetadata from "@/data/siteMetadata";
