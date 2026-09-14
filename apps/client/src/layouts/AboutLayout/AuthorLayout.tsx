@@ -33,7 +33,7 @@ export default function AuthorLayout({ children, content }: Props) {
             {name}
           </h1>
           <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-            Goes by Nac
+            {siteMetadata.legalName} · goes by Nac
           </p>
         </div>
       </header>
