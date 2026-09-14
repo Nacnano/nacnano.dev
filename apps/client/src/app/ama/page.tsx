@@ -12,6 +12,15 @@ export const metadata = genPageMetaData({
   title: "Ask me anything",
   description:
     "Questions people have asked Nac, and the answers worth keeping. If yours isn't here, send it over.",
+  // Answers land here rarely and without warning, which is exactly what a feed
+  // is for. `canonical` is repeated from the root layout because per-page
+  // `alternates` replaces it rather than merging into it.
+  alternates: {
+    canonical: "./",
+    types: {
+      "application/rss+xml": `${siteMetadata.siteUrl}/ama/rss.xml`,
+    },
+  },
 });
 
 /**

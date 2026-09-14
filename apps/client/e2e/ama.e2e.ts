@@ -75,3 +75,33 @@ test("a submission with no store configured says so instead of faking success", 
   await expect(live).toContainText(/isn't working right now/i);
   await expect(live).not.toContainText(/^Sent/);
 });
+
+test("serves /ama/rss.xml as a real feed the page points at", async ({
+  page,
+  request,
+}) => {
+  // The AMA feed is written into `public/` by the postbuild, so the thing worth
+  // proving is that it survives to the wire: a static file under a path that is
+  // also an app route is exactly where a build can quietly drop it.
+  await page.goto("/ama");
+  const href = await page
+    .locator('link[rel="alternate"][type="application/rss+xml"][href*="/ama/rss.xml"]')
+    .getAttribute("href");
+  expect(href).toBeTruthy();
+
+  const response = await request.get("/ama/rss.xml");
+  expect(response.status()).toBe(200);
+
+  const xml = await response.text();
+  expect(xml).toContain("<rss");
+  expect(xml).toContain("<atom:link");
+  // One item per answer on the page, each anchored at its own heading.
+  const guids = [...xml.matchAll(/<guid>([^<]+)<\/guid>/g)].map((m) => m[1]!);
+  const anchors = await page
+    .locator("article h3[id]")
+    .evaluateAll((nodes) => nodes.map((n) => n.id));
+  expect(guids).toHaveLength(anchors.length);
+  for (const id of anchors) {
+    expect(guids.some((g) => g.endsWith(`/ama#${id}`))).toBe(true);
+  }
+});
