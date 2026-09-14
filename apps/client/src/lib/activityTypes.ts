@@ -12,7 +12,7 @@
 
 // The day the counter starts from. Shown once in the feed header so a reader
 // knows how far back the numbers go.
-export const VISITS_TRACKED_SINCE = "2024-08-16";
+export const VISITS_TRACKED_SINCE = "2026-09-14";
 
 export type VisitEvent = {
   id: string;
