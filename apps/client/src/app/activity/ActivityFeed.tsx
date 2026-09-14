@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import CustomLink from "@/components/Link";
+import { useMounted } from "@/lib/useMounted";
 import { formatDate } from "@/lib/formatDate";
 import { sortVisitsDesc } from "@/lib/activity";
 import {
@@ -81,19 +82,15 @@ export default function ActivityFeed({
   const [hasMore, setHasMore] = useState<boolean>(initialHasMore);
   const [loadingMore, setLoadingMore] = useState(false);
   const [failedMore, setFailedMore] = useState(false);
+  const [now, setNow] = useState(() => Date.now());
   // Relative times are a clock race against the server pass, so they only
   // appear once hydrated; the first paint (server and first client render) is
   // identical because `mounted` is false in both.
-  const [mounted, setMounted] = useState(false);
-  const [now, setNow] = useState(() => Date.now());
+  const mounted = useMounted();
 
   // Guards so a slow/duplicate response can never reorder the list.
   const loadingMoreRef = useRef(false);
   const sentinelRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   // Re-anchor "now" on a coarse tick so the labels age without a re-fetch storm.
   useEffect(() => {

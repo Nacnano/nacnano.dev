@@ -1,13 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { useTheme } from "next-themes";
+import { useMounted } from "@/lib/useMounted";
 
 const ThemeSwitch = () => {
   const { setTheme, resolvedTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => setMounted(true), []);
+  const mounted = useMounted();
 
   const isDark = mounted && resolvedTheme === "dark";
   // Before mount the resolved theme is unknown, so the control stays
