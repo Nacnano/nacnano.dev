@@ -1,35 +1,34 @@
 /**
- * Pure helpers behind the activity feed.
+ * Pure helpers behind the site-visit activity feed.
  *
- * Everything here is a total function over ActivityEvent values with no
- * Node, Redis, or DOM access, so the same code runs on the server during the
- * build, in the browser, and under `bun test`. The route handlers and the
- * client both borrow from here rather than reinventing the ordering, grouping,
- * or globe-marker rules — three places those were once wrong on their own.
+ * Everything here is a total function over VisitEvent values with no Node,
+ * Redis, or DOM access, so the same code runs on the server during the build,
+ * in the browser, and under `bun test`. The route handlers and the client both
+ * borrow from here rather than reinventing the ordering, aggregation, or
+ * globe-marker rules.
  */
 
 import {
-  ACTIVITY_TRACKED_SINCE,
-  type ActivityEvent,
-  type ActivityFeedPayload,
-  type ActivityMarker,
+  type VisitEvent,
+  type VisitFeedPayload,
+  type VisitMarker,
 } from "./activityTypes";
 
 /** Newest first. A stable sort keeps authored order inside one second. */
-export function sortEventsDesc(events: readonly ActivityEvent[]): ActivityEvent[] {
-  return [...events].sort(
+export function sortVisitsDesc(visits: readonly VisitEvent[]): VisitEvent[] {
+  return [...visits].sort(
     (a, b) => new Date(b.ts).getTime() - new Date(a.ts).getTime()
   );
 }
 
-/** The calendar day (UTC) an event belongs to, as `YYYY-MM-DD`. */
+/** The calendar day (UTC) a visit belongs to, as `YYYY-MM-DD`. */
 export function dayKey(ts: string): string {
   return ts.slice(0, 10);
 }
 
-export type ActivityDay = {
+export type VisitDay = {
   day: string;
-  events: ActivityEvent[];
+  visits: VisitEvent[];
 };
 
 /**
@@ -37,16 +36,14 @@ export type ActivityDay = {
  * within-day order it was given. Days are compared, not parsed back to Dates,
  * so a malformed timestamp can never silently reorder the feed.
  */
-export function groupByDay(
-  events: readonly ActivityEvent[]
-): ActivityDay[] {
-  const ordered = sortEventsDesc(events);
-  const days: ActivityDay[] = [];
-  for (const event of ordered) {
-    const key = dayKey(event.ts);
+export function groupByDay(visits: readonly VisitEvent[]): VisitDay[] {
+  const ordered = sortVisitsDesc(visits);
+  const days: VisitDay[] = [];
+  for (const visit of ordered) {
+    const key = dayKey(visit.ts);
     const last = days[days.length - 1];
-    if (last && last.day === key) last.events.push(event);
-    else days.push({ day: key, events: [event] });
+    if (last && last.day === key) last.visits.push(visit);
+    else days.push({ day: key, visits: [visit] });
   }
   return days;
 }
@@ -59,7 +56,7 @@ function startOfUtcDay(ts: string): number {
 
 /**
  * Whole calendar days between the tracked-since epoch and now, inclusive. Used
- * for the "over N days" framing next to the running count.
+ * for the "over N days" framing next to the running total.
  */
 export function trackedDays(ts: string, now: string): number {
   const diff = startOfUtcDay(now) - startOfUtcDay(ts);
@@ -101,21 +98,23 @@ export function countryFlag(code?: string): string {
   );
 }
 
+function locationKey(lat: number, lng: number): string {
+  return `${lat.toFixed(2)},${lng.toFixed(2)}`;
+}
+
 /**
- * Points for the globe: every event that carries a coordinate, de-duplicated
- * by location so a city visited many times is one marker scaled by how many
- * events landed there. Size is clamped into cobe's comfortable range.
+ * Points for the globe: every visit that carries a coordinate, merged by
+ * location so one city viewed many times is a single marker scaled by how
+ * many visits landed there. Size is clamped into cobe's comfortable range.
  */
-export function activityMarkers(
-  events: readonly ActivityEvent[]
-): ActivityMarker[] {
+export function visitMarkers(visits: readonly VisitEvent[]): VisitMarker[] {
   const buckets = new Map<string, { lat: number; lng: number; n: number }>();
-  for (const event of events) {
-    if (typeof event.lat !== "number" || typeof event.lng !== "number") continue;
-    const key = `${event.lat.toFixed(2)},${event.lng.toFixed(2)}`;
+  for (const visit of visits) {
+    if (typeof visit.lat !== "number" || typeof visit.lng !== "number") continue;
+    const key = locationKey(visit.lat, visit.lng);
     const found = buckets.get(key);
     if (found) found.n += 1;
-    else buckets.set(key, { lat: event.lat, lng: event.lng, n: 1 });
+    else buckets.set(key, { lat: visit.lat, lng: visit.lng, n: 1 });
   }
   return Array.from(buckets.values()).map((bucket) => ({
     location: [bucket.lat, bucket.lng] as [number, number],
@@ -123,15 +122,85 @@ export function activityMarkers(
   }));
 }
 
-/** The public feed body: newest-first events plus the running total. */
-export function buildFeedPayload(
-  events: readonly ActivityEvent[],
-  count: number
-): ActivityFeedPayload {
-  return { events: sortEventsDesc(events), count };
+export type CountryAggregate = {
+  countryCode: string;
+  city?: string;
+  lat?: number;
+  lng?: number;
+  count: number;
+};
+
+/**
+ * Roll visits up by country, newest-touched first by count. A country with no
+ * code is skipped (nothing to aggregate); the first city and coordinate seen
+ * for a country are kept as its representative point.
+ */
+export function aggregateByCountry(
+  visits: readonly VisitEvent[]
+): CountryAggregate[] {
+  const buckets = new Map<string, CountryAggregate>();
+  for (const visit of visits) {
+    const code = visit.countryCode?.trim().toUpperCase();
+    if (!code) continue;
+    const existing = buckets.get(code);
+    if (existing) {
+      existing.count += 1;
+      if (!existing.city && visit.city) existing.city = visit.city;
+      if (existing.lat === undefined && typeof visit.lat === "number") {
+        existing.lat = visit.lat;
+        existing.lng = visit.lng;
+      }
+    } else {
+      buckets.set(code, {
+        countryCode: code,
+        city: visit.city,
+        lat: visit.lat,
+        lng: visit.lng,
+        count: 1,
+      });
+    }
+  }
+  return Array.from(buckets.values()).sort((a, b) => b.count - a.count);
 }
 
-export { ACTIVITY_TRACKED_SINCE };
+export type PageAggregate = {
+  page: string;
+  title?: string;
+  count: number;
+};
+
+/** Most-viewed pages first, ties broken by the title it first appeared with. */
+export function topPages(visits: readonly VisitEvent[]): PageAggregate[] {
+  const buckets = new Map<string, PageAggregate>();
+  for (const visit of visits) {
+    const existing = buckets.get(visit.page);
+    if (existing) {
+      existing.count += 1;
+      if (!existing.title && visit.title) existing.title = visit.title;
+    } else {
+      buckets.set(visit.page, { page: visit.page, title: visit.title, count: 1 });
+    }
+  }
+  return Array.from(buckets.values()).sort((a, b) => b.count - a.count);
+}
+
+/** Distinct countries present in a set of visits. */
+export function countCountries(visits: readonly VisitEvent[]): number {
+  const codes = new Set<string>();
+  for (const visit of visits) {
+    const code = visit.countryCode?.trim().toUpperCase();
+    if (code) codes.add(code);
+  }
+  return codes.size;
+}
+
+/** The public feed body: newest-first visits plus the running total. */
+export function buildFeedPayload(
+  visits: readonly VisitEvent[],
+  count: number
+): VisitFeedPayload {
+  return { visits: sortVisitsDesc(visits), count };
+}
 
 /**
  * Live mode is on only when the site has been pointed at a Redis instance.

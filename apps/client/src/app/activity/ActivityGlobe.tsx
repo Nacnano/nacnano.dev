@@ -2,7 +2,7 @@
 
 import createGlobe from "cobe";
 import { useEffect, useRef } from "react";
-import type { ActivityMarker } from "@/lib/activityTypes";
+import type { VisitMarker } from "@/lib/activityTypes";
 
 // The single accent, as 0–1 rgb, so the markers match the rest of the site
 // rather than inventing a colour here.
@@ -22,7 +22,7 @@ function prefersReducedMotion(): boolean {
  * instead of three.js. It draws nothing until mounted, pauses its spin for
  * readers who ask for reduced motion, and follows the site's light/dark class.
  */
-export default function ActivityGlobe({ markers }: { markers: ActivityMarker[] }) {
+export default function ActivityGlobe({ markers }: { markers: VisitMarker[] }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {

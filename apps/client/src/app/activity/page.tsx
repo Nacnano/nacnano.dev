@@ -1,19 +1,16 @@
 import { genPageMetaData } from "@/app/seo";
 import { buildFeedPayload, isActivityLive } from "@/lib/activity";
-import { seedActivityEvents } from "@/data/activityData";
+import { seedVisits } from "@/data/activityData";
 import ActivityFeed from "./ActivityFeed";
 
 export const metadata = genPageMetaData({
   title: "Activity",
   description:
-    "A live feed of likes, visits, and other things happening on nacnano.dev.",
+    "A live feed of visits to nacnano.dev — who has been here, from where, and what they read.",
 });
 
 export default function Activity() {
-  const { events, count } = buildFeedPayload(
-    seedActivityEvents,
-    seedActivityEvents.length
-  );
+  const { visits, count } = buildFeedPayload(seedVisits, seedVisits.length);
 
   return (
     <div className="py-12 sm:py-16">
@@ -21,13 +18,13 @@ export default function Activity() {
         Activity
       </h1>
       <p className="mt-4 max-w-measure text-[1.0625rem] leading-[1.75] text-zinc-600 dark:text-zinc-400">
-        A small, honest record of what this corner of the internet has been up
-        to. The globe spins wherever people have shown up.
+        A public record of people visiting this site. No cookies, no personal
+        data — just roughly where in the world each visit came from.
       </p>
 
       <div className="mt-12">
         <ActivityFeed
-          initialEvents={events}
+          initialVisits={visits}
           initialCount={count}
           live={isActivityLive()}
         />
