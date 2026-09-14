@@ -1,5 +1,5 @@
 import React from "react";
-import { Authors } from "contentlayer/generated";
+import type { Author } from "@/lib/content";
 import Image from "@/components/Image";
 import SocialIcon from "@/components/social-icons";
 import CustomLink from "@/components/Link";
@@ -9,7 +9,7 @@ import { workItems, educationItems } from "@/data/timelineData";
 
 interface Props {
   children: React.ReactNode;
-  content: Omit<Authors, "_id" | "_raw" | "body">;
+  content: Author;
 }
 
 export default function AuthorLayout({ children, content }: Props) {

@@ -17,6 +17,15 @@
     "dev": {
       "cache": false,
       "persistent": true
-    }
-  }
+    },
+    "typecheck": {
+      "dependsOn": [
+        "^build"
+      ]
+    },
+    "test": {}
+  },
+  "globalEnv": [
+    "NODE_ENV"
+  ]
 }

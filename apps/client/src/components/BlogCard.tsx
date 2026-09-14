@@ -1,10 +1,9 @@
-import { formatDate } from "pliny/utils/formatDate";
+import { formatDate } from "@/lib/formatDate";
 import CustomLink from "./Link";
 import siteMetadata from "@/data/siteMetadata";
-import { CoreContent } from "pliny/utils/contentlayer";
-import { Blog } from "contentlayer/generated";
+import type { Blog } from "@/lib/content";
 
-export default function BlogCard({ post }: { post: CoreContent<Blog> }) {
+export default function BlogCard({ post }: { post: Blog }) {
   const { slug, date, title, summary, readingTime } = post;
 
   return (
