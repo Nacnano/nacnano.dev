@@ -62,10 +62,15 @@ bun run build        # next build + RSS postbuild
 | Work and education    | `apps/client/src/data/timelineData.ts`     |
 | Name, status, socials | `apps/client/src/data/siteMetadata.ts`     |
 | Author bio            | `apps/client/src/data/authors/default.mdx` |
+| Answered questions    | `apps/client/src/data/amaData.ts`          |
 
 Essay frontmatter needs `title`, `date` and `summary`; set `draft: true` to
 hide one. Each essay closes on a single `#### ...` line, which renders as the
 takeaway block rather than a heading.
+
+The `/ama` answers are authored content, not an inbox: write one up in
+`amaData.ts` when a question deserves a public answer, and set `draft: true` to
+hide one without deleting it. The answers are MDX.
 
 `timelineData.ts` must stay in sync with <https://resume.nacnano.dev>, which is
 the source of truth for roles and dates.
