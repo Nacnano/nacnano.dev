@@ -10,7 +10,13 @@ import { test, expect, type Page } from "@playwright/test";
  * invisible to a header assertion, so these tests watch what the browser
  * actually did.
  */
-const PAGES = ["/", "/about", "/projects", "/blogs/dating-app", "/activity"];
+// `/ama` is the only page carrying a server action, so it is the one whose
+// policy has the most to get wrong. What it does NOT guard is its JSON-LD
+// block: measured by deleting that hash from the manifest and re-serving, a
+// `type="application/ld+json"` data block is never prepared as a script, so
+// the browser neither refuses it nor reports a violation. It is hashed as
+// defence in depth; nothing observable depends on the hash being there.
+const PAGES = ["/", "/about", "/projects", "/blogs/dating-app", "/activity", "/ama"];
 
 type CspReporter = { __reportCspViolation: (directive: string, sample: string) => void };
 

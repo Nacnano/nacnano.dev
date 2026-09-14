@@ -1,11 +1,16 @@
 /**
- * Per-client rate limiting for the visit beacon.
+ * Per-client rate limiting for the site's unauthenticated writes.
  *
  * Recording a visit is an unauthenticated write that fans out to Upstash, so
  * without a ceiling one script could inflate the counter and burn the instance's
  * request quota. The limiter rides the same Upstash client as the feed; when no
  * client is configured (static mode) there is nothing to protect, so requests
  * are allowed through untouched.
+ *
+ * The /ama ask box is the other write, and it is a different shape: a human
+ * types it, so its ceiling is measured in questions per hour rather than beacons
+ * per minute. It gets its own window and prefix rather than sharing the
+ * beacon's.
  */
 
 import { Ratelimit } from "@upstash/ratelimit";
@@ -20,18 +25,33 @@ const LIMIT_PER_WINDOW = 60;
 // one — it exists to stop unthrottled `?limit=100` hammering, not honest polling.
 const READ_LIMIT_PER_WINDOW = 300;
 
+// The ask box writes free text a human typed, into an inbox a human reads. A
+// handful an hour per bucket is generous for an honest asker and useless to
+// anyone trying to fill the stream; the sliding window means a burst of five
+// does not then unlock five more a second later.
+const ASK_WINDOW = "1 h";
+const ASK_WINDOW_SECONDS = 60 * 60;
+const ASK_LIMIT_PER_WINDOW = 5;
+
 /** Shared with the route so the advertised `Retry-After` can never drift. */
 export const RETRY_AFTER_SECONDS = WINDOW_SECONDS;
+/** Same contract for the ask box, which throttles over a much longer window. */
+export const ASK_RETRY_AFTER_SECONDS = ASK_WINDOW_SECONDS;
 
 let limiter: Ratelimit | null | undefined;
 let readLimiter: Ratelimit | null | undefined;
+let askLimiter: Ratelimit | null | undefined;
 
-function buildLimiter(prefix: string, limit: number): Ratelimit | null {
+function buildLimiter(
+  prefix: string,
+  limit: number,
+  window: Parameters<typeof Ratelimit.slidingWindow>[1] = WINDOW
+): Ratelimit | null {
   const client = getActivityClient();
   if (!client) return null;
   return new Ratelimit({
     redis: client,
-    limiter: Ratelimit.slidingWindow(limit, WINDOW),
+    limiter: Ratelimit.slidingWindow(limit, window),
     prefix,
     analytics: false,
     // In-process deny cache: an already-blocked key is rejected without a
@@ -50,6 +70,12 @@ function getReadLimiter(): Ratelimit | null {
   if (readLimiter === undefined)
     readLimiter = buildLimiter("activity:feed-rl", READ_LIMIT_PER_WINDOW);
   return readLimiter;
+}
+
+function getAskLimiter(): Ratelimit | null {
+  if (askLimiter === undefined)
+    askLimiter = buildLimiter("ama:ask-rl", ASK_LIMIT_PER_WINDOW, ASK_WINDOW);
+  return askLimiter;
 }
 
 /**
@@ -106,4 +132,14 @@ export async function allowVisit(ip: string): Promise<boolean> {
 /** Read-path ceiling for `GET /api/activity/feed`. Same fail-open contract. */
 export async function allowFeed(ip: string): Promise<boolean> {
   return throttle(getReadLimiter, ip, "rate-limit-feed");
+}
+
+/**
+ * Ceiling for the /ama ask box. Fails open for the same reason the others do —
+ * an Upstash incident must not read to an asker as "your question was refused".
+ * What stands behind it either way is the capped, expiring inbox stream: the
+ * worst a flood past an outage can do is churn entries the author never reads.
+ */
+export async function allowAsk(ip: string): Promise<boolean> {
+  return throttle(getAskLimiter, ip, "rate-limit-ask");
 }

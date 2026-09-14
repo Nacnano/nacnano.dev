@@ -40,11 +40,11 @@ The author writes infrequently and the site should say so plainly rather than im
 ## Capabilities and Constraints
 
 - Next.js 16 App Router (Turbopack), React 19, TypeScript (strict), Tailwind CSS 3, MDX via `next-mdx-remote`, `next-themes`. Bun workspaces + Turborepo monorepo; this app is `apps/client`.
-- Statically generated; no backend, no database, no auth, no comments. (An optional Upstash-backed activity feed is the one runtime data path — see `/activity`.)
-- Existing routes: `/`, `/blogs/[...slug]`, `/projects`, `/activity`, `/about`, `/link`, `/link/[link]`. `/blogs`, `/tags`, `/tags/[tag]` and `/blog/:slug` are permanent redirects (see `next.config.js`).
+- Statically generated; no auth and no comments. Two optional Upstash-backed runtime data paths, both off unless `UPSTASH_REDIS_REST_*` is set: the activity feed (`/activity`) and the `/ama` ask box, which writes to a **private** inbox nothing renders (announced to the author over an optional webhook or Discord bot). Every page is still prerendered from files in the repo, and nothing a visitor submits reaches a page without the author writing it up by hand.
+- Existing routes: `/`, `/blogs/[...slug]`, `/projects`, `/activity`, `/ama`, `/about`, `/link`, `/link/[link]`, plus the generated `/feed.xml`, `/ama/rss.xml` and `/sitemap.xml`. `/blogs`, `/tags`, `/tags/[tag]` and `/blog/:slug` are permanent redirects (see `next.config.js`).
 - Dark mode is complete and correct across every surface; `theme-provider` defaults to `system`. This is a working asset to preserve.
 - MDX pipeline supports GFM, heading anchors/autolinks, and Prism syntax highlighting. Math (KaTeX) and citations were dropped with contentlayer — no published post used them.
-- RSS and sitemap are generated at postbuild. Both currently emit the wrong route prefix (`/blog/` for a `/blogs/` route).
+- Sitemap and **two** RSS feeds are generated at postbuild: `/feed.xml` for essays and `/ama/rss.xml` for answered questions. Separate feeds on purpose — following the writing is not the same subscription as being told when a question gets answered. The wrong-prefix bug (`/blog/` for a `/blogs/` route) is fixed and guarded by a test in `lib/feed.test.ts`.
 - **Undecided:** whether `/tags` and `/blogs` survive as routes. Nothing is off-limits (confirmed 2026-09-13).
 
 ## Brand Commitments
