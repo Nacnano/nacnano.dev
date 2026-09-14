@@ -17,6 +17,7 @@
     "typecheck": "tsc --noEmit",
     "test": "bun test",
     "ama:inbox": "bun ./src/scripts/amaInbox.ts",
+    "discord:setup": "bun ./src/scripts/discordSetup.ts",
     "e2e": "playwright test",
     "e2e:install": "playwright install --with-deps chromium"
   },

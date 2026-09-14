@@ -77,6 +77,9 @@ Submissions expire from the inbox after 90 days, and the box is inert unless
 than having to check, set `AMA_NOTIFY_URL` to a Slack or Discord webhook (or
 any JSON endpoint), or `DISCORD_BOT_TOKEN` plus `DISCORD_CHANNEL_ID` /
 `DISCORD_DM_USER_ID` to have a bot post or DM it. Either, both, or neither.
+`bun run discord:setup` validates the bot token, prints the invite URL for
+your own application and sends a test message, so the setup can be checked
+without submitting a question.
 
 `timelineData.ts` must stay in sync with <https://resume.nacnano.dev>, which is
 the source of truth for roles and dates.
