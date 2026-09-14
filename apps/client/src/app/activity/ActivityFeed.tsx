@@ -1,8 +1,9 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import CustomLink from "@/components/Link";
 import { formatDate } from "@/lib/formatDate";
+import { sortVisitsDesc } from "@/lib/activity";
 import {
   aggregateByCountry,
   countCountries,
@@ -20,11 +21,14 @@ import {
 } from "@/lib/activityTypes";
 import ActivityGlobe from "./ActivityGlobe";
 
-// Poll frequently enough that a fresh visit lands on the globe within a
-// couple of seconds of happening, but pause while the tab is hidden.
+// One page size for both the live head and infinite-scroll pages. Paused while
+// the tab is hidden.
+const PAGE_SIZE = 30;
 const POLL_MS = 2500;
-const RECENT_LIMIT = 15;
-const TOP_PAGES = 5;
+// Bound how many rows feed the globe/leaderboards so re-renders stay cheap as
+// the reader pages deep into history. The full list still renders; only the
+// aggregates sample the most recent slice.
+const AGGREGATE_WINDOW = 200;
 
 function locationLabel(visit: VisitEvent): string {
   const country = visit.countryCode
@@ -33,29 +37,59 @@ function locationLabel(visit: VisitEvent): string {
   return [visit.city, country].filter(Boolean).join(" · ") || "somewhere";
 }
 
+/** Newest-first union of two visit sets, de-duplicated by id. */
+function mergeById(
+  existing: readonly VisitEvent[],
+  incoming: readonly VisitEvent[]
+): VisitEvent[] {
+  const map = new Map(existing.map((visit) => [visit.id, visit]));
+  for (const visit of incoming) {
+    if (!map.has(visit.id)) map.set(visit.id, visit);
+  }
+  return sortVisitsDesc(Array.from(map.values()));
+}
+
+async function fetchPage(before: string | null): Promise<VisitFeedPayload | null> {
+  const params = new URLSearchParams({ limit: String(PAGE_SIZE) });
+  if (before) params.set("before", before);
+  const response = await fetch(`/api/activity/feed?${params.toString()}`, {
+    headers: { accept: "application/json" },
+  });
+  if (!response.ok) return null;
+  const payload: unknown = await response.json();
+  return isVisitFeedPayload(payload) ? payload : null;
+}
+
 type Props = {
   initialVisits: VisitEvent[];
   initialCount: number;
+  initialHasMore: boolean;
+  initialCursor: string | null;
   live: boolean;
 };
 
 export default function ActivityFeed({
   initialVisits,
   initialCount,
+  initialHasMore,
+  initialCursor,
   live,
 }: Props) {
   const [visits, setVisits] = useState<VisitEvent[]>(initialVisits);
   const [count, setCount] = useState<number>(initialCount);
+  const [cursor, setCursor] = useState<string | null>(initialCursor);
+  const [hasMore, setHasMore] = useState<boolean>(initialHasMore);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [failedMore, setFailedMore] = useState(false);
   // Relative times are a clock race against the server pass, so they only
   // appear once hydrated; the first paint (server and first client render) is
   // identical because `mounted` is false in both.
   const [mounted, setMounted] = useState(false);
   const [now, setNow] = useState(() => Date.now());
 
-  const replace = useCallback((payload: VisitFeedPayload) => {
-    setVisits(payload.visits);
-    setCount(payload.count);
-  }, []);
+  // Guards so a slow/duplicate response can never reorder the list.
+  const loadingMoreRef = useRef(false);
+  const sentinelRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setMounted(true);
@@ -67,6 +101,8 @@ export default function ActivityFeed({
     return () => window.clearInterval(id);
   }, []);
 
+  // Live head: poll the newest page and merge it over whatever is loaded, so
+  // new visits surface without disturbing the older pages already shown.
   useEffect(() => {
     if (!live) return;
 
@@ -74,12 +110,11 @@ export default function ActivityFeed({
     const load = async () => {
       if (document.visibilityState !== "visible") return;
       try {
-        const response = await fetch("/api/activity/feed", {
-          headers: { accept: "application/json" },
-        });
-        if (!response.ok) return;
-        const payload: unknown = await response.json();
-        if (active && isVisitFeedPayload(payload)) replace(payload);
+        const payload = await fetchPage(null);
+        if (active && payload) {
+          setVisits((current) => mergeById(current, payload.visits));
+          setCount(payload.count);
+        }
       } catch {
         // A failed poll keeps the last good feed on screen.
       }
@@ -91,13 +126,56 @@ export default function ActivityFeed({
       active = false;
       window.clearInterval(id);
     };
-  }, [live, replace]);
+  }, [live]);
+
+  // Fetch the next older page, keyed by the oldest loaded stream id.
+  const loadMore = useCallback(async () => {
+    if (loadingMoreRef.current || !hasMore || !cursor) return;
+    loadingMoreRef.current = true;
+    setLoadingMore(true);
+    setFailedMore(false);
+    try {
+      const payload = await fetchPage(cursor);
+      if (payload) {
+        setVisits((current) => mergeById(current, payload.visits));
+        setCursor(payload.nextCursor ?? null);
+        setHasMore(Boolean(payload.hasMore));
+      } else {
+        setFailedMore(true);
+      }
+    } catch {
+      setFailedMore(true);
+    } finally {
+      setLoadingMore(false);
+      loadingMoreRef.current = false;
+    }
+  }, [hasMore, cursor]);
+
+  // Infinite scroll: load the next page as the sentinel nears the viewport.
+  useEffect(() => {
+    const sentinel = sentinelRef.current;
+    if (!sentinel || !hasMore) return;
+
+    const observer = new IntersectionObserver(
+      (records) => {
+        if (records.some((record) => record.isIntersecting)) void loadMore();
+      },
+      { rootMargin: "600px 0px" }
+    );
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [hasMore, loadMore]);
 
   const markers = useMemo(() => visitMarkers(visits), [visits]);
-  const countries = useMemo(() => aggregateByCountry(visits), [visits]);
-  const pages = useMemo(() => topPages(visits), [visits]);
-  const recent = useMemo(() => visits.slice(0, RECENT_LIMIT), [visits]);
-  const countryCount = useMemo(() => countCountries(visits), [visits]);
+  const aggregateSource = useMemo(
+    () => visits.slice(0, AGGREGATE_WINDOW),
+    [visits]
+  );
+  const countries = useMemo(() => aggregateByCountry(aggregateSource), [aggregateSource]);
+  const pages = useMemo(() => topPages(aggregateSource), [aggregateSource]);
+  const countryCount = useMemo(() => countCountries(aggregateSource), [aggregateSource]);
+
+  const totalLabel = count.toLocaleString("en-US");
 
   return (
     <div className="flex flex-col gap-10 lg:flex-row lg:items-start lg:gap-14">
@@ -145,7 +223,7 @@ export default function ActivityFeed({
         </p>
 
         <dl className="mt-6 flex flex-wrap gap-x-10 gap-y-4">
-          <Stat label="Visits" value={count.toLocaleString("en-US")} />
+          <Stat label="Visits" value={totalLabel} />
           <Stat label="Countries" value={String(countryCount)} />
           <Stat
             label="Tracked since"
@@ -162,7 +240,7 @@ export default function ActivityFeed({
               Most visited
             </h2>
             <ul className="mt-2 divide-y divide-zinc-200 border-t border-zinc-200 dark:divide-zinc-800 dark:border-zinc-800">
-              {pages.slice(0, TOP_PAGES).map((page) => (
+              {pages.slice(0, 5).map((page) => (
                 <li
                   key={page.page}
                   className="flex items-baseline justify-between gap-4 py-2.5"
@@ -189,21 +267,66 @@ export default function ActivityFeed({
           >
             Recent visits
           </h2>
-          {recent.length === 0 ? (
+          {visits.length === 0 ? (
             <p className="mt-3 text-[0.9375rem] text-zinc-600 dark:text-zinc-400">
               No visits yet. Give it a minute.
             </p>
           ) : (
-            <ul className="mt-2 divide-y divide-zinc-200 border-t border-zinc-200 dark:divide-zinc-800 dark:border-zinc-800">
-              {recent.map((visit) => (
-                <VisitRow
-                  key={visit.id}
-                  visit={visit}
-                  now={now}
-                  mounted={mounted}
-                />
-              ))}
-            </ul>
+            <>
+              <ul className="mt-2 divide-y divide-zinc-200 border-t border-zinc-200 dark:divide-zinc-800 dark:border-zinc-800">
+                {visits.map((visit) => (
+                  <VisitRow
+                    key={visit.id}
+                    visit={visit}
+                    now={now}
+                    mounted={mounted}
+                  />
+                ))}
+              </ul>
+
+              {/* Infinite-scroll affordance: a sentinel the observer watches, a
+                  button that doubles as the accessible fallback, and a clear
+                  end state so the feed never just silently stops. */}
+              <div
+                ref={sentinelRef}
+                className="flex flex-col items-center justify-center gap-2 py-8 text-center"
+              >
+                {hasMore ? (
+                  <>
+                    <span className="flex items-center gap-2 font-mono text-xs uppercase tracking-[0.08em] text-zinc-400 dark:text-zinc-600">
+                      {loadingMore ? (
+                        <>
+                          <Spinner />
+                          loading more…
+                        </>
+                      ) : (
+                        <>
+                          keep scrolling
+                          <ChevronDown />
+                        </>
+                      )}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => void loadMore()}
+                      disabled={loadingMore}
+                      className="rounded border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-700 transition-colors hover:border-zinc-400 hover:text-accent-600 disabled:cursor-default disabled:opacity-60 dark:border-zinc-700 dark:text-zinc-300 dark:hover:border-zinc-600 dark:hover:text-accent-300"
+                    >
+                      {loadingMore ? "Loading…" : "Load more visits"}
+                    </button>
+                    {failedMore ? (
+                      <span className="text-xs text-zinc-500 dark:text-zinc-400">
+                        Couldn&rsquo;t load more — try again.
+                      </span>
+                    ) : null}
+                  </>
+                ) : (
+                  <span className="font-mono text-xs uppercase tracking-[0.08em] text-zinc-400 dark:text-zinc-600">
+                    That&rsquo;s every visit we&rsquo;ve tracked
+                  </span>
+                )}
+              </div>
+            </>
           )}
         </section>
 
@@ -227,6 +350,32 @@ function Stat({ label, value }: { label: string; value: string }) {
         {value}
       </dd>
     </div>
+  );
+}
+
+function Spinner() {
+  return (
+    <span
+      className="inline-block h-3 w-3 animate-spin rounded-full border border-zinc-400 border-t-transparent motion-reduce:animate-none motion-reduce:border-t-zinc-400"
+      aria-hidden="true"
+    />
+  );
+}
+
+function ChevronDown() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className="h-3.5 w-3.5 motion-safe:animate-bounce"
+      aria-hidden="true"
+    >
+      <path d="M6 9l6 6 6-6" />
+    </svg>
   );
 }
 

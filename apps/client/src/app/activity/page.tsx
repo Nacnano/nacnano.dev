@@ -8,6 +8,10 @@ import { readActivityFeed } from "@/lib/activityRedis";
 import { seedVisits } from "@/data/activityData";
 import ActivityFeed from "./ActivityFeed";
 
+// One page of visits up front; the client pages older ones as the reader
+// scrolls. Keep in sync with the route's default.
+const HEAD_LIMIT = 30;
+
 // The feed reflects live visits, so it is rendered per request rather than
 // baked at build. This also means the "show seed or not" decision is made with
 // the deployment's runtime environment, so the sample data can never be
@@ -25,22 +29,26 @@ async function getInitialFeed(live: boolean) {
   // sample. A failed read is an honest empty feed, never a fabricated one.
   if (live) {
     try {
-      return await readActivityFeed();
+      return await readActivityFeed(HEAD_LIMIT);
     } catch {
-      return { visits: [], count: 0 };
+      return { visits: [], count: 0, hasMore: false, nextCursor: null };
     }
   }
   // Store-less local dev still gets the sample; any Vercel deploy (where this
   // runs without Redis configured) shows the empty state instead.
   if (shouldUseSeed()) {
-    return buildFeedPayload(seedVisits, seedVisits.length);
+    return {
+      ...buildFeedPayload(seedVisits, seedVisits.length),
+      hasMore: false,
+      nextCursor: null,
+    };
   }
-  return { visits: [], count: 0 };
+  return { visits: [], count: 0, hasMore: false, nextCursor: null };
 }
 
 export default async function Activity() {
   const live = isActivityLive();
-  const { visits, count } = await getInitialFeed(live);
+  const { visits, count, hasMore, nextCursor } = await getInitialFeed(live);
 
   return (
     <div className="py-12 sm:py-16">
@@ -56,6 +64,8 @@ export default async function Activity() {
         <ActivityFeed
           initialVisits={visits}
           initialCount={count}
+          initialHasMore={hasMore ?? false}
+          initialCursor={nextCursor ?? null}
           live={live}
         />
       </div>

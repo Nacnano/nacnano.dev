@@ -8,11 +8,12 @@
  * points it at a real instance.
  *
  * The store is a capped Redis stream plus a counter. Visits are written as
- * JSON; the newest `MAXLEN` are what the public feed reads back.
+ * JSON; the newest `MAXLEN` are what the public feed reads back, and the stream
+ * id doubles as the pagination cursor for the client's infinite scroll.
  */
 
 import { Redis } from "@upstash/redis";
-import { buildFeedPayload, sortVisitsDesc } from "./activity";
+import { sortVisitsDesc } from "./activity";
 import type { VisitEvent, VisitFeedPayload } from "./activityTypes";
 
 const STREAM_KEY = "activity:stream";
@@ -53,74 +54,123 @@ function isVisitEvent(value: unknown): value is VisitEvent {
   );
 }
 
-/**
- * Pull the newest `limit` visits plus the running total.
- *
- * Upstash hands a stream back as id→field pairs, but the exact shape differs
- * between the REST deserializer (an object keyed by id) and the raw reply (an
- * array of [id, flat-fields]). Both are normalised here so a change in the
- * client library or runtime cannot silently blank the feed.
- */
-export async function readActivityFeed(limit = 120): Promise<VisitFeedPayload> {
-  const client = getActivityClient();
-  if (!client) return buildFeedPayload([], 0);
-
-  const [entries, count] = await Promise.all([
-    client.xrevrange(STREAM_KEY, "+", "-", limit),
-    client.get<number>(COUNT_KEY),
-  ]);
-
-  const visits: VisitEvent[] = [];
-  for (const fields of normaliseEntries(entries)) {
-    // Upstash's stream deserializer runs JSON.parse on every field value, so
-    // `data` normally arrives as the parsed object; if a client/runtime returns
-    // the raw wire value instead, it is a JSON string. Accept both.
-    const visit = coerceVisit(fields.data);
-    if (visit) visits.push(visit);
-  }
-
-  return buildFeedPayload(visits, count ?? visits.length);
-}
-
 export function coerceVisit(raw: unknown): VisitEvent | null {
   const candidate =
     typeof raw === "string"
-      ? (() => {
-          try {
-            return JSON.parse(raw) as unknown;
-          } catch {
-            return null;
-          }
-        })()
+      ? safeParse(raw)
       : raw;
   return isVisitEvent(candidate) ? candidate : null;
 }
 
-export function normaliseEntries(entries: unknown): Record<string, unknown>[] {  const collected: Record<string, unknown>[] = [];
+function safeParse(value: string): unknown {
+  try {
+    return JSON.parse(value);
+  } catch {
+    return null;
+  }
+}
+
+type StreamEntry = { id: string; fields: Record<string, unknown> };
+
+/**
+ * Normalise the newest→oldest stream reply into `{ id, fields }` pairs.
+ *
+ * Upstash's stream deserializer hands back an object keyed by entry id whose
+ * values are field maps (and runs JSON.parse on each field value, so `data` is
+ * normally an object). Older/raw replies are an array of `[id, [field, value]]`
+ * tuples. Both shapes — plus a single unwrapped entry — are handled here so a
+ * client or runtime change cannot silently blank the feed or drop the cursor.
+ */
+export function parseStreamEntries(entries: unknown): StreamEntry[] {
+  const collected: StreamEntry[] = [];
+
+  const recordFromFlat = (flat: unknown[]): Record<string, unknown> => {
+    const record: Record<string, unknown> = {};
+    for (let i = 0; i + 1 < flat.length; i += 2) {
+      record[String(flat[i])] = flat[i + 1];
+    }
+    return record;
+  };
+
   if (Array.isArray(entries)) {
-    // [id, [field, value, field, value, ...]] or already [id, { field: value }]
+    // A single unwrapped entry: [id, fields]
+    if (
+      entries.length === 2 &&
+      typeof entries[0] === "string" &&
+      Array.isArray(entries[1])
+    ) {
+      return [{ id: entries[0], fields: recordFromFlat(entries[1]) }];
+    }
+    // A list of entries, each [id, fields]
     for (const entry of entries) {
-      const pair = Array.isArray(entry) ? entry[1] : entry;
-      if (Array.isArray(pair)) {
-        const record: Record<string, unknown> = {};
-        for (let i = 0; i + 1 < pair.length; i += 2) {
-          record[String(pair[i])] = pair[i + 1];
-        }
-        collected.push(record);
-      } else if (pair && typeof pair === "object") {
-        collected.push(pair as Record<string, unknown>);
+      if (Array.isArray(entry) && entry.length >= 2 && typeof entry[0] === "string") {
+        collected.push({
+          id: entry[0],
+          fields: Array.isArray(entry[1])
+            ? recordFromFlat(entry[1])
+            : ((entry[1] as Record<string, unknown>) ?? {}),
+        });
+      } else if (entry && typeof entry === "object") {
+        // Some shape without an id we can use; skip rather than guess.
+        continue;
       }
     }
     return collected;
   }
+
   if (entries && typeof entries === "object") {
-    for (const value of Object.values(entries as Record<string, unknown>)) {
+    for (const [id, value] of Object.entries(entries as Record<string, unknown>)) {
       if (value && typeof value === "object") {
-        collected.push(value as Record<string, unknown>);
+        collected.push({ id, fields: value as Record<string, unknown> });
       }
     }
   }
   return collected;
+}
+
+/** A stream id looks like `<ms>-<seq>`; anything else is treated as absent. */
+function normaliseCursor(before?: string | null): string | null {
+  return before && /^\d+-\d+$/.test(before) ? before : null;
+}
+
+/**
+ * Read one page of visits, newest first, oldest-last.
+ *
+ * @param limit  max rows to return (newest first)
+ * @param before stream id to page older than (exclusive); omit for the head page
+ */
+export async function readActivityFeed(
+  limit = 30,
+  before?: string | null
+): Promise<VisitFeedPayload> {
+  const client = getActivityClient();
+  if (!client) return { visits: [], count: 0, hasMore: false, nextCursor: null };
+
+  const cursor = normaliseCursor(before);
+  // `(<id>` is an exclusive upper bound, so the page starts strictly older than
+  // the cursor the client already has.
+  const upper = cursor ? `(${cursor}` : "+";
+
+  const [entries, count] = await Promise.all([
+    client.xrevrange(STREAM_KEY, upper, "-", limit),
+    client.get<number>(COUNT_KEY),
+  ]);
+
+  const visits: VisitEvent[] = [];
+  for (const entry of parseStreamEntries(entries)) {
+    const visit = coerceVisit(entry.fields.data);
+    if (visit) visits.push({ ...visit, cursor: entry.id });
+  }
+
+  const ordered = sortVisitsDesc(visits);
+  return {
+    visits: ordered,
+    count: count ?? ordered.length,
+    // A full page implies older entries likely remain; a short/empty page ends
+    // the walk. The last (oldest) id is the cursor for the next older page.
+    hasMore: ordered.length === limit,
+    nextCursor: ordered.length ? ordered[ordered.length - 1].cursor ?? null : null,
+  };
 }
 
 export function visitEvent(input: VisitInput): VisitEvent {
@@ -148,15 +198,4 @@ export async function recordVisit(input: VisitInput): Promise<boolean> {
   await client.incr(COUNT_KEY);
 
   return true;
-}
-
-/** Merges live visits over the static seed, newest first, de-duplicated. */
-export function mergeFeed(
-  live: readonly VisitEvent[],
-  seed: readonly VisitEvent[]
-): VisitEvent[] {
-  if (live.length === 0) return sortVisitsDesc(seed);
-  const seen = new Set(live.map((event) => event.id));
-  const fallback = seed.filter((event) => !seen.has(event.id));
-  return sortVisitsDesc([...live, ...fallback]);
 }

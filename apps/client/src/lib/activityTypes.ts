@@ -29,11 +29,17 @@ export type VisitEvent = {
   /** Coordinates for the globe marker, when geo resolution gave us any. */
   lat?: number;
   lng?: number;
+  /** The Redis stream entry id, used as an opaque pagination cursor. */
+  cursor?: string;
 };
 
 export type VisitFeedPayload = {
   visits: VisitEvent[];
   count: number;
+  /** Cursor (oldest returned stream id) to ask for the next older page. */
+  nextCursor?: string | null;
+  /** Whether more, older visits exist beyond this page. */
+  hasMore?: boolean;
 };
 
 export type VisitMarker = {

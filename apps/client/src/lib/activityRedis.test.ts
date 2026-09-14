@@ -1,15 +1,15 @@
 import { describe, expect, it } from "bun:test";
-import { coerceVisit, normaliseEntries } from "./activityRedis";
+import { coerceVisit, parseStreamEntries } from "./activityRedis";
+
+const visit = {
+  id: "v1",
+  ts: "2026-09-14T03:00:00.000Z",
+  page: "/projects",
+  title: "Projects",
+  countryCode: "TH",
+};
 
 describe("coerceVisit", () => {
-  const visit = {
-    id: "v1",
-    ts: "2026-09-14T03:00:00.000Z",
-    page: "/projects",
-    title: "Projects",
-    countryCode: "TH",
-  };
-
   it("accepts an already-parsed object (Upstash parses stream values)", () => {
     expect(coerceVisit(visit)).toMatchObject({ id: "v1", page: "/projects" });
   });
@@ -25,24 +25,34 @@ describe("coerceVisit", () => {
   });
 });
 
-describe("normaliseEntries", () => {
-  it("handles the object-keyed-by-id form Upstash actually returns", () => {
-    const entries = { "1-0": { data: { id: "v1", ts: "t", page: "/" } } };
-    const records = normaliseEntries(entries);
-    expect(records).toHaveLength(1);
-    expect(records[0].data).toMatchObject({ id: "v1" });
+describe("parseStreamEntries", () => {
+  it("reads the object-keyed-by-id form Upstash actually returns, keeping the id as the cursor", () => {
+    const entries = { "1700000000000-0": { data: visit } };
+    const parsed = parseStreamEntries(entries);
+    expect(parsed).toHaveLength(1);
+    expect(parsed[0].id).toBe("1700000000000-0");
+    expect(coerceVisit(parsed[0].fields.data)).toMatchObject({ id: "v1" });
   });
 
-  it("handles the raw array-of-entries form", () => {
-    const entries = [["1-0", ["data", '{"id":"v1","ts":"t","page":"/"}']]];
-    const records = normaliseEntries(entries);
-    expect(records).toHaveLength(1);
-    expect(coerceVisit(records[0].data)).toMatchObject({ id: "v1" });
+  it("reads the array-of-entries form and keeps each stream id", () => {
+    const entries = [
+      ["1-0", ["data", JSON.stringify(visit)]],
+      ["2-0", ["data", JSON.stringify({ ...visit, id: "v2" })]],
+    ];
+    const parsed = parseStreamEntries(entries);
+    expect(parsed.map((entry) => entry.id)).toEqual(["1-0", "2-0"]);
+    expect(coerceVisit(parsed[1].fields.data)).toMatchObject({ id: "v2" });
+  });
+
+  it("reads a single unwrapped entry", () => {
+    const parsed = parseStreamEntries(["1-0", ["data", JSON.stringify(visit)]]);
+    expect(parsed).toHaveLength(1);
+    expect(parsed[0].id).toBe("1-0");
   });
 
   it("returns nothing for an empty stream", () => {
-    expect(normaliseEntries([])).toEqual([]);
-    expect(normaliseEntries({})).toEqual([]);
-    expect(normaliseEntries(undefined)).toEqual([]);
+    expect(parseStreamEntries([])).toEqual([]);
+    expect(parseStreamEntries({})).toEqual([]);
+    expect(parseStreamEntries(undefined)).toEqual([]);
   });
 });
