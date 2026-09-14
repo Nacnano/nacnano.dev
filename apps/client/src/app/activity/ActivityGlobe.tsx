@@ -79,12 +79,12 @@ export default function ActivityGlobe({ markers }: { markers: VisitMarker[] }) {
       baseColor: (isDark() ? [0.24, 0.24, 0.27] : [0.83, 0.84, 0.87]) as [
         number,
         number,
-        number
+        number,
       ],
       glowColor: (isDark() ? [0.3, 0.45, 0.9] : [0.6, 0.7, 0.95]) as [
         number,
         number,
-        number
+        number,
       ],
     });
 

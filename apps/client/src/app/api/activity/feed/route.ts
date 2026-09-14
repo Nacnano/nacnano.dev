@@ -1,9 +1,5 @@
 import { NextResponse } from "next/server";
-import {
-  buildFeedPayload,
-  isActivityLive,
-  shouldUseSeed,
-} from "@/lib/activity";
+import { buildFeedPayload, isActivityLive, shouldUseSeed } from "@/lib/activity";
 import { readActivityFeed } from "@/lib/activityRedis";
 import { captureError } from "@/lib/observability";
 import { seedVisits } from "@/data/activityData";

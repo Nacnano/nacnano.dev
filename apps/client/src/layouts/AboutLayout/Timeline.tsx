@@ -34,7 +34,7 @@ const Entry = ({ item }: { item: TimelineItem }) => (
       )}
     </p>
     {item.description && (
-      <p className="mt-2 max-w-measure text-[0.9375rem] leading-7 text-zinc-600 dark:text-zinc-400">
+      <p className="max-w-measure mt-2 text-[0.9375rem] leading-7 text-zinc-600 dark:text-zinc-400">
         {item.description}
       </p>
     )}
@@ -71,7 +71,7 @@ const Timeline = ({
           type="button"
           onClick={() => setExpanded((v) => !v)}
           aria-expanded={expanded}
-          className="ml-7 mt-4 rounded border border-zinc-200 px-3 py-1.5 text-sm font-medium text-zinc-700 transition-colors hover:border-zinc-300 hover:text-zinc-900 sm:ml-8 dark:border-zinc-800 dark:text-zinc-300 dark:hover:border-zinc-700 dark:hover:text-zinc-100"
+          className="ml-7 mt-4 rounded border border-zinc-200 px-3 py-1.5 text-sm font-medium text-zinc-700 transition-colors hover:border-zinc-300 hover:text-zinc-900 dark:border-zinc-800 dark:text-zinc-300 dark:hover:border-zinc-700 dark:hover:text-zinc-100 sm:ml-8"
         >
           {expanded ? "Show fewer" : `Show ${hidden} ${moreLabel}`}
         </button>

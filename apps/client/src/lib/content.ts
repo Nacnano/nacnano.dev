@@ -78,9 +78,7 @@ function toBlog({ file, raw }: { file: string; raw: string }): Blog {
   const slug = file.replace(/\.mdx$/, "");
 
   if (!data.title || !data.date) {
-    throw new Error(
-      `blogs/${file} is missing required frontmatter (title, date)`
-    );
+    throw new Error(`blogs/${file} is missing required frontmatter (title, date)`);
   }
 
   return {

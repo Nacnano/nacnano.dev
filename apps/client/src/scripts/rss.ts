@@ -32,11 +32,9 @@ export function renderFeed(posts: FeedPost[]): string {
   // Newest by value, not by array position — this export may be called with
   // unsorted input. Guard against an unparseable frontmatter date, which would
   // otherwise emit the literal string "Invalid Date" and break feed validators.
-  const newestMs = posts.reduce(
-    (max, p) => Math.max(max, new Date(p.date).getTime()),
-    0,
-  );
-  const lastBuild = Number.isFinite(newestMs) && newestMs > 0 ? new Date(newestMs) : new Date();
+  const newestMs = posts.reduce((max, p) => Math.max(max, new Date(p.date).getTime()), 0);
+  const lastBuild =
+    Number.isFinite(newestMs) && newestMs > 0 ? new Date(newestMs) : new Date();
   return `<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>

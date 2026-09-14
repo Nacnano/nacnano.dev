@@ -57,8 +57,7 @@ export const workItems: TimelineItem[] = [
     title: "Software Engineer, Part Time",
     organisation: "Ayasan Holding",
     location: "Remote",
-    description:
-      "Shipped features across the web apps and the React Native app.",
+    description: "Shipped features across the web apps and the React Native app.",
   },
   {
     period: "Nov 2024 – Jun 2025",
@@ -121,6 +120,7 @@ export const educationItems: TimelineItem[] = [
     start: "2016-05-01",
     title: "Secondary school",
     organisation: "Suankularb Wittayalai School",
-    description: "Played football all day. Wrote my first line of code somewhere in between.",
+    description:
+      "Played football all day. Wrote my first line of code somewhere in between.",
   },
 ];

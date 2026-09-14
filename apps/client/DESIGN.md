@@ -160,6 +160,7 @@ The material is thin. A neutral zinc ground — pure white or near-black, never 
 Type does the hierarchy. Inter carries everything readable; the platform mono stack carries every date, reading time, count and period, always at 12px uppercase with tabular numerals so metadata rails line up in columns. Optical tracking tightens twice — hard at headline sizes, lightly at the 15–17px semibold step — and opens out to +0.08em for micro-labels. Running prose never exceeds a 68ch measure. Light and dark are the same build, not a palette and its afterthought; every color decision in this file is a pair.
 
 **Key Characteristics:**
+
 - Neutral zinc ground with exactly one accent hue, in one light value and one dark value
 - Hairline rules and dividers instead of cards, panels or tinted surfaces
 - One elevation step, reserved for a single floating overlay control

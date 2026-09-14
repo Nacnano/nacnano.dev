@@ -17,7 +17,7 @@ export default function BlogCard({ post }: { post: Blog }) {
         </dl>
 
         <div className="min-w-0">
-          <h3 className="text-[1.0625rem] font-semibold leading-7 tracking-[-0.011em] text-zinc-900 transition-colors group-hover:text-accent-600 dark:text-zinc-100 dark:group-hover:text-accent-300">
+          <h3 className="group-hover:text-accent-600 dark:group-hover:text-accent-300 text-[1.0625rem] font-semibold leading-7 tracking-[-0.011em] text-zinc-900 transition-colors dark:text-zinc-100">
             <CustomLink href={`/blogs/${slug}`} className="rounded">
               {/* Stretched link: the whole row is the target, with one
                   accessible name and no nested anchors. */}

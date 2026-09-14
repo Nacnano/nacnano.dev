@@ -16,9 +16,7 @@ import {
 
 /** Newest first. A stable sort keeps authored order inside one second. */
 export function sortVisitsDesc(visits: readonly VisitEvent[]): VisitEvent[] {
-  return [...visits].sort(
-    (a, b) => new Date(b.ts).getTime() - new Date(a.ts).getTime()
-  );
+  return [...visits].sort((a, b) => new Date(b.ts).getTime() - new Date(a.ts).getTime());
 }
 
 /** The calendar day (UTC) a visit belongs to, as `YYYY-MM-DD`. */
@@ -135,9 +133,7 @@ export type CountryAggregate = {
  * code is skipped (nothing to aggregate); the first city and coordinate seen
  * for a country are kept as its representative point.
  */
-export function aggregateByCountry(
-  visits: readonly VisitEvent[]
-): CountryAggregate[] {
+export function aggregateByCountry(visits: readonly VisitEvent[]): CountryAggregate[] {
   const buckets = new Map<string, CountryAggregate>();
   for (const visit of visits) {
     const code = visit.countryCode?.trim().toUpperCase();

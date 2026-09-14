@@ -29,7 +29,7 @@ export default function AuthorLayout({ children, content }: Props) {
           />
         )}
         <div className="min-w-0">
-          <h1 className="text-[1.75rem] font-semibold leading-[1.2] tracking-[-0.022em] text-zinc-900 sm:text-[2.125rem] dark:text-zinc-100">
+          <h1 className="text-[1.75rem] font-semibold leading-[1.2] tracking-[-0.022em] text-zinc-900 dark:text-zinc-100 sm:text-[2.125rem]">
             {name}
           </h1>
           <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
@@ -38,12 +38,12 @@ export default function AuthorLayout({ children, content }: Props) {
         </div>
       </header>
 
-      <div className="prose prose-zinc mt-9 max-w-measure dark:prose-invert">
+      <div className="prose prose-zinc max-w-measure dark:prose-invert mt-9">
         {children}
       </div>
 
       {/* A hairline aside, not a card — the system uses rules for this. */}
-      <p className="mt-8 max-w-measure border-l border-zinc-300 pl-4 text-[0.9375rem] leading-7 text-zinc-600 dark:border-zinc-700 dark:text-zinc-400">
+      <p className="max-w-measure mt-8 border-l border-zinc-300 pl-4 text-[0.9375rem] leading-7 text-zinc-600 dark:border-zinc-700 dark:text-zinc-400">
         {siteMetadata.now}
       </p>
 
@@ -55,7 +55,7 @@ export default function AuthorLayout({ children, content }: Props) {
         </div>
         <CustomLink
           href={siteMetadata.resume}
-          className="rounded text-sm text-zinc-500 underline decoration-zinc-300 underline-offset-4 transition-colors hover:text-accent-600 hover:decoration-accent-600 dark:text-zinc-400 dark:decoration-zinc-700 dark:hover:text-accent-300 dark:hover:decoration-accent-300"
+          className="hover:text-accent-600 hover:decoration-accent-600 dark:hover:text-accent-300 dark:hover:decoration-accent-300 rounded text-sm text-zinc-500 underline decoration-zinc-300 underline-offset-4 transition-colors dark:text-zinc-400 dark:decoration-zinc-700"
         >
           The formal version, if you need it
         </CustomLink>

@@ -23,8 +23,8 @@ export default async function Activity() {
   if (initial.status === "error") {
     return (
       <p className="max-w-measure text-[1.0625rem] leading-[1.75] text-zinc-600 dark:text-zinc-400">
-        The live feed is unavailable right now — that&rsquo;s a problem on my
-        side, not yours. Please check back in a moment.
+        The live feed is unavailable right now — that&rsquo;s a problem on my side, not
+        yours. Please check back in a moment.
       </p>
     );
   }
