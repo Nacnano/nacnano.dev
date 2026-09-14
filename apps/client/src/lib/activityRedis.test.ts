@@ -28,10 +28,10 @@ describe("coerceVisit", () => {
 describe("parseStreamEntries", () => {
   it("reads the object-keyed-by-id form Upstash actually returns, keeping the id as the cursor", () => {
     const entries = { "1700000000000-0": { data: visit } };
-    const parsed = parseStreamEntries(entries);
-    expect(parsed).toHaveLength(1);
-    expect(parsed[0].id).toBe("1700000000000-0");
-    expect(coerceVisit(parsed[0].fields.data)).toMatchObject({ id: "v1" });
+    const [entry] = parseStreamEntries(entries);
+    expect(entry).toBeDefined();
+    expect(entry!.id).toBe("1700000000000-0");
+    expect(coerceVisit(entry!.fields.data)).toMatchObject({ id: "v1" });
   });
 
   it("reads the array-of-entries form and keeps each stream id", () => {
@@ -40,14 +40,17 @@ describe("parseStreamEntries", () => {
       ["2-0", ["data", JSON.stringify({ ...visit, id: "v2" })]],
     ];
     const parsed = parseStreamEntries(entries);
-    expect(parsed.map((entry) => entry.id)).toEqual(["1-0", "2-0"]);
-    expect(coerceVisit(parsed[1].fields.data)).toMatchObject({ id: "v2" });
+    expect(parsed.map((e) => e.id)).toEqual(["1-0", "2-0"]);
+    expect(coerceVisit(parsed[1]!.fields.data)).toMatchObject({ id: "v2" });
   });
 
   it("reads a single unwrapped entry", () => {
-    const parsed = parseStreamEntries(["1-0", ["data", JSON.stringify(visit)]]);
-    expect(parsed).toHaveLength(1);
-    expect(parsed[0].id).toBe("1-0");
+    const [entry] = parseStreamEntries([
+      "1-0",
+      ["data", JSON.stringify(visit)],
+    ]);
+    expect(entry).toBeDefined();
+    expect(entry!.id).toBe("1-0");
   });
 
   it("returns nothing for an empty stream", () => {

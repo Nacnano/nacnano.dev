@@ -11,12 +11,6 @@
     "paths": {
       "@/*": [
         "./*"
-      ],
-      "$modules/*": [
-        "./modules/*"
-      ],
-      "$context/*": [
-        "./core/context/*"
       ]
     }
   },
