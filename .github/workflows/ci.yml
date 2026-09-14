@@ -36,19 +36,24 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.bun/install/cache
-          key: ${{ runner.os }}-bun-1.3.14-${{ hashFiles('**/bun.lock') }}
+          # Exact, not `**/bun.lock` — a single-lockfile repo, and the key must
+          # be deterministic (a broad glob could match a lockfile under
+          # node_modules and make the cache key depend on install contents).
+          key: ${{ runner.os }}-bun-1.3.14-${{ hashFiles('bun.lock') }}
           restore-keys: |
             ${{ runner.os }}-bun-1.3.14-
 
       - name: Install
         run: bun install --frozen-lockfile
 
-      # Surface known advisories between Dependabot's passes. Advisory-only for
-      # now (transitive moderates aren't all bumpable yet), so a finding warns
-      # rather than reddens — but it is never silently skipped.
+      # A real gate, not decoration: bun exits non-zero on *any* advisory, so a
+      # bare `bun audit` would fail on today's two transitive moderates and force
+      # a `continue-on-error` that also swallows a critical. Scoping to
+      # `--audit-level=high` still prints moderates for information but reddens
+      # the build only on a high/critical. Verified to exit 0 on the current
+      # tree, so it is green on day one.
       - name: Dependency audit
-        continue-on-error: true
-        run: bun audit
+        run: bun audit --audit-level=high
 
       # Cheap, catches the Prettier gate before the slower steps run.
       - name: Format

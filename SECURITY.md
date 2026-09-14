@@ -18,8 +18,9 @@ optional city, and coordinates rounded to ~10 km, with a salted hash of the IP
 used only as a rate-limit key). There is no authentication and no account or
 personally-identifiable data.
 
-Everything outside that feed is a static export, so the realistic surface is the
-dependency tree, the build pipeline, and the two activity endpoints.
+Everything outside that feed is prerendered at build time, so the realistic
+surface is the dependency tree, the build pipeline, and the two activity
+endpoints.
 
 For anything exploitable in the activity feed — abuse of the write beacon, the
 read path, the rate limiter, or anything that could read or write the store
