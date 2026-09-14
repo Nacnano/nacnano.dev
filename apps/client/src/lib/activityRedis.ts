@@ -13,7 +13,7 @@
  */
 
 import { Redis } from "@upstash/redis";
-import { sortVisitsDesc } from "./activity";
+import { isInternalPath, sortVisitsDesc } from "./activity";
 import type { VisitEvent, VisitFeedPayload } from "./activityTypes";
 
 const STREAM_KEY = "activity:stream";
@@ -166,7 +166,11 @@ export async function readActivityFeed(
   const visits: VisitEvent[] = [];
   for (const entry of parseStreamEntries(entries)) {
     const visit = coerceVisit(entry.fields.data);
-    if (visit) visits.push({ ...visit, cursor: entry.id });
+    // The write endpoint enforces this now, but the feed renders `page` as a
+    // link — so re-check on read too, or any row written before the guard (or
+    // through a path that bypasses it) keeps rendering as an outbound link.
+    // Dropping the row here means the guarantee holds for data we didn't write.
+    if (visit && isInternalPath(visit.page)) visits.push({ ...visit, cursor: entry.id });
   }
 
   const ordered = sortVisitsDesc(visits);

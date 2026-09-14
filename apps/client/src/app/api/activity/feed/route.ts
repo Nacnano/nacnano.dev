@@ -38,7 +38,13 @@ export async function GET(request: Request) {
     if (!(await allowFeed(clientIp(request.headers)))) {
       return NextResponse.json(
         { ok: false, error: "rate_limited" },
-        { status: 429, headers: { "Retry-After": String(RETRY_AFTER_SECONDS) } }
+        {
+          status: 429,
+          headers: {
+            "Retry-After": String(RETRY_AFTER_SECONDS),
+            "Cache-Control": "no-store",
+          },
+        }
       );
     }
     try {
@@ -60,13 +66,23 @@ export async function GET(request: Request) {
   }
 
   // No store configured. The sample seed is a single, unpaginated page and a
-  // local-dev aid only; on Vercel we show the empty state instead.
+  // local-dev aid only; on Vercel we show the empty state instead. Both are
+  // fixed until the next deploy, so they edge-cache far longer than live data.
+  const staticHeaders = {
+    headers: { "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300" },
+  };
   if (shouldUseSeed()) {
-    return NextResponse.json({
-      ...buildFeedPayload(seedVisits, seedVisits.length),
-      hasMore: false,
-      nextCursor: null,
-    });
+    return NextResponse.json(
+      {
+        ...buildFeedPayload(seedVisits, seedVisits.length),
+        hasMore: false,
+        nextCursor: null,
+      },
+      staticHeaders
+    );
   }
-  return NextResponse.json({ visits: [], count: 0, hasMore: false, nextCursor: null });
+  return NextResponse.json(
+    { visits: [], count: 0, hasMore: false, nextCursor: null },
+    staticHeaders
+  );
 }

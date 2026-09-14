@@ -14,29 +14,43 @@
  */
 
 import siteMetadata from "@/data/siteMetadata";
+import { PAGE_TITLES } from "@/data/pageTitles";
 import { publishedBlogs } from "./content";
 
 const STATIC_TITLES: Record<string, string> = {
   "/": siteMetadata.title,
-  "/about": "About",
-  "/projects": "Things I've made",
-  "/link": "Links",
-  "/activity": "Activity",
+  "/about": PAGE_TITLES.about,
+  "/projects": PAGE_TITLES.projects,
+  "/link": PAGE_TITLES.link,
+  "/activity": PAGE_TITLES.activity,
 };
 
 const BLOG_PREFIX = "/blogs/";
 
-/** Human label for an already-validated internal path, or undefined. */
+/**
+ * Human label for an already-validated internal path, or undefined.
+ *
+ * This runs on the beacon's request path, so it owns its own failure: the
+ * lookup reads MDX off disk (memoised, but the first call per lambda instance
+ * does I/O, and #30 makes the loader throw on malformed frontmatter). A title
+ * lookup must never be the reason the fire-and-forget beacon errors — so any
+ * throw degrades to "no title" (the feed then shows the path), exactly as
+ * `allowVisit` degrades to allow on a store outage.
+ */
 export function resolveVisitTitle(path: string): string | undefined {
-  const staticTitle = STATIC_TITLES[path];
-  if (staticTitle) return staticTitle;
+  try {
+    const staticTitle = STATIC_TITLES[path];
+    if (staticTitle) return staticTitle;
 
-  if (path.startsWith(BLOG_PREFIX)) {
-    const slug = path.slice(BLOG_PREFIX.length).replace(/\/+$/, "");
-    // `blog.path` is stored without a leading slash, e.g. `blogs/hello`.
-    const post = publishedBlogs().find((blog) => blog.slug === slug);
-    return post?.title;
+    if (path.startsWith(BLOG_PREFIX)) {
+      const slug = path.slice(BLOG_PREFIX.length).replace(/\/+$/, "");
+      // `blog.path` is stored without a leading slash, e.g. `blogs/hello`.
+      const post = publishedBlogs().find((blog) => blog.slug === slug);
+      return post?.title;
+    }
+
+    return undefined;
+  } catch {
+    return undefined;
   }
-
-  return undefined;
 }

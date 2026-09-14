@@ -170,9 +170,10 @@ describe("formatRelative boundaries", () => {
   const now = new Date("2026-09-14T12:00:00.000Z").getTime();
   const ago = (seconds: number) => new Date(now - seconds * 1000).toISOString();
 
-  it("flips from 'just now' to minutes at 45 seconds", () => {
-    expect(formatRelative(ago(44), now)).toBe("just now");
-    expect(formatRelative(ago(45), now)).toBe("0m");
+  it("flips from 'just now' to minutes at 60 seconds (never renders 0m)", () => {
+    expect(formatRelative(ago(45), now)).toBe("just now");
+    expect(formatRelative(ago(59), now)).toBe("just now");
+    expect(formatRelative(ago(60), now)).toBe("1m");
   });
 
   it("flips from days to an absolute label at 7 days", () => {
@@ -211,6 +212,8 @@ describe("isInternalPath", () => {
       "/activity",
       "/blogs/teaching-failure",
       "/blogs/post.v2",
+      "/blogs/caf%C3%A9",
+      "/blogs/%E0%B8%AA%E0%B8%9A%E0%B8%9A",
     ]) {
       expect(isInternalPath(path)).toBe(true);
     }

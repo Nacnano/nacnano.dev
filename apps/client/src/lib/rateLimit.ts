@@ -84,14 +84,14 @@ async function limitKey(ip: string): Promise<string> {
  * before `recordVisit` ever got to handle its own failure.
  */
 async function throttle(
-  getLimiter: () => Ratelimit | null,
+  getLimiterFn: () => Ratelimit | null,
   ip: string,
   scope: string
 ): Promise<boolean> {
-  const limiter = getLimiter();
-  if (!limiter) return true;
+  const rl = getLimiterFn();
+  if (!rl) return true;
   try {
-    const { success } = await limiter.limit(await limitKey(ip));
+    const { success } = await rl.limit(await limitKey(ip));
     return success;
   } catch (error) {
     captureError(error, { scope });

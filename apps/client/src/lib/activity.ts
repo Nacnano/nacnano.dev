@@ -89,7 +89,9 @@ export function formatRelative(ts: string, now: number): string {
   const then = new Date(ts).getTime();
   if (!Number.isFinite(then)) return "";
   const seconds = Math.floor((now - then) / 1000);
-  if (seconds < 45) return "just now";
+  // 60s (not 45) so the minute bucket never renders a "0m" — a 45–59s-old visit
+  // reads "just now", the first minute label is a genuine "1m".
+  if (seconds < 60) return "just now";
   if (seconds < 3600) return `${Math.floor(seconds / 60)}m`;
   if (seconds < 86_400) return `${Math.floor(seconds / 3600)}h`;
   const days = Math.floor(seconds / 86_400);
@@ -237,14 +239,16 @@ export function isActivityLive(): boolean {
  * the public page. Only accept an absolute, same-site path built from the
  * characters our routes actually use: a single leading slash, then slug-ish
  * segments. This rejects protocol-relative (`//host`), scheme (`javascript:`),
- * backslash, whitespace, and traversal before anything is stored.
+ * backslash, whitespace, and traversal before anything is stored. `%` is allowed
+ * so percent-encoded (e.g. non-ASCII) slugs aren't silently rejected — traversal
+ * is blocked separately via the `..` check, not by withholding the character.
  */
 export function isInternalPath(value: unknown): value is string {
   if (typeof value !== "string") return false;
   if (!value.startsWith("/")) return false;
   if (value.startsWith("//") || value.startsWith("/\\")) return false;
   if (value.includes("..")) return false;
-  return /^\/[A-Za-z0-9\-._~]*(?:\/[A-Za-z0-9\-._~]*)*$/.test(value);
+  return /^\/[A-Za-z0-9\-._~%]*(?:\/[A-Za-z0-9\-._~%]*)*$/.test(value);
 }
 
 /**

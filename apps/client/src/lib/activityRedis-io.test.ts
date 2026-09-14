@@ -87,6 +87,25 @@ describe("readActivityFeed", () => {
     expect(page.count).toBe(1);
     expect(page.hasMore).toBe(false);
   });
+
+  it("drops a well-formed row whose page is not an internal path", async () => {
+    // A valid VisitEvent shape with an absolute/protocol-relative page — exactly
+    // what an attacker injected before the write guard existed. The read path
+    // re-checks, so it can never surface as an outbound link in the feed.
+    xrevrangeReturn = {
+      "3-0": { data: { id: "1", ts: "2026-09-14T03:00:00.000Z", page: "/ok" } },
+      "2-0": {
+        data: { id: "2", ts: "2026-09-14T02:00:00.000Z", page: "//evil.example" },
+      },
+      "1-0": {
+        data: { id: "3", ts: "2026-09-14T01:00:00.000Z", page: "https://evil.example/x" },
+      },
+    };
+    getReturn = 99; // running total is independent of the filtered rows
+    const page = await readActivityFeed(30);
+    expect(page.visits.map((v) => v.id)).toEqual(["1"]);
+    expect(page.count).toBe(99);
+  });
 });
 
 describe("recordVisit", () => {
