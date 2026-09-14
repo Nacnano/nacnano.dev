@@ -10,6 +10,7 @@ import {
   blogStructuredData,
   getAuthor,
   getBlog,
+  jsonLdScriptProps,
   publishedBlogs,
   type Author,
 } from "@/lib/content";
@@ -90,20 +91,12 @@ export default async function Page({ params }: RouteParams) {
     post,
     authors.map((author) => author.name)
   );
-  // Escaping `<` prevents a `</script>` sequence in a title/summary from closing
-  // the tag early and injecting markup. The content is ours, so this is defence
-  // in depth rather than a live XSS, but a stray `<` would otherwise break the
-  // page. The JSON is otherwise unchanged (the client parses `\u003c` back).
-  const jsonLdHtml = JSON.stringify(jsonLd).replace(/</g, "\\u003c");
 
   const Layout = resolveLayout(post.layout);
 
   return (
     <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: jsonLdHtml }}
-      />
+      <script {...jsonLdScriptProps(jsonLd)} />
       {/*
         `resolveLayout` returns one of a fixed, module-level map — it does not
         create a component during render, so the "created during render" rule is

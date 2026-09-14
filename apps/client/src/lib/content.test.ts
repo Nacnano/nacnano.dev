@@ -1,5 +1,12 @@
 import { describe, it, expect } from "bun:test";
-import { allBlogs, publishedBlogs, getBlog, blogStructuredData } from "./content";
+import {
+  allBlogs,
+  blogStructuredData,
+  getBlog,
+  jsonLdScriptProps,
+  publishedBlogs,
+  type Blog,
+} from "./content";
 import siteMetadata from "@/data/siteMetadata";
 
 /**
@@ -54,5 +61,33 @@ describe("content loader", () => {
     expect(jsonLd.headline).toBe(post.title);
     expect(jsonLd.url).toContain(`/blogs/${post.slug}`);
     expect(jsonLd.author).toEqual([{ "@type": "Person", name: "Nacnano" }]);
+  });
+});
+
+describe("jsonLdScriptProps", () => {
+  // The whole point of the helper is that a specific byte sequence never reaches
+  // the output — so assert it directly, not just via the page render.
+  const payload = blogStructuredData(
+    {
+      ...(allBlogs()[0] as Blog),
+      title: "A </script><img onerror=x> title",
+    },
+    ["N"]
+  );
+  const html = jsonLdScriptProps(payload).dangerouslySetInnerHTML.__html;
+
+  it("sets the ld+json script type", () => {
+    expect(jsonLdScriptProps({}).type).toBe("application/ld+json");
+  });
+
+  it("never emits a closing script tag", () => {
+    expect(html).not.toContain("</script>");
+    expect(html.toLowerCase()).not.toContain("<img");
+  });
+
+  it("is lossless — the escaped output parses back to the original data", () => {
+    // This is the claim in the code comment that nothing else checks: escaping
+    // `<` must not corrupt the structured data Google reads.
+    expect(JSON.parse(html).headline).toBe("A </script><img onerror=x> title");
   });
 });
