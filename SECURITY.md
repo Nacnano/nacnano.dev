@@ -52,10 +52,20 @@ unreproducible.
 `style-src` still allows `'unsafe-inline'`: Tailwind's runtime theme switch and
 `next/font` write `style` attributes, which no nonce or hash can reach.
 
-`e2e/csp.e2e.ts` is the guard. A stale manifest and a Next release that stops
-applying the nonce fail the same silent way — the policy looks right, the
-browser refuses the scripts, the page never hydrates — so that spec watches for
-real `securitypolicyviolation` events and then asserts the page hydrated.
+Two guards, because neither covers the other. `e2e/csp.e2e.ts` catches the
+failure a browser sees: a stale manifest and a Next release that stops applying
+the nonce fail the same silent way — the policy looks right, the browser
+refuses the scripts, the page never hydrates — so that spec watches for real
+`securitypolicyviolation` events and then asserts the page hydrated.
+
+`bun run verify:csp` catches the failure a browser does _not_ see. It fetches
+every page from a running production server and checks each inline script
+against the policy that page was served with, without a browser. Measured:
+delete the `/ama` JSON-LD hash from the manifest and rebuild, and the browser
+suite still passes — a `type="application/ld+json"` block is a data block,
+never prepared as a script, so no refusal and no violation event is produced.
+Run it locally against `bun run start` when changing anything that emits
+markup; CI runs it after the build.
 
 ## Automation
 
