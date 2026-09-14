@@ -2,8 +2,7 @@ import CustomLink from "@/components/Link";
 import ScrollTop from "@/components/ScrollTop";
 import Tag from "@/components/Tag";
 import siteMetadata from "@/data/siteMetadata";
-import { Authors, Blog } from "contentlayer/generated";
-import { CoreContent } from "pliny/utils/contentlayer";
+import type { Author, Blog } from "@/lib/content";
 import { ReactNode } from "react";
 
 const githubUrl = (filePath: string) =>
@@ -16,8 +15,8 @@ const postDateTemplate: Intl.DateTimeFormatOptions = {
 };
 
 interface Props {
-  content: CoreContent<Blog>;
-  authors: CoreContent<Authors>[];
+  content: Blog;
+  authors: Author[];
   newer?: { path: string; title: string };
   older?: { path: string; title: string };
   children: ReactNode;

@@ -40,8 +40,6 @@ yarn-error.log*
 .vercel
 
 
-# Contentlayer
-.contentlayer
 tag-data.json
 
 # Impeccable review captures are build artifacts

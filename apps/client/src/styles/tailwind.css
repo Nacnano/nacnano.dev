@@ -104,10 +104,6 @@ input:-webkit-autofill:focus {
   transition: background-color 600000s 0s, color 600000s 0s;
 }
 
-.katex-display {
-  overflow: auto hidden;
-}
-
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

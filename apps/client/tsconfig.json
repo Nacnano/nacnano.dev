@@ -17,9 +17,6 @@
       ],
       "$context/*": [
         "./core/context/*"
-      ],
-      "contentlayer/generated": [
-        ".././.contentlayer/generated"
       ]
     }
   },
@@ -27,8 +24,7 @@
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
-    ".next/types/**/*.ts",
-    ".contentlayer/generated"
+    ".next/types/**/*.ts"
   ],
   "exclude": [
     "node_modules"

@@ -1,5 +1,3 @@
-const { withContentlayer } = require('next-contentlayer')
-
 const isDev = process.env.NODE_ENV !== 'production'
 
 // Scoped to what this site actually loads: its own assets, inline styles from
@@ -67,8 +65,7 @@ const securityHeaders = [
  * @type {import('next/dist/next-server/server/config').NextConfig}
  **/
 module.exports = () => {
-  const plugins = [withContentlayer]
-  return plugins.reduce((acc, next) => next(acc), {
+  return {
     reactStrictMode: true,
     pageExtensions: ['ts', 'tsx', 'js', 'jsx', 'md', 'mdx'],
     eslint: {
@@ -106,5 +103,5 @@ module.exports = () => {
 
       return config
     }
-  })
+  }
 }

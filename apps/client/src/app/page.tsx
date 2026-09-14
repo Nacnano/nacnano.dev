@@ -1,10 +1,6 @@
-import React from "react";
 import Main from "@/app/Main";
-import { sortPosts, allCoreContent } from "pliny/utils/contentlayer";
-import { allBlogs } from "contentlayer/generated";
+import { publishedBlogs } from "@/lib/content";
 
-export default async function Page() {
-  const sortedBlogs = sortPosts(allBlogs);
-  const posts = allCoreContent(sortedBlogs);
-  return <Main posts={posts} />;
+export default function Page() {
+  return <Main posts={publishedBlogs()} />;
 }

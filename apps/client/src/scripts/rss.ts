@@ -1,16 +1,9 @@
-import { readFileSync, writeFileSync } from "fs";
-import path from "path";
+import { writeFileSync } from "fs";
 import siteMetadata from "../data/siteMetadata";
+import { publishedBlogs, type Blog } from "../lib/content";
 import { postUrl, trimTrailingSlash } from "../lib/feed";
 
-type FeedPost = {
-  slug: string;
-  title: string;
-  date: string;
-  summary?: string;
-  draft?: boolean;
-  tags?: string[];
-};
+type FeedPost = Pick<Blog, "slug" | "title" | "date" | "summary" | "tags">;
 
 const escapeXml = (value: string) =>
   value
@@ -19,16 +12,6 @@ const escapeXml = (value: string) =>
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&apos;");
-
-/** Read the generated JSON directly: the generated ESM entrypoint uses the
- *  `assert { type: 'json' }` syntax current Node no longer parses. */
-function readPosts(): FeedPost[] {
-  const file = path.join(
-    process.cwd(),
-    ".contentlayer/generated/Blog/_index.json"
-  );
-  return JSON.parse(readFileSync(file, "utf8")) as FeedPost[];
-}
 
 export function renderItem(post: FeedPost): string {
   const url = postUrl(siteMetadata.siteUrl, post.slug);
@@ -64,9 +47,7 @@ export function renderFeed(posts: FeedPost[]): string {
 }
 
 export default function rss() {
-  const published = readPosts()
-    .filter((post) => post.draft !== true)
-    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  const published = publishedBlogs();
 
   if (published.length === 0) {
     console.log("RSS feed skipped: no published posts.");
