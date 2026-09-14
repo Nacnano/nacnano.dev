@@ -106,6 +106,28 @@ describe("readActivityFeed", () => {
     expect(page.visits.map((v) => v.id)).toEqual(["1"]);
     expect(page.count).toBe(99);
   });
+
+  it("does not let a filtered row truncate the page or mis-key the cursor", async () => {
+    // Regression: `hasMore`/`nextCursor` must be decided by the RAW page Redis
+    // returned, not the filtered one. Five rows for limit=5 is a full page (so
+    // older entries remain) even though one is dropped; paging must continue,
+    // and the cursor must be the oldest RAW id — otherwise a single poisoned row
+    // ends the walk early and strands all older history.
+    xrevrangeReturn = {
+      "5-0": { data: { id: "5", ts: "2026-09-14T05:00:00.000Z", page: "/e" } },
+      "4-0": { data: { id: "4", ts: "2026-09-14T04:00:00.000Z", page: "/d" } },
+      "3-0": {
+        data: { id: "x", ts: "2026-09-14T03:00:00.000Z", page: "//evil.example" },
+      },
+      "2-0": { data: { id: "2", ts: "2026-09-14T02:00:00.000Z", page: "/b" } },
+      "1-0": { data: { id: "1", ts: "2026-09-14T01:00:00.000Z", page: "/a" } },
+    };
+    getReturn = 500;
+    const page = await readActivityFeed(5);
+    expect(page.visits.map((v) => v.id)).toEqual(["5", "4", "2", "1"]);
+    expect(page.hasMore).toBe(true); // full RAW page → keep paging
+    expect(page.nextCursor).toBe("1-0"); // oldest RAW id, filtered row included
+  });
 });
 
 describe("recordVisit", () => {

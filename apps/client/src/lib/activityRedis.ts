@@ -163,8 +163,10 @@ export async function readActivityFeed(
     client.get<number>(COUNT_KEY),
   ]);
 
+  const parsed = parseStreamEntries(entries);
+
   const visits: VisitEvent[] = [];
-  for (const entry of parseStreamEntries(entries)) {
+  for (const entry of parsed) {
     const visit = coerceVisit(entry.fields.data);
     // The write endpoint enforces this now, but the feed renders `page` as a
     // link — so re-check on read too, or any row written before the guard (or
@@ -177,10 +179,14 @@ export async function readActivityFeed(
   return {
     visits: ordered,
     count: count ?? ordered.length,
-    // A full page implies older entries likely remain; a short/empty page ends
-    // the walk. The last (oldest) id is the cursor for the next older page.
-    hasMore: ordered.length === limit,
-    nextCursor: ordered.at(-1)?.cursor ?? null,
+    // Paging is decided by the RAW page Redis returned, not the filtered one —
+    // otherwise a single dropped row makes a full page look short, ends the walk
+    // early, and strands all older history (a durable denial worse than the
+    // injection this filter exists to stop). A full raw page ⇒ older entries
+    // likely remain; the cursor is the oldest RAW id, so the next page never
+    // re-reads rows we already discarded.
+    hasMore: parsed.length === limit,
+    nextCursor: parsed.at(-1)?.id ?? null,
   };
 }
 

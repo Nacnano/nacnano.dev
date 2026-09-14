@@ -227,11 +227,21 @@ describe("isInternalPath", () => {
       "javascript:alert(1)",
       "/a b",
       "/blogs/../etc",
+      // Encoded traversal must not slip past once `%` is in the alphabet.
+      "/blogs/%2e%2e/%2e%2e/etc",
+      "/%2e%2e/admin",
+      "/blogs/%2E%2E/x",
       "about",
       "",
     ]) {
       expect(isInternalPath(path)).toBe(false);
     }
+  });
+
+  it("rejects a malformed percent-escape rather than throwing", () => {
+    // decodeURIComponent("%") would throw; the guard turns it into a rejection.
+    expect(isInternalPath("/a%zz")).toBe(false);
+    expect(isInternalPath("/%")).toBe(false);
   });
 
   it("rejects non-strings", () => {

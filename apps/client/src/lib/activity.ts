@@ -239,16 +239,30 @@ export function isActivityLive(): boolean {
  * the public page. Only accept an absolute, same-site path built from the
  * characters our routes actually use: a single leading slash, then slug-ish
  * segments. This rejects protocol-relative (`//host`), scheme (`javascript:`),
- * backslash, whitespace, and traversal before anything is stored. `%` is allowed
- * so percent-encoded (e.g. non-ASCII) slugs aren't silently rejected — traversal
- * is blocked separately via the `..` check, not by withholding the character.
+ * backslash, whitespace, and traversal before anything is stored.
+ *
+ * `%` is allowed so percent-encoded (e.g. non-ASCII) slugs aren't silently
+ * rejected — but a literal `..` check is not enough once `%` is in the alphabet,
+ * because `%2e%2e` decodes to `..`. So the *decoded* value is checked for
+ * traversal and protocol-relative too; a malformed `%`-escape (which would make
+ * `decodeURIComponent` throw) is treated as a rejection, not a 500.
  */
 export function isInternalPath(value: unknown): value is string {
   if (typeof value !== "string") return false;
   if (!value.startsWith("/")) return false;
   if (value.startsWith("//") || value.startsWith("/\\")) return false;
-  if (value.includes("..")) return false;
-  return /^\/[A-Za-z0-9\-._~%]*(?:\/[A-Za-z0-9\-._~%]*)*$/.test(value);
+  if (!/^\/[A-Za-z0-9\-._~%]*(?:\/[A-Za-z0-9\-._~%]*)*$/.test(value)) return false;
+
+  let decoded: string;
+  try {
+    decoded = decodeURIComponent(value);
+  } catch {
+    return false; // malformed percent-encoding
+  }
+  if (decoded.startsWith("//") || decoded.includes("..") || decoded.includes("\\")) {
+    return false;
+  }
+  return true;
 }
 
 /**
