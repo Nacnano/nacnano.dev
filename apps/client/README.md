@@ -34,7 +34,7 @@ bun run build     # next build + RSS/sitemap postbuild
 - Projects: `src/data/projectsData.ts`
 - Work and education: `src/data/timelineData.ts` — **keep this in sync with
   <https://resume.nacnano.dev>, which is the canonical CV.**
-- Site-wide facts, including the status line shown on the home page: `src/data/siteMetadata.js`
+- Site-wide facts, including the status line shown on the home page: `src/data/siteMetadata.ts`
 
 ## Design
 
