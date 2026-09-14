@@ -1,10 +1,13 @@
 import { describe, it, expect, afterEach } from "bun:test";
 import {
+  amaDiscordMessage,
   isNotifyConfigured,
   notificationPayload,
   notifyNewQuestion,
   questionPreview,
 } from "./amaNotify";
+import { MAX_EMBED_DESCRIPTION } from "./discord";
+import siteMetadata from "@/data/siteMetadata";
 import type { AskRecord } from "./amaInbox";
 
 /**
@@ -72,12 +75,71 @@ describe("notificationPayload", () => {
   });
 });
 
+describe("amaDiscordMessage", () => {
+  it("keeps the question's line breaks, unlike the one-line webhook preview", () => {
+    const embed = amaDiscordMessage({ ...record, question: "one.\n\ntwo." }).embeds?.[0];
+    expect(embed?.description).toBe("one.\n\ntwo.");
+    expect(notificationPayload({ ...record, question: "one.\n\ntwo." }).text).toContain(
+      "one. two."
+    );
+  });
+
+  it("links back to the page and carries the record id for cross-referencing", () => {
+    const embed = amaDiscordMessage(record).embeds?.[0];
+    expect(embed?.url).toBe(`${siteMetadata.siteUrl}/ama`);
+    expect(embed?.footer?.text).toBe(record.id);
+    expect(embed?.timestamp).toBe(record.ts);
+  });
+
+  it("adds a From field only when the asker left a contact", () => {
+    expect(amaDiscordMessage(record).embeds?.[0]?.fields).toBeUndefined();
+    const withContact = amaDiscordMessage({ ...record, contact: "a@b.c" });
+    expect(withContact.embeds?.[0]?.fields).toEqual([
+      { name: "From", value: "a@b.c", inline: true },
+    ]);
+  });
+
+  // Over the limit is a 400 from Discord, which would read as a missing
+  // notification rather than as an error.
+  it("clamps the description to Discord's embed limit", () => {
+    const embed = amaDiscordMessage({ ...record, question: "a".repeat(9000) })
+      .embeds?.[0];
+    expect(embed?.description).toHaveLength(MAX_EMBED_DESCRIPTION);
+  });
+});
+
 describe("notifyNewQuestion", () => {
-  it("is a no-op with no endpoint configured", async () => {
+  it("is a no-op with no transport configured", async () => {
     delete process.env.AMA_NOTIFY_URL;
     expect(isNotifyConfigured()).toBe(false);
-    // No endpoint to hit, so the only assertion available is that it returns.
+    // Nothing to hit, so the only assertion available is that it returns.
     expect(await notifyNewQuestion(record)).toBeUndefined();
+  });
+
+  // The two transports are independent. A token with no destination is the
+  // state a half-finished Discord setup leaves behind, and it must not cost
+  // the webhook its delivery. (That the bot side stays quiet on an API error
+  // is `discord.test.ts`'s job; asserting it here would mean a real call to
+  // Discord from the test suite.)
+  it("still delivers the webhook when the Discord bot is half-configured", async () => {
+    let received: unknown;
+    const server = Bun.serve({
+      port: 0,
+      async fetch(request) {
+        received = await request.json();
+        return new Response("ok");
+      },
+    });
+    process.env.AMA_NOTIFY_URL = `http://localhost:${server.port}/hook`;
+    process.env.DISCORD_BOT_TOKEN = "t";
+    delete process.env.DISCORD_CHANNEL_ID;
+    delete process.env.DISCORD_DM_USER_ID;
+
+    await notifyNewQuestion(record);
+    server.stop(true);
+    delete process.env.DISCORD_BOT_TOKEN;
+
+    expect(received).toMatchObject({ question: "Why zinc?" });
   });
 
   it("POSTs the payload as JSON to the configured endpoint", async () => {

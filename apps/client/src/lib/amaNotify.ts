@@ -1,23 +1,37 @@
 /**
  * Tell the author when a question arrives.
  *
- * The inbox is useless if nobody knows to look in it, so a stored question
- * fires one POST at whatever `AMA_NOTIFY_URL` points to. Deliberately a plain
- * webhook rather than an email dependency: `observability.ts` already
- * established that shape here, and it means Slack, Discord, or anything that
- * accepts JSON works without a provider SDK or an API key.
+ * The inbox is useless if nobody knows to look in it, so a stored question is
+ * announced over every transport that is configured, and over none if none is:
+ *
+ * - `AMA_NOTIFY_URL` — one JSON POST. Slack incoming webhooks, Discord
+ *   webhooks and anything generic all read the same body.
+ * - A Discord bot — `DISCORD_BOT_TOKEN` plus a channel or a user to DM. See
+ *   `discord.ts` for what a bot buys over the webhook above.
+ *
+ * Both may be on at once; they are independent, and neither failing affects
+ * the other or the asker.
  *
  * Two properties this has to hold. It never blocks the asker — the caller runs
  * it in `after()`, so the response is already on its way when the POST starts.
  * And it never fails the submission: a question that is in Redis has been
- * delivered, whether or not the author's Slack heard about it.
+ * delivered, whether or not the author's Discord heard about it.
  *
  * Note what leaves the building: the question text and any contact the asker
- * volunteered are sent to the configured endpoint. That is the point of the
+ * volunteered are sent to whatever is configured. That is the point of the
  * feature, but it is worth knowing before pointing this at a shared channel.
  */
 
 import type { AskRecord } from "./amaInbox";
+import {
+  clampToLimit,
+  isDiscordConfigured,
+  sendDiscordMessage,
+  MAX_EMBED_DESCRIPTION,
+  MAX_EMBED_FIELD_VALUE,
+  type DiscordMessage,
+} from "./discord";
+import siteMetadata from "@/data/siteMetadata";
 import { captureError } from "./observability";
 
 /** Enough of the question to triage it from a phone notification. */
@@ -73,8 +87,8 @@ export function notificationPayload(record: AskRecord) {
   };
 }
 
-/** Fire one notification. Resolves either way; never throws. */
-export async function notifyNewQuestion(record: AskRecord): Promise<void> {
+/** POST the generic payload at `AMA_NOTIFY_URL`. Resolves either way; never throws. */
+async function postWebhook(record: AskRecord): Promise<void> {
   const endpoint = process.env.AMA_NOTIFY_URL;
   if (!endpoint) return;
 
@@ -94,5 +108,65 @@ export async function notifyNewQuestion(record: AskRecord): Promise<void> {
     }
   } catch (error) {
     captureError(error, { scope: "ama/notify" });
+  }
+}
+
+/** Signal Blue, so the embed's accent matches the site it came from. */
+const ACCENT = 0x2556da;
+
+/**
+ * The bot's version of the same news, as an embed.
+ *
+ * An embed rather than plain `content` because Discord renders the question as
+ * a quoted block with the contact as its own field, which is the difference
+ * between triaging from the notification and having to open the site. The
+ * question keeps its line breaks here — unlike the one-line webhook preview,
+ * there is room for them.
+ */
+export function amaDiscordMessage(record: AskRecord): DiscordMessage {
+  return {
+    embeds: [
+      {
+        title: "New question on /ama",
+        url: `${siteMetadata.siteUrl}/ama`,
+        description: clampToLimit(record.question.trim(), MAX_EMBED_DESCRIPTION),
+        color: ACCENT,
+        timestamp: record.ts,
+        ...(record.contact
+          ? {
+              fields: [
+                {
+                  name: "From",
+                  value: clampToLimit(record.contact, MAX_EMBED_FIELD_VALUE),
+                  inline: true,
+                },
+              ],
+            }
+          : {}),
+        footer: { text: record.id },
+      },
+    ],
+  };
+}
+
+async function postDiscordBot(record: AskRecord): Promise<void> {
+  if (!isDiscordConfigured()) return;
+  await sendDiscordMessage(amaDiscordMessage(record));
+}
+
+/**
+ * Announce a question over every configured transport. Resolves either way;
+ * never throws.
+ *
+ * `allSettled` rather than `all`: each transport already swallows its own
+ * failures, but this is the function the submit path trusts not to throw, and
+ * it should not start doing so the day a third transport forgets to.
+ */
+export async function notifyNewQuestion(record: AskRecord): Promise<void> {
+  const results = await Promise.allSettled([postWebhook(record), postDiscordBot(record)]);
+  for (const result of results) {
+    if (result.status === "rejected") {
+      captureError(result.reason, { scope: "ama/notify" });
+    }
   }
 }

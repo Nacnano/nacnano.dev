@@ -40,7 +40,7 @@ The author writes infrequently and the site should say so plainly rather than im
 ## Capabilities and Constraints
 
 - Next.js 16 App Router (Turbopack), React 19, TypeScript (strict), Tailwind CSS 3, MDX via `next-mdx-remote`, `next-themes`. Bun workspaces + Turborepo monorepo; this app is `apps/client`.
-- Statically generated; no auth and no comments. Two optional Upstash-backed runtime data paths, both off unless `UPSTASH_REDIS_REST_*` is set: the activity feed (`/activity`) and the `/ama` ask box, which writes to a **private** inbox nothing renders (announced to the author over an optional `AMA_NOTIFY_URL` webhook). Every page is still prerendered from files in the repo, and nothing a visitor submits reaches a page without the author writing it up by hand.
+- Statically generated; no auth and no comments. Two optional Upstash-backed runtime data paths, both off unless `UPSTASH_REDIS_REST_*` is set: the activity feed (`/activity`) and the `/ama` ask box, which writes to a **private** inbox nothing renders (announced to the author over an optional webhook or Discord bot). Every page is still prerendered from files in the repo, and nothing a visitor submits reaches a page without the author writing it up by hand.
 - Existing routes: `/`, `/blogs/[...slug]`, `/projects`, `/activity`, `/ama`, `/about`, `/link`, `/link/[link]`. `/blogs`, `/tags`, `/tags/[tag]` and `/blog/:slug` are permanent redirects (see `next.config.js`).
 - Dark mode is complete and correct across every surface; `theme-provider` defaults to `system`. This is a working asset to preserve.
 - MDX pipeline supports GFM, heading anchors/autolinks, and Prism syntax highlighting. Math (KaTeX) and citations were dropped with contentlayer — no published post used them.
