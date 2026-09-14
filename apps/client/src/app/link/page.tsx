@@ -1,9 +1,10 @@
 import links from "./links.json";
 import CustomLink from "@/components/Link";
 import { genPageMetaData } from "@/app/seo";
+import { PAGE_TITLES } from "@/data/pageTitles";
 
 export const metadata = genPageMetaData({
-  title: "Links",
+  title: PAGE_TITLES.link,
   description: "Shared links and files.",
   robots: { index: false, follow: false },
 });

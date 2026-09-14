@@ -1,9 +1,10 @@
 import projectsData from "@/data/projectsData";
 import { genPageMetaData } from "@/app/seo";
+import { PAGE_TITLES } from "@/data/pageTitles";
 import ProjectCard from "./ProjectCard";
 
 export const metadata = genPageMetaData({
-  title: "Things I've made",
+  title: PAGE_TITLES.projects,
   description:
     "A few things Nac has built — student tools, an open-source course planner, and a handful of research projects.",
 });

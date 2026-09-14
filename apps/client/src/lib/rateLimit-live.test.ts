@@ -17,9 +17,16 @@ let behavior: (key: string) => Promise<{ success: boolean }> = async () => ({
   success: true,
 });
 let seenKey = "";
+// Every limiter the module constructs, in order — lets a test assert the read
+// path uses a DIFFERENT bucket prefix than the write path.
+const constructedPrefixes: string[] = [];
 
 mock.module("@upstash/ratelimit", () => ({
   Ratelimit: class {
+    constructor(cfg?: unknown) {
+      const prefix = (cfg as { prefix?: string } | undefined)?.prefix;
+      if (prefix) constructedPrefixes.push(prefix);
+    }
     static slidingWindow() {
       return () => ({});
     }
@@ -38,7 +45,7 @@ mock.module("@/lib/observability", () => ({
   captureError: (error: unknown) => errors.push(error),
 }));
 
-import { allowVisit } from "./rateLimit";
+import { allowFeed, allowVisit } from "./rateLimit";
 
 describe("allowVisit against a live store", () => {
   it("keys the limiter by a salted digest, never the raw IP", async () => {
@@ -61,6 +68,34 @@ describe("allowVisit against a live store", () => {
     // The outage must not become a 500 on the beacon path.
     expect(await allowVisit("203.0.113.9")).toBe(true);
     expect(errors.length).toBeGreaterThan(0);
+  });
+});
+
+describe("allowFeed against a live store", () => {
+  it("keys by a salted digest and throttles when the limiter denies", async () => {
+    seenKey = "";
+    behavior = async () => ({ success: true });
+    expect(await allowFeed("203.0.113.9")).toBe(true);
+    expect(seenKey).toMatch(/^[0-9a-f]{64}$/);
+    expect(seenKey).not.toContain("203.0.113.9");
+
+    behavior = async () => ({ success: false });
+    expect(await allowFeed("203.0.113.9")).toBe(false);
+  });
+
+  it("fails OPEN when the read limiter store is down", async () => {
+    behavior = async () => {
+      throw new Error("upstash unreachable");
+    };
+    expect(await allowFeed("203.0.113.9")).toBe(true);
+  });
+
+  it("uses a separate bucket prefix from the write path", async () => {
+    // Both limiters have now been constructed (one per exported function).
+    expect(constructedPrefixes).toContain("activity:visit-rl");
+    expect(constructedPrefixes).toContain("activity:feed-rl");
+    // Distinct so flooding reads cannot exhaust the write budget, or vice versa.
+    expect(new Set(constructedPrefixes).size).toBe(2);
   });
 });
 

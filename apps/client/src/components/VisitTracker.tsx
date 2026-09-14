@@ -14,8 +14,10 @@ import { useEffect, useRef } from "react";
  * the Redis credentials are only present in the runtime environment, not the
  * build.
  *
- * Path-only — no query strings — which keeps the component clear of the
- * useSearchParams Suspense constraint, and it is de-duped per path so a
+ * Path-only — no query strings, and no title. The server resolves the page
+ * label from its own content, which both keeps an attacker from choosing the
+ * text the public feed displays and avoids the one-page-late `document.title`
+ * a client-side navigation would otherwise report. It is de-duped per path so a
  * re-render cannot double-count.
  */
 export default function VisitTracker() {
@@ -29,7 +31,7 @@ export default function VisitTracker() {
     void fetch("/api/activity/visit", {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ path: pathname, title: document.title }),
+      body: JSON.stringify({ path: pathname }),
       keepalive: true,
     }).catch(() => {
       // Tracking must never surface as a page error.

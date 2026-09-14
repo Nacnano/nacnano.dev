@@ -1,4 +1,5 @@
 import { genPageMetaData } from "@/app/seo";
+import { PAGE_TITLES } from "@/data/pageTitles";
 import { isActivityLive } from "@/lib/activity";
 import { loadInitialFeed } from "@/lib/activityServer";
 import ActivityFeed from "./ActivityFeed";
@@ -11,7 +12,7 @@ import ActivityFeed from "./ActivityFeed";
 export const dynamic = "force-dynamic";
 
 export const metadata = genPageMetaData({
-  title: "Activity",
+  title: PAGE_TITLES.activity,
   description:
     "A live feed of visits to nacnano.dev — who has been here, from where, and what they read.",
 });

@@ -15,27 +15,41 @@ import { captureError } from "./observability";
 const WINDOW = "60 s";
 const WINDOW_SECONDS = 60;
 const LIMIT_PER_WINDOW = 60;
+// Reads are polled every couple seconds per open tab and shared by everyone
+// behind one carrier-NAT IP, so the read ceiling is far looser than the write
+// one — it exists to stop unthrottled `?limit=100` hammering, not honest polling.
+const READ_LIMIT_PER_WINDOW = 300;
 
 /** Shared with the route so the advertised `Retry-After` can never drift. */
 export const RETRY_AFTER_SECONDS = WINDOW_SECONDS;
 
 let limiter: Ratelimit | null | undefined;
+let readLimiter: Ratelimit | null | undefined;
+
+function buildLimiter(prefix: string, limit: number): Ratelimit | null {
+  const client = getActivityClient();
+  if (!client) return null;
+  return new Ratelimit({
+    redis: client,
+    limiter: Ratelimit.slidingWindow(limit, WINDOW),
+    prefix,
+    analytics: false,
+    // In-process deny cache: an already-blocked key is rejected without a
+    // round trip, so a flood does not double Upstash traffic on the hot path.
+    ephemeralCache: new Map(),
+  });
+}
 
 function getLimiter(): Ratelimit | null {
-  if (limiter !== undefined) return limiter;
-  const client = getActivityClient();
-  limiter = client
-    ? new Ratelimit({
-        redis: client,
-        limiter: Ratelimit.slidingWindow(LIMIT_PER_WINDOW, WINDOW),
-        prefix: "activity:visit-rl",
-        analytics: false,
-        // In-process deny cache: an already-blocked key is rejected without a
-        // round trip, so a flood does not double Upstash traffic on the hot path.
-        ephemeralCache: new Map(),
-      })
-    : null;
+  if (limiter === undefined)
+    limiter = buildLimiter("activity:visit-rl", LIMIT_PER_WINDOW);
   return limiter;
+}
+
+function getReadLimiter(): Ratelimit | null {
+  if (readLimiter === undefined)
+    readLimiter = buildLimiter("activity:feed-rl", READ_LIMIT_PER_WINDOW);
+  return readLimiter;
 }
 
 /**
@@ -69,14 +83,27 @@ async function limitKey(ip: string): Promise<string> {
  * this is the first Upstash call on the beacon path, so a throw here would 500
  * before `recordVisit` ever got to handle its own failure.
  */
-export async function allowVisit(ip: string): Promise<boolean> {
-  const client = getLimiter();
-  if (!client) return true;
+async function throttle(
+  getLimiterFn: () => Ratelimit | null,
+  ip: string,
+  scope: string
+): Promise<boolean> {
+  const rl = getLimiterFn();
+  if (!rl) return true;
   try {
-    const { success } = await client.limit(await limitKey(ip));
+    const { success } = await rl.limit(await limitKey(ip));
     return success;
   } catch (error) {
-    captureError(error, { scope: "rate-limit" });
+    captureError(error, { scope });
     return true;
   }
+}
+
+export async function allowVisit(ip: string): Promise<boolean> {
+  return throttle(getLimiter, ip, "rate-limit");
+}
+
+/** Read-path ceiling for `GET /api/activity/feed`. Same fail-open contract. */
+export async function allowFeed(ip: string): Promise<boolean> {
+  return throttle(getReadLimiter, ip, "rate-limit-feed");
 }
