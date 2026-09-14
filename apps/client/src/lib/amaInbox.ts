@@ -84,8 +84,8 @@ export function askRecord(input: AskInput): AskRecord {
 }
 
 /** True when a store is configured and a question can actually be delivered. */
-export function isInboxLive(): boolean {
-  return getActivityClient() !== null;
+export function isInboxLive(client = getActivityClient()): boolean {
+  return client !== null;
 }
 
 /**
@@ -96,9 +96,17 @@ export function isInboxLive(): boolean {
  *
  * One pipeline, one round trip, mirroring `recordVisit`: append with a count
  * trim, apply the age trim, refresh the idle expiry.
+ *
+ * The store arrives as a parameter, defaulted to the configured one, for the
+ * same reason `AskDeps` does: a test can hand it a fake instead of reaching for
+ * `mock.module("@upstash/redis")`, which is process-global in bun and would
+ * fight the fake `activityRedis-io.test.ts` already installs. Callers pass
+ * nothing.
  */
-export async function askAma(input: AskInput): Promise<AskRecord | null> {
-  const client = getActivityClient();
+export async function askAma(
+  input: AskInput,
+  client = getActivityClient()
+): Promise<AskRecord | null> {
   if (!client) return null;
 
   const record = askRecord(input);
@@ -207,8 +215,10 @@ export async function submitAsk(fields: AskFields, deps: AskDeps): Promise<AskSt
  * Upstash hands back three different shapes depending on client and runtime,
  * and that function is where the codebase already knows about all of them.
  */
-export async function readInbox(limit = 50): Promise<AskRecord[]> {
-  const client = getActivityClient();
+export async function readInbox(
+  limit = 50,
+  client = getActivityClient()
+): Promise<AskRecord[]> {
   if (!client) return [];
 
   const entries = await client.xrevrange(STREAM_KEY, "+", "-", limit);

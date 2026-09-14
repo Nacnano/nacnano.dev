@@ -46,9 +46,10 @@ export function mdToPlainText(md: string): string {
       .replace(/^\s*>\s?/gm, "") // blockquote markers
       .replace(/(\*{1,3})(?=\S)([\s\S]*?\S)\1/g, "$2") // *em* / **strong**
       .replace(/(?<![\p{L}\p{N}_])(_{1,3})(?=\S)([\s\S]*?\S)\1(?![\p{L}\p{N}_])/gu, "$2")
-      // Collapse every run of whitespace — newlines included — in one pass. Done
-      // as two rules (spaces, then newlines) a paragraph break survives as a
-      // double space in the structured data.
+      // Collapse every run of whitespace — newlines included — in ONE pass.
+      // Split into two rules (spaces first, then newlines) and a paragraph
+      // break survives the first, reaching the structured data as a double
+      // space.
       .replace(/\s+/g, " ")
       .trim()
   );
