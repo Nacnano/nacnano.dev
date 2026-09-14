@@ -102,14 +102,14 @@ export default async function Page({ params }: RouteParams) {
     <>
       <script
         type="application/ld+json"
+        // biome-ignore lint/security/noDangerouslySetInnerHtml: JSON-LD built from authored front matter, never visitor input.
         dangerouslySetInnerHTML={{ __html: jsonLdHtml }}
       />
       {/*
         `resolveLayout` returns one of a fixed, module-level map — it does not
-        create a component during render, so the "created during render" rule is
-        a false positive here. The layout registry is resolved per request.
+        create a component during render, despite reading like it does. The
+        layout registry is resolved per request.
       */}
-      {/* eslint-disable-next-line react-hooks/static-components */}
       <Layout content={post} authors={authors} newer={newer} older={older}>
         <Mdx source={post.body} />
       </Layout>

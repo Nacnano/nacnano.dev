@@ -12,7 +12,6 @@ let xrevrangeReturn: unknown = {};
 let getReturn: number | null = null;
 
 class FakeRedis {
-  constructor(_cfg?: unknown) {}
   xrevrange(..._a: unknown[]) {
     return xrevrangeReturn;
   }

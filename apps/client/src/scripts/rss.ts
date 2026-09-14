@@ -1,4 +1,4 @@
-import { writeFileSync } from "fs";
+import { writeFileSync } from "node:fs";
 import siteMetadata from "../data/siteMetadata";
 import { publishedBlogs, type Blog } from "../lib/content";
 import { postUrl, trimTrailingSlash } from "../lib/feed";

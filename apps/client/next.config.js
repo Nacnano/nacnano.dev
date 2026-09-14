@@ -2,7 +2,7 @@
 // checkout without history still builds; it just gets a constant ID.
 function headCommit() {
   try {
-    return require("child_process").execSync("git rev-parse HEAD").toString().trim();
+    return require("node:child_process").execSync("git rev-parse HEAD").toString().trim();
   } catch {
     return "no-git";
   }

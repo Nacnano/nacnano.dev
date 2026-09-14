@@ -21,6 +21,7 @@ export default function Ama() {
         type="application/ld+json"
         // Structured data is generated from authored content above, never from
         // anything a visitor controls, so it is safe to inline verbatim.
+        // biome-ignore lint/security/noDangerouslySetInnerHtml: JSON-LD built from authored content, never visitor input.
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 

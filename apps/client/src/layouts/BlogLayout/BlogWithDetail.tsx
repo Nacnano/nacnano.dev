@@ -3,7 +3,7 @@ import ScrollTop from "@/components/ScrollTop";
 import Tag from "@/components/Tag";
 import siteMetadata from "@/data/siteMetadata";
 import type { Author, Blog } from "@/lib/content";
-import { ReactNode } from "react";
+import type { ReactNode } from "react";
 
 const githubUrl = (filePath: string) =>
   `${siteMetadata.siteRepo}/blob/main/apps/client/src/data/${filePath}`;

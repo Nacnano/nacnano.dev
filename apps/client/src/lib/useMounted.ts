@@ -8,11 +8,11 @@ import { useEffect, useState } from "react";
  * render a stable value first and never mismatch between server and client.
  *
  * Centralised here so the one legitimate "setState in an effect" (the flag can
- * only exist after mount) is suppressed once, not copy-pasted per component.
+ * only exist after mount) lives in a single place, not copy-pasted per
+ * component.
  */
 export function useMounted(): boolean {
   const [mounted, setMounted] = useState(false);
-  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => setMounted(true), []);
   return mounted;
 }

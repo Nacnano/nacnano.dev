@@ -119,6 +119,7 @@ export function parseStreamEntries(entries: unknown): StreamEntry[] {
         });
       } else if (entry && typeof entry === "object") {
         // Some shape without an id we can use; skip rather than guess.
+        // biome-ignore lint/complexity/noUselessContinue: explicit skip documents the third shape; dropping it hides the case.
         continue;
       }
     }

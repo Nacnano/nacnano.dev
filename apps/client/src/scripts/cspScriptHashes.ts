@@ -9,8 +9,8 @@
  * second pass and fails if the HTML moved underneath us, which would mean the
  * shipped header no longer matches the shipped pages.
  */
-import { readFileSync, readdirSync, writeFileSync } from "fs";
-import path from "path";
+import { readFileSync, readdirSync, writeFileSync } from "node:fs";
+import path from "node:path";
 import { hashInlineScripts } from "../lib/cspHashes";
 
 const CLIENT_ROOT = path.join(import.meta.dir, "../..");

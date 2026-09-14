@@ -1,4 +1,4 @@
-import { createHash } from "crypto";
+import { createHash } from "node:crypto";
 
 // React escapes `<` as `\u003c` inside the inline payloads it serializes, so a
 // non-greedy scan for the closing tag cannot be fooled by script contents.

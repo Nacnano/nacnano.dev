@@ -163,6 +163,7 @@ export default function ActivityGlobe({ markers }: { markers: VisitMarker[] }) {
   };
 
   return (
+    // biome-ignore lint/a11y/noAriaHiddenOnFocusable: decorative canvas; pointer handlers do not make it keyboard-focusable (it has no tabIndex).
     <canvas
       ref={canvasRef}
       aria-hidden="true"

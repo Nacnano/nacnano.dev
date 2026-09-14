@@ -1,5 +1,5 @@
-import { readFileSync, readdirSync } from "fs";
-import path from "path";
+import { readFileSync, readdirSync } from "node:fs";
+import path from "node:path";
 import matter from "gray-matter";
 import readingTime from "reading-time";
 import siteMetadata from "@/data/siteMetadata";

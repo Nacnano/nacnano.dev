@@ -1,4 +1,4 @@
-import React from "react";
+import type React from "react";
 import type { Author } from "@/lib/content";
 import Image from "next/image";
 import SocialIcon from "@/components/social-icons";

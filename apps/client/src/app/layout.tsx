@@ -2,7 +2,7 @@ import "@/styles/tailwind.css";
 
 import { Inter } from "next/font/google";
 
-import { Metadata, Viewport } from "next";
+import type { Metadata, Viewport } from "next";
 import siteMetadata from "@/data/siteMetadata";
 import SectionContainer from "@/components/SectionContainer";
 import { ThemeProviders } from "./theme-provider";
