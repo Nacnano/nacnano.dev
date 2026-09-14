@@ -8,6 +8,7 @@ import {
   RETENTION_DAYS,
   type AskDeps,
   type AskInput,
+  type AskRecord,
 } from "./amaInbox";
 
 /**
@@ -19,17 +20,19 @@ import {
 
 function deps(overrides: Partial<AskDeps> = {}) {
   const stored: AskInput[] = [];
+  const notified: AskRecord[] = [];
   const errors: unknown[] = [];
   const base: AskDeps = {
     isLive: () => true,
     allow: async () => true,
     store: async (input) => {
       stored.push(input);
-      return true;
+      return askRecord(input);
     },
+    notify: (record) => notified.push(record),
     onError: (error) => errors.push(error),
   };
-  return { deps: { ...base, ...overrides }, stored, errors };
+  return { deps: { ...base, ...overrides }, stored, notified, errors };
 }
 
 describe("normaliseAsk", () => {
@@ -76,6 +79,14 @@ describe("submitAsk", () => {
     const { deps: d, stored } = deps();
     expect(await submitAsk({ question: "Why zinc?" }, d)).toEqual({ status: "sent" });
     expect(stored).toEqual([{ question: "Why zinc?", contact: undefined }]);
+  });
+
+  it("notifies with the stored record, once, after storing", async () => {
+    const { deps: d, notified } = deps();
+    await submitAsk({ question: "Why zinc?", contact: "a@b.c" }, d);
+    expect(notified).toHaveLength(1);
+    expect(notified[0]?.question).toBe("Why zinc?");
+    expect(notified[0]?.contact).toBe("a@b.c");
   });
 
   it("says so honestly when there is no store configured", async () => {
@@ -133,11 +144,43 @@ describe("submitAsk", () => {
   });
 
   it("does not claim success when the store declines the write", async () => {
-    const { deps: d } = deps({ store: async () => false });
+    const { deps: d } = deps({ store: async () => null });
     expect(await submitAsk({ question: "Why zinc?" }, d)).toEqual({
       status: "error",
       reason: "unavailable",
     });
+  });
+
+  // The question is in Redis by the time the notifier runs. Telling the asker
+  // it failed because the author's webhook is down would be a lie, and one
+  // that invites them to send the same question again.
+  it("still reports sent when the notifier throws", async () => {
+    const boom = new Error("webhook down");
+    const { deps: d, errors } = deps({
+      notify: () => {
+        throw boom;
+      },
+    });
+    expect(await submitAsk({ question: "Why zinc?" }, d)).toEqual({ status: "sent" });
+    expect(errors).toEqual([boom]);
+  });
+
+  it("does not notify for a question it never stored", async () => {
+    const cases: Array<Partial<AskDeps>> = [
+      { isLive: () => false },
+      { allow: async () => false },
+      { store: async () => null },
+    ];
+    for (const override of cases) {
+      const { deps: d, notified } = deps(override);
+      await submitAsk({ question: "Why zinc?" }, d);
+      expect(notified).toHaveLength(0);
+    }
+
+    // ...including the honeypot, which is answered with a success on purpose.
+    const { deps: d, notified } = deps();
+    await submitAsk({ question: "Why zinc?", honeypot: "http://x" }, d);
+    expect(notified).toHaveLength(0);
   });
 });
 

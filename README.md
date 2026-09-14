@@ -73,7 +73,9 @@ inbox that no page and no route reads back. Read it with `bun run ama:inbox`
 from `apps/client`, then write the ones worth answering into `amaData.ts` by
 hand. Answers are MDX, and `draft: true` hides one without deleting it.
 Submissions expire from the inbox after 90 days, and the box is inert unless
-`UPSTASH_REDIS_REST_*` is configured.
+`UPSTASH_REDIS_REST_*` is configured. Set `AMA_NOTIFY_URL` to a Slack or
+Discord webhook (or any JSON endpoint) to be told when one arrives instead of
+having to check.
 
 `timelineData.ts` must stay in sync with <https://resume.nacnano.dev>, which is
 the source of truth for roles and dates.

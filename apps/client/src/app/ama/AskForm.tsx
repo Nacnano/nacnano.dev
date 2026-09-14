@@ -87,21 +87,21 @@ export default function AskForm({
           id={questionId}
           name="question"
           required
-          rows={4}
+          rows={3}
           maxLength={maxQuestion}
           aria-describedby={`${hintId} ${countId}`}
-          className="field mt-2 resize-y"
+          className="field mt-1.5 resize-y"
         />
         <p
           id={countId}
-          className="tabular mt-1.5 font-mono text-xs uppercase tracking-[0.08em] text-zinc-500 dark:text-zinc-400"
+          className="tabular mt-1 font-mono text-xs uppercase tracking-[0.08em] text-zinc-500 dark:text-zinc-400"
         >
           Up to {maxQuestion} characters
         </p>
 
         <label
           htmlFor={contactId}
-          className="mt-5 block text-xs uppercase tracking-[0.08em] text-zinc-500 dark:text-zinc-400"
+          className="mt-4 block text-xs uppercase tracking-[0.08em] text-zinc-500 dark:text-zinc-400"
         >
           Name or email <span className="normal-case tracking-normal">(optional)</span>
         </label>
@@ -110,7 +110,7 @@ export default function AskForm({
           name="contact"
           type="text"
           maxLength={maxContact}
-          className="field mt-2"
+          className="field mt-1.5"
         />
 
         {/*
@@ -133,7 +133,7 @@ export default function AskForm({
           />
         </div>
 
-        <div className="mt-5 flex flex-wrap items-center gap-x-4 gap-y-3">
+        <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-3">
           <button
             type="submit"
             disabled={pending}

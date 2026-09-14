@@ -1,8 +1,10 @@
 "use server";
 
 import { headers } from "next/headers";
+import { after } from "next/server";
 import { askAma, isInboxLive, submitAsk, type AskState } from "@/lib/amaInbox";
 import { allowAsk, clientIp } from "@/lib/rateLimit";
+import { notifyNewQuestion } from "@/lib/amaNotify";
 import { captureError } from "@/lib/observability";
 
 /**
@@ -16,6 +18,9 @@ import { captureError } from "@/lib/observability";
  *
  * All of the ordering and validation lives in `submitAsk`; everything here is
  * adapter — pull the fields off the FormData, bind the real collaborators.
+ *
+ * The notification runs inside `after()`, so it starts once the response is
+ * already on its way. The asker waits on Redis, never on the author's Slack.
  */
 
 export async function askQuestion(
@@ -34,6 +39,7 @@ export async function askQuestion(
       isLive: isInboxLive,
       allow: () => allowAsk(clientIp(requestHeaders)),
       store: askAma,
+      notify: (record) => after(() => notifyNewQuestion(record)),
       onError: (error) => captureError(error, { route: "ama/ask" }),
     }
   );

@@ -89,15 +89,17 @@ export function isInboxLive(): boolean {
 }
 
 /**
- * Append a question to the inbox. Returns false in static mode, where there is
- * nowhere to put it.
+ * Append a question to the inbox. Returns the stored record, or null in static
+ * mode, where there is nowhere to put it. The record comes back rather than a
+ * bare boolean so the caller can hand the same values to the notifier without
+ * rebuilding (and re-timestamping) them.
  *
  * One pipeline, one round trip, mirroring `recordVisit`: append with a count
  * trim, apply the age trim, refresh the idle expiry.
  */
-export async function askAma(input: AskInput): Promise<boolean> {
+export async function askAma(input: AskInput): Promise<AskRecord | null> {
   const client = getActivityClient();
-  if (!client) return false;
+  if (!client) return null;
 
   const record = askRecord(input);
   const oldestAllowed = `${Date.now() - RETENTION_MS}-0`;
@@ -117,7 +119,7 @@ export async function askAma(input: AskInput): Promise<boolean> {
   pipeline.expire(STREAM_KEY, RETENTION_SECONDS);
   await pipeline.exec();
 
-  return true;
+  return record;
 }
 
 export type AskFailure = AskRejection | "rate_limited" | "unavailable" | "failed";
@@ -137,7 +139,9 @@ export type AskState =
 export type AskDeps = {
   isLive: () => boolean;
   allow: () => Promise<boolean>;
-  store: (input: AskInput) => Promise<boolean>;
+  store: (input: AskInput) => Promise<AskRecord | null>;
+  /** Fire-and-forget. Called only after the question is durably stored. */
+  notify: (record: AskRecord) => void;
   onError: (error: unknown) => void;
 };
 
@@ -173,15 +177,26 @@ export async function submitAsk(fields: AskFields, deps: AskDeps): Promise<AskSt
   const normalised = normaliseAsk({ question: fields.question, contact: fields.contact });
   if (!normalised.ok) return { status: "error", reason: normalised.reason };
 
+  let record: AskRecord | null;
   try {
-    const stored = await deps.store(normalised.value);
-    return stored ? { status: "sent" } : { status: "error", reason: "unavailable" };
+    record = await deps.store(normalised.value);
   } catch (error) {
     // A store failure is the operator's problem, not the asker's — but they
     // still need to know the question did not land, or they will wait forever.
     deps.onError(error);
     return { status: "error", reason: "failed" };
   }
+  if (!record) return { status: "error", reason: "unavailable" };
+
+  // Past this line the question is durably stored, so the asker is told it
+  // sent no matter what happens next. A notification is for the author's
+  // benefit; failing to deliver one must never retract a delivered question.
+  try {
+    deps.notify(record);
+  } catch (error) {
+    deps.onError(error);
+  }
+  return { status: "sent" };
 }
 
 /**
