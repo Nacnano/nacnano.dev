@@ -73,28 +73,58 @@ function readMdxDir(dir: string): { file: string; raw: string }[] {
     }));
 }
 
+/**
+ * A missing required field is a hard build failure naming the file and field —
+ * the alternative (silent coercion) turns "this post renders oddly" into a
+ * production mystery. `tags`/`images`/`authors` are coerced leniently today, so
+ * a typo'd frontmatter key or a scalar where a list was meant slips through;
+ * these guards catch that at build.
+ */
+function requireNonEmptyString(value: unknown, field: string, file: string): string {
+  const str = typeof value === "string" ? value.trim() : "";
+  if (!str) throw new Error(`blogs/${file}: \`${field}\` must be a non-empty string`);
+  return str;
+}
+
+function requireIsoDate(value: unknown, field: string, file: string): string {
+  const date = new Date(value as string | number);
+  if (Number.isNaN(date.getTime())) {
+    throw new Error(`blogs/${file}: \`${field}\` is not a valid date (${String(value)})`);
+  }
+  return date.toISOString();
+}
+
+function requireStringArray(
+  value: unknown,
+  field: string,
+  file: string
+): string[] | undefined {
+  if (value === undefined) return undefined;
+  if (!Array.isArray(value) || value.some((item) => typeof item !== "string")) {
+    throw new Error(`blogs/${file}: \`${field}\` must be an array of strings`);
+  }
+  return value;
+}
+
 function toBlog({ file, raw }: { file: string; raw: string }): Blog {
   const { data, content } = matter(raw);
   const slug = file.replace(/\.mdx$/, "");
-
-  if (!data.title || !data.date) {
-    throw new Error(`blogs/${file} is missing required frontmatter (title, date)`);
-  }
 
   return {
     slug,
     path: `blogs/${slug}`,
     filePath: `blogs/${file}`,
-    title: String(data.title),
-    // Frontmatter dates parse to Date objects; normalise to ISO strings so
-    // every consumer gets one type.
-    date: new Date(data.date).toISOString(),
-    lastmod: data.lastmod ? new Date(data.lastmod).toISOString() : undefined,
+    title: requireNonEmptyString(data.title, "title", file),
+    date: requireIsoDate(data.date, "date", file),
+    lastmod:
+      data.lastmod === undefined
+        ? undefined
+        : requireIsoDate(data.lastmod, "lastmod", file),
     summary: data.summary ? String(data.summary) : undefined,
-    tags: Array.isArray(data.tags) ? data.tags.map(String) : [],
+    tags: requireStringArray(data.tags, "tags", file) ?? [],
     draft: data.draft === true,
-    images: Array.isArray(data.images) ? data.images.map(String) : undefined,
-    authors: Array.isArray(data.authors) ? data.authors.map(String) : undefined,
+    images: requireStringArray(data.images, "images", file),
+    authors: requireStringArray(data.authors, "authors", file),
     layout: data.layout ? String(data.layout) : undefined,
     readingTime: readingTime(content),
     body: content,

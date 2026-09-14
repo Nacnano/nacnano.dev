@@ -5,12 +5,12 @@ import dynamic from "next/dynamic";
 import CustomLink from "@/components/Link";
 import { useMounted } from "@/lib/useMounted";
 import { formatDate } from "@/lib/formatDate";
-import { sortVisitsDesc } from "@/lib/activity";
 import {
   aggregateByCountry,
   countCountries,
   countryFlag,
   formatRelative,
+  mergeById,
   topPages,
   trackedDays,
   visitMarkers,
@@ -52,18 +52,7 @@ function locationLabel(visit: VisitEvent): string {
   return [visit.city, country].filter(Boolean).join(" · ") || "somewhere";
 }
 
-/** Newest-first union of two visit sets, de-duplicated by id. */
-function mergeById(
-  existing: readonly VisitEvent[],
-  incoming: readonly VisitEvent[]
-): VisitEvent[] {
-  const map = new Map(existing.map((visit) => [visit.id, visit]));
-  for (const visit of incoming) {
-    if (!map.has(visit.id)) map.set(visit.id, visit);
-  }
-  return sortVisitsDesc(Array.from(map.values()));
-}
-
+/** Fetch one page of the feed; a non-ok or malformed response is `null`. */
 async function fetchPage(before: string | null): Promise<VisitFeedPayload | null> {
   const params = new URLSearchParams({ limit: String(PAGE_SIZE) });
   if (before) params.set("before", before);

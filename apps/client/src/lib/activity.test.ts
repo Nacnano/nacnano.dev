@@ -5,6 +5,8 @@ import {
   countryFlag,
   formatRelative,
   groupByDay,
+  isInternalPath,
+  mergeById,
   sortVisitsDesc,
   topPages,
   trackedDays,
@@ -161,5 +163,76 @@ describe("trackedDays", () => {
 
   it("is never below one", () => {
     expect(trackedDays("2026-09-14T00:00:00.000Z", "2026-09-14T00:00:00.000Z")).toBe(1);
+  });
+});
+
+describe("formatRelative boundaries", () => {
+  const now = new Date("2026-09-14T12:00:00.000Z").getTime();
+  const ago = (seconds: number) => new Date(now - seconds * 1000).toISOString();
+
+  it("flips from 'just now' to minutes at 45 seconds", () => {
+    expect(formatRelative(ago(44), now)).toBe("just now");
+    expect(formatRelative(ago(45), now)).toBe("0m");
+  });
+
+  it("flips from days to an absolute label at 7 days", () => {
+    expect(formatRelative(ago(6 * 86_400), now)).toBe("6d");
+    expect(formatRelative(ago(7 * 86_400), now)).toBe("Sep 7");
+  });
+});
+
+describe("mergeById", () => {
+  it("de-duplicates a re-reported visit by id on a poll", () => {
+    const existing = [visit({ id: "a", ts: "2026-09-14T12:00:00.000Z" })];
+    const incoming = [
+      visit({ id: "a", ts: "2026-09-14T12:00:00.000Z", title: "re-poll" }),
+      visit({ id: "b", ts: "2026-09-14T12:00:05.000Z" }),
+    ];
+    const merged = mergeById(existing, incoming);
+    expect(merged.map((v) => v.id)).toEqual(["b", "a"]);
+    // The existing entry wins, so the re-poll's mutated copy is discarded.
+    expect(merged.find((v) => v.id === "a")?.title).toBeUndefined();
+  });
+
+  it("keeps the list newest-first across both inputs", () => {
+    const merged = mergeById(
+      [visit({ id: "old", ts: "2026-09-13T00:00:00.000Z" })],
+      [visit({ id: "new", ts: "2026-09-14T00:00:00.000Z" })]
+    );
+    expect(merged.map((v) => v.id)).toEqual(["new", "old"]);
+  });
+});
+
+describe("isInternalPath", () => {
+  it("accepts the site's real route shapes", () => {
+    for (const path of [
+      "/",
+      "/about",
+      "/activity",
+      "/blogs/teaching-failure",
+      "/blogs/post.v2",
+    ]) {
+      expect(isInternalPath(path)).toBe(true);
+    }
+  });
+
+  it("rejects anything that could become an outbound or script link", () => {
+    for (const path of [
+      "https://evil.example/x",
+      "//evil.example",
+      "/\\evil.example",
+      "javascript:alert(1)",
+      "/a b",
+      "/blogs/../etc",
+      "about",
+      "",
+    ]) {
+      expect(isInternalPath(path)).toBe(false);
+    }
+  });
+
+  it("rejects non-strings", () => {
+    expect(isInternalPath(undefined)).toBe(false);
+    expect(isInternalPath(42)).toBe(false);
   });
 });

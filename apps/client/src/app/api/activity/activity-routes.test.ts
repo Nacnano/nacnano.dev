@@ -12,6 +12,7 @@ import * as activity from "@/lib/activity";
 import * as activityRedis from "@/lib/activityRedis";
 import * as rateLimit from "@/lib/rateLimit";
 import * as observability from "@/lib/observability";
+import * as visitTitles from "@/lib/visitTitles";
 import { loadInitialFeed } from "@/lib/activityServer";
 import { seedVisits } from "@/data/activityData";
 import type { VisitInput } from "@/lib/activityRedis";
@@ -23,6 +24,7 @@ const originalActivity = { ...activity };
 const originalRedis = { ...activityRedis };
 const originalRateLimit = { ...rateLimit };
 const originalObservability = { ...observability };
+const originalVisitTitles = { ...visitTitles };
 
 type Control = {
   live: boolean;
@@ -31,6 +33,7 @@ type Control = {
   allow: boolean;
   read: (limit: number, before?: string | null) => Promise<VisitFeedPayload>;
   record: (input: VisitInput) => Promise<boolean>;
+  title: (path: string) => string | undefined;
 };
 
 let ctrl: Control;
@@ -46,6 +49,7 @@ function reset() {
     allow: true,
     read: async () => ({ visits: [], count: 0, hasMore: false, nextCursor: null }),
     record: async () => true,
+    title: () => undefined,
   };
   recordCalls = [];
   readCalls = [];
@@ -72,10 +76,16 @@ mock.module("@/lib/activityRedis", () => ({
 mock.module("@/lib/rateLimit", () => ({
   ...originalRateLimit,
   allowVisit: async () => ctrl.allow,
+  allowFeed: async () => ctrl.allow,
   clientIp: () => "203.0.113.7",
 }));
 mock.module("@/lib/observability", () => ({
   captureError: (error: unknown) => errors.push(error),
+}));
+// Titles are resolved server-side from our own content; stub the lookup so the
+// route's title wiring is testable without reading the real MDX corpus.
+mock.module("@/lib/visitTitles", () => ({
+  resolveVisitTitle: (path: string) => ctrl.title(path),
 }));
 
 function feedRequest(query = "") {
@@ -99,6 +109,7 @@ afterAll(() => {
   mock.module("@/lib/activityRedis", () => originalRedis);
   mock.module("@/lib/rateLimit", () => originalRateLimit);
   mock.module("@/lib/observability", () => originalObservability);
+  mock.module("@/lib/visitTitles", () => originalVisitTitles);
   mock.restore();
 });
 
@@ -124,9 +135,22 @@ describe("GET /api/activity/feed", () => {
       hasMore: true,
       nextCursor: "1700000000000-0",
     });
-    const body = await (await getFeed(feedRequest())).json();
+    const res = await getFeed(feedRequest());
+    const body = await res.json();
     expect(body.count).toBe(42);
     expect(body.nextCursor).toBe("1700000000000-0");
+    // The per-tab poll storm is absorbed at the edge; the client tolerates this
+    // much staleness by design (it polls on a 2.5s cadence anyway).
+    expect(res.headers.get("cache-control")).toContain("s-maxage=2");
+  });
+
+  it("throttles an unauthenticated flood of reads with 429", async () => {
+    ctrl.live = true;
+    ctrl.allow = false;
+    const res = await getFeed(feedRequest("?limit=100"));
+    expect(res.status).toBe(429);
+    expect(res.headers.get("retry-after")).toBe("60");
+    expect(readCalls).toHaveLength(0);
   });
 
   it("reports an upstream failure as 503, not an empty feed", async () => {
@@ -136,6 +160,8 @@ describe("GET /api/activity/feed", () => {
     };
     const res = await getFeed(feedRequest());
     expect(res.status).toBe(503);
+    // An outage must never be cached, or a 2s blip would serve empty for a while.
+    expect(res.headers.get("cache-control")).toBe("no-store");
     expect(errors).toHaveLength(1);
   });
 
@@ -165,25 +191,59 @@ describe("POST /api/activity/visit", () => {
 
   it("records the visit with geo when live", async () => {
     ctrl.live = true;
+    ctrl.title = (path) => (path === "/blogs/hello" ? "Hello" : undefined);
     const res = await postVisit(
-      visitRequest(JSON.stringify({ path: "/blogs/hello", title: "Hello" }), geo)
+      visitRequest(JSON.stringify({ path: "/blogs/hello", title: "IGNORED" }), geo)
     );
     expect(res.status).toBe(200);
     expect(await res.json()).toEqual({ ok: true, skipped: false });
     expect(recordCalls[0]).toMatchObject({
       path: "/blogs/hello",
-      title: "Hello",
       countryCode: "TH",
       city: "Bangkok",
       lat: 13.75,
       lng: 100.5,
     });
+    // The title is the server-resolved one, never the attacker-supplied string.
+    expect(recordCalls[0]?.title).toBe("Hello");
   });
 
-  it("clamps an over-long title to the bounded maximum", async () => {
+  it("ignores a client-supplied title in favour of the server's own", async () => {
     ctrl.live = true;
-    await postVisit(visitRequest(JSON.stringify({ path: "/x", title: "a".repeat(500) })));
-    expect(recordCalls[0]?.title).toHaveLength(200);
+    ctrl.title = () => undefined;
+    await postVisit(
+      visitRequest(
+        JSON.stringify({ path: "/about", title: "Free money https://evil.example" })
+      )
+    );
+    // Unknown to the title resolver -> stored with no title (feed shows the path).
+    expect(recordCalls[0]?.title).toBeUndefined();
+  });
+
+  it("records no coordinates when the geo headers are absent or blank", async () => {
+    ctrl.live = true;
+    await postVisit(
+      visitRequest(JSON.stringify({ path: "/about" }), {
+        // Present-but-empty must not read as latitude/longitude 0 (Null Island).
+        "x-vercel-ip-latitude": "",
+        "x-vercel-ip-longitude": "",
+      })
+    );
+    expect(recordCalls[0]?.lat).toBeUndefined();
+    expect(recordCalls[0]?.lng).toBeUndefined();
+  });
+
+  it("rejects an absolute or protocol-relative path so it can never be a link", async () => {
+    ctrl.live = true;
+    for (const path of [
+      "https://evil.example/x",
+      "//evil.example",
+      "javascript:alert(1)",
+    ]) {
+      const res = await postVisit(visitRequest(JSON.stringify({ path })));
+      expect(res.status).toBe(400);
+    }
+    expect(recordCalls).toHaveLength(0);
   });
 
   it("throttles a flooding client with 429 and never writes", async () => {
@@ -219,7 +279,7 @@ describe("POST /api/activity/visit", () => {
     ctrl.record = async () => {
       throw new Error("stream write failed");
     };
-    const res = await postVisit(visitRequest(JSON.stringify({ path: "/x" })));
+    const res = await postVisit(visitRequest(JSON.stringify({ path: "/about" })));
     expect(res.status).toBe(200);
     expect(await res.json()).toEqual({ ok: true, skipped: true });
     expect(errors).toHaveLength(1);

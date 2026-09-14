@@ -19,6 +19,23 @@ export function sortVisitsDesc(visits: readonly VisitEvent[]): VisitEvent[] {
   return [...visits].sort((a, b) => new Date(b.ts).getTime() - new Date(a.ts).getTime());
 }
 
+/**
+ * Newest-first union of two visit sets, de-duplicated by `id` — the existing
+ * entry wins, so a poll that re-reports an already-shown visit never duplicates
+ * the row (and a page the reader scrolled to is never reordered underneath
+ * them). Shared by the live poll and the infinite-scroll pager in the feed.
+ */
+export function mergeById(
+  existing: readonly VisitEvent[],
+  incoming: readonly VisitEvent[]
+): VisitEvent[] {
+  const map = new Map(existing.map((visit) => [visit.id, visit]));
+  for (const visit of incoming) {
+    if (!map.has(visit.id)) map.set(visit.id, visit);
+  }
+  return sortVisitsDesc(Array.from(map.values()));
+}
+
 /** The calendar day (UTC) a visit belongs to, as `YYYY-MM-DD`. */
 export function dayKey(ts: string): string {
   return ts.slice(0, 10);
@@ -206,10 +223,28 @@ export function buildFeedPayload(
  * static site.
  */
 export function isActivityLive(): boolean {
-  return (
-    process.env.UPSTASH_REDIS_REST_URL !== undefined &&
-    process.env.UPSTASH_REDIS_REST_TOKEN !== undefined
-  );
+  // Truthiness, not `!== undefined`: an env var set to the empty string is the
+  // classic CI/Vercel misconfiguration, and `getActivityClient` treats `""` as
+  // absent. Both must agree, or a blank credential reads as "live" here while
+  // the client returns null.
+  return !!process.env.UPSTASH_REDIS_REST_URL && !!process.env.UPSTASH_REDIS_REST_TOKEN;
+}
+
+/**
+ * Is this a safe, *internal* page path? The visit beacon is an unauthenticated
+ * write, and the feed renders `page` as a link — so a stored value like
+ * `https://evil.example` or `//evil.example` would become an outbound link on
+ * the public page. Only accept an absolute, same-site path built from the
+ * characters our routes actually use: a single leading slash, then slug-ish
+ * segments. This rejects protocol-relative (`//host`), scheme (`javascript:`),
+ * backslash, whitespace, and traversal before anything is stored.
+ */
+export function isInternalPath(value: unknown): value is string {
+  if (typeof value !== "string") return false;
+  if (!value.startsWith("/")) return false;
+  if (value.startsWith("//") || value.startsWith("/\\")) return false;
+  if (value.includes("..")) return false;
+  return /^\/[A-Za-z0-9\-._~]*(?:\/[A-Za-z0-9\-._~]*)*$/.test(value);
 }
 
 /**

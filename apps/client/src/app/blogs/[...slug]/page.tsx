@@ -90,6 +90,11 @@ export default async function Page({ params }: RouteParams) {
     post,
     authors.map((author) => author.name)
   );
+  // Escaping `<` prevents a `</script>` sequence in a title/summary from closing
+  // the tag early and injecting markup. The content is ours, so this is defence
+  // in depth rather than a live XSS, but a stray `<` would otherwise break the
+  // page. The JSON is otherwise unchanged (the client parses `\u003c` back).
+  const jsonLdHtml = JSON.stringify(jsonLd).replace(/</g, "\\u003c");
 
   const Layout = resolveLayout(post.layout);
 
@@ -97,7 +102,7 @@ export default async function Page({ params }: RouteParams) {
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: jsonLdHtml }}
       />
       {/*
         `resolveLayout` returns one of a fixed, module-level map — it does not

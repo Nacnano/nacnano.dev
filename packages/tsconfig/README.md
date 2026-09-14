@@ -4,7 +4,6 @@ Shared TypeScript configs for every app in this workspace.
 
 - `base.json` — the defaults, `strict: true`.
 - `nextjs.json` — Next.js apps. `strict` and `noUncheckedIndexedAccess` are on.
-- `react-library.json` — for any shared UI package.
 
 ## Policy
 
