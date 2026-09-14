@@ -2,7 +2,6 @@
   "extends": "tsconfig/nextjs.json",
   "compilerOptions": {
     "jsx": "preserve",
-    "noImplicitAny": false,
     "plugins": [
       {
         "name": "next"
@@ -10,10 +9,18 @@
     ],
     "baseUrl": "src",
     "paths": {
-      "@/*": ["./*"],
-      "$modules/*": ["./modules/*"],
-      "$context/*": ["./core/context/*"],
-      "contentlayer/generated": [".././.contentlayer/generated"]
+      "@/*": [
+        "./*"
+      ],
+      "$modules/*": [
+        "./modules/*"
+      ],
+      "$context/*": [
+        "./core/context/*"
+      ],
+      "contentlayer/generated": [
+        ".././.contentlayer/generated"
+      ]
     }
   },
   "include": [
@@ -23,5 +30,7 @@
     ".next/types/**/*.ts",
     ".contentlayer/generated"
   ],
-  "exclude": ["node_modules"]
+  "exclude": [
+    "node_modules"
+  ]
 }

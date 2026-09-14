@@ -1,22 +1,35 @@
 const { withContentlayer } = require('next-contentlayer')
 
-// You might need to insert additional domains in script-src if you are using external services
-const ContentSecurityPolicy = `
-  default-src 'self';
-  script-src 'self' 'unsafe-eval' 'unsafe-inline' giscus.app analytics.umami.is;
-  style-src 'self' 'unsafe-inline';
-  img-src * blob: data:;
-  media-src *.s3.amazonaws.com;
-  connect-src *;
-  font-src 'self';
-  frame-src giscus.app
-`
+const isDev = process.env.NODE_ENV !== 'production'
+
+// Scoped to what this site actually loads: its own assets, inline styles from
+// Tailwind's runtime theme switch, and nothing third-party. The previous
+// policy allowlisted giscus.app and analytics.umami.is, neither of which is
+// used, and opened connect-src/img-src/media-src to the whole internet.
+//
+// 'unsafe-inline' in script-src is still required: the App Router and
+// next-themes both emit inline bootstrap scripts, and Next does not wire a
+// nonce through a statically exported page. 'unsafe-eval' is dev-only, where
+// React Refresh needs it.
+const ContentSecurityPolicy = [
+  "default-src 'self'",
+  `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ''}`,
+  "style-src 'self' 'unsafe-inline'",
+  "img-src 'self' data: blob:",
+  "font-src 'self' data:",
+  "connect-src 'self'",
+  "object-src 'none'",
+  "base-uri 'self'",
+  "form-action 'self'",
+  "frame-ancestors 'none'",
+  'upgrade-insecure-requests'
+].join('; ')
 
 const securityHeaders = [
   // https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP
   {
     key: 'Content-Security-Policy',
-    value: ContentSecurityPolicy.replace(/\n/g, '')
+    value: ContentSecurityPolicy
   },
   // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Referrer-Policy
   {
@@ -59,15 +72,11 @@ module.exports = () => {
     reactStrictMode: true,
     pageExtensions: ['ts', 'tsx', 'js', 'jsx', 'md', 'mdx'],
     eslint: {
-      dirs: ['src/app', 'src/components', 'src/layouts', 'src/scripts']
+      dirs: ['src/app', 'src/components', 'src/layouts', 'src/lib', 'src/scripts']
     },
     images: {
-      remotePatterns: [
-        {
-          protocol: 'https',
-          hostname: 'picsum.photos'
-        }
-      ]
+      // All imagery is local; no remote patterns are permitted.
+      remotePatterns: []
     },
     async headers () {
       return [
