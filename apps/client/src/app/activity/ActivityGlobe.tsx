@@ -163,6 +163,10 @@ export default function ActivityGlobe({ markers }: { markers: VisitMarker[] }) {
   };
 
   return (
+    // A canvas with no tabIndex is not keyboard-focusable — the pointer handlers
+    // are a drag affordance, not a focus target — so the rule misreads this.
+    // Dropping aria-hidden would expose an unlabelled canvas to a screen reader.
+    // biome-ignore lint/a11y/noAriaHiddenOnFocusable: decorative canvas, not focusable
     <canvas
       ref={canvasRef}
       aria-hidden="true"

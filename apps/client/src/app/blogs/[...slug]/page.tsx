@@ -14,7 +14,7 @@ import {
   publishedBlogs,
   type Author,
 } from "@/lib/content";
-import { type LayoutName } from "@/lib/blogLayouts";
+import type { LayoutName } from "@/lib/blogLayouts";
 
 // The component map is keyed by the same `LayoutName` the content loader
 // validates against, so the registry holds itself to the PR's own rule: add a

@@ -11,8 +11,8 @@
  * on a dynamic route, the page it breaks is named here instead of in a console
  * a visitor sees.
  */
-import { readdirSync } from "fs";
-import path from "path";
+import { readdirSync } from "node:fs";
+import path from "node:path";
 
 import { extractInlineScriptTags, hashInlineScript } from "../lib/cspHashes";
 

@@ -15,7 +15,7 @@ import {
  * would assume those rather than prove them.
  */
 
-type Call = { path: string; auth: string | null; body: any };
+type Call = { path: string; auth: string | null; body: Record<string, unknown> };
 
 function fakeDiscord(handler?: (call: Call) => Response) {
   const calls: Call[] = [];

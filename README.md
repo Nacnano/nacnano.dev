@@ -18,7 +18,7 @@ apps/client                 the site
   src/data                  content: essays, projects, timeline, site metadata
   src/scripts               postbuild (RSS)
 packages/tsconfig           shared TypeScript config
-packages/eslint-config-custom  shared ESLint config
+biome.jsonc                 lint rules (Prettier still owns formatting)
 ```
 
 ## Getting started
@@ -48,7 +48,7 @@ These four run in CI on every pull request, and are the same commands locally:
 
 ```bash
 bun run typecheck    # tsc --noEmit, strict
-bun run lint         # eslint, warnings fail (use lint:fix to write)
+bun run lint         # biome, warnings fail (use lint:fix to write)
 bun run test         # bun test
 bun run build        # next build + RSS postbuild
 ```

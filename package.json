@@ -13,15 +13,14 @@
     "build": "turbo run build",
     "dev": "turbo run dev",
     "lint": "turbo run lint",
-    "format": "prettier --write \"**/*.{ts,tsx,js,mjs,json,md,mdx,yml,yaml}\"",
-    "format:check": "prettier --check \"**/*.{ts,tsx,js,mjs,json,md,mdx,yml,yaml}\"",
+    "format": "prettier --write \"**/*.{ts,tsx,js,mjs,json,jsonc,md,mdx,yml,yaml}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,mjs,json,jsonc,md,mdx,yml,yaml}\"",
     "typecheck": "turbo run typecheck",
     "test": "turbo run test"
   },
   "devDependencies": {
+    "@biomejs/biome": "^2.5.13",
     "@turbo/gen": "^2.5.5",
-    "eslint": "^9.0.0",
-    "eslint-config-custom": "workspace:*",
     "prettier": "^3.0.0",
     "prettier-plugin-tailwindcss": "^0.4.1",
     "turbo": "^2.5.5"

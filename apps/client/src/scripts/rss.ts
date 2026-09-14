@@ -11,8 +11,8 @@
  * adding the second feed added no second copy of the escaping or the envelope —
  * which is the bug this file has already had once (see `lib/feed.ts`).
  */
-import { mkdirSync, writeFileSync } from "fs";
-import path from "path";
+import { mkdirSync, writeFileSync } from "node:fs";
+import path from "node:path";
 import siteMetadata from "../data/siteMetadata";
 import { publishedBlogs } from "../lib/content";
 import { mdToPlainText, publishedAma } from "../lib/ama";
