@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import dynamic from "next/dynamic";
 import CustomLink from "@/components/Link";
 import { useMounted } from "@/lib/useMounted";
 import { formatDate } from "@/lib/formatDate";
@@ -20,7 +21,6 @@ import {
   type VisitEvent,
   type VisitFeedPayload,
 } from "@/lib/activityTypes";
-import ActivityGlobe from "./ActivityGlobe";
 
 // One page size for both the live head and infinite-scroll pages. Paused while
 // the tab is hidden.
@@ -30,6 +30,20 @@ const POLL_MS = 2500;
 // the reader pages deep into history. The full list still renders; only the
 // aggregates sample the most recent slice.
 const AGGREGATE_WINDOW = 200;
+
+// The globe is a WebGL canvas that only ever draws on the client, so its cobe
+// code is deferred; a sized placeholder keeps the sticky column from shifting.
+// Follow-up: it still downloads on first paint even though it's below the fold
+// on mobile — gating this behind an IntersectionObserver would cut LCP further.
+const ActivityGlobe = dynamic(() => import("./ActivityGlobe"), {
+  ssr: false,
+  loading: () => (
+    <div
+      aria-hidden="true"
+      className="h-full w-full rounded-full border border-zinc-200 dark:border-zinc-800"
+    />
+  ),
+});
 
 function locationLabel(visit: VisitEvent): string {
   const country = visit.countryCode
