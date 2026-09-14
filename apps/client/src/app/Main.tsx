@@ -31,7 +31,7 @@ const Main = ({ posts }: { posts: CoreContent<Blog>[] }) => (
             {siteMetadata.greeting}
           </h1>
           <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-            {siteMetadata.author}
+            {siteMetadata.legalName}
           </p>
         </div>
       </div>

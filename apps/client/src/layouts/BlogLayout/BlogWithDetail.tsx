@@ -109,7 +109,7 @@ export default function BlogWithDetail({
             <span className="font-medium text-zinc-900 dark:text-zinc-100">
               {siteMetadata.author}
             </span>
-            , who goes by Nac. {siteMetadata.description}
+            . {siteMetadata.description}
           </p>
           <div className="mt-4 flex flex-wrap gap-2">
             <CustomLink
