@@ -72,6 +72,26 @@ jobs:
       - name: Build
         run: bun run build
 
+      # Serve that build and check, per page, that every inline script it emits
+      # is allowed by the policy it was served with.
+      #
+      # This is not a duplicate of `e2e/csp.e2e.ts`, which watches for real
+      # `securitypolicyviolation` events in a browser. Measured: delete the
+      # /ama JSON-LD hash from the manifest, rebuild, and the browser suite
+      # still passes — a `type="application/ld+json"` block is a data block,
+      # never prepared as a script, so a missing hash for it yields no refusal
+      # and no violation event. This check compares served policy against
+      # served markup directly, so it fails on exactly that drift.
+      - name: Verify Content-Security-Policy
+        working-directory: apps/client
+        run: |
+          bun run start &
+          for _ in $(seq 1 60); do
+            curl -sf -o /dev/null http://localhost:3000/ && break
+            sleep 1
+          done
+          bun run verify:csp
+
   e2e:
     name: e2e · playwright
     runs-on: ubuntu-latest
