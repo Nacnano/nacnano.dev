@@ -11,8 +11,13 @@ export function generateStaticParams() {
 
 export const dynamicParams = false;
 
-export default function Page({ params }: { params: { link: string } }) {
-  const target = table[params.link];
+export default async function Page({
+  params,
+}: {
+  params: Promise<{ link: string }>;
+}) {
+  const { link } = await params;
+  const target = table[link];
   if (!target) notFound();
   redirect(target);
 }

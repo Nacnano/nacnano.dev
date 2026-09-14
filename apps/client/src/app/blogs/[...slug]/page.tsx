@@ -29,8 +29,12 @@ function authorsFor(slugs: string[] | undefined): Author[] {
     .filter((author): author is Author => Boolean(author));
 }
 
-export function generateMetadata({ params }: { params: { slug: string[] } }) {
-  const blog = getBlog(decodeURI(params.slug.join("/")));
+/** Next 16 passes route params as a Promise. */
+type RouteParams = { params: Promise<{ slug: string[] }> };
+
+export async function generateMetadata({ params }: RouteParams) {
+  const { slug: segments } = await params;
+  const blog = getBlog(decodeURI(segments.join("/")));
   if (!blog) return {};
 
   const authors = authorsFor(blog.authors).map((author) => author.name);
@@ -72,8 +76,9 @@ export function generateStaticParams() {
 
 export const dynamicParams = false;
 
-export default function Page({ params }: { params: { slug: string[] } }) {
-  const slug = decodeURI(params.slug.join("/"));
+export default async function Page({ params }: RouteParams) {
+  const { slug: segments } = await params;
+  const slug = decodeURI(segments.join("/"));
 
   // Drafts are previewable in development but never reachable in production.
   const post = getBlog(slug);

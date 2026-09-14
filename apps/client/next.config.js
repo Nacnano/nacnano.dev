@@ -68,9 +68,6 @@ module.exports = () => {
   return {
     reactStrictMode: true,
     pageExtensions: ['ts', 'tsx', 'js', 'jsx', 'md', 'mdx'],
-    eslint: {
-      dirs: ['src/app', 'src/components', 'src/layouts', 'src/lib', 'src/scripts']
-    },
     images: {
       // All imagery is local; no remote patterns are permitted.
       remotePatterns: []
@@ -94,14 +91,6 @@ module.exports = () => {
         { source: '/tags/:tag/feed.xml', destination: '/feed.xml', permanent: true },
         { source: '/blog/:slug', destination: '/blogs/:slug', permanent: true }
       ]
-    },
-    webpack: (config, options) => {
-      config.module.rules.push({
-        test: /\.svg$/,
-        use: ['@svgr/webpack']
-      })
-
-      return config
     }
   }
 }
