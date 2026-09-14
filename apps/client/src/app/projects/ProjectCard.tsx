@@ -9,6 +9,7 @@ const ProjectCard = ({
   imgSrc,
   mark,
   href,
+  repo,
   stack,
   note,
 }: Project) => (
@@ -62,6 +63,17 @@ const ProjectCard = ({
             </li>
           ))}
         </ul>
+      )}
+
+      {/* Only shown when the title already points at a live site. `relative`
+          lifts it above the stretched row overlay so it stays clickable. */}
+      {repo && href && (
+        <CustomLink
+          href={repo}
+          className="relative mt-2.5 inline-block rounded text-sm text-zinc-500 underline decoration-zinc-300 underline-offset-4 transition-colors hover:text-accent-600 hover:decoration-accent-600 dark:text-zinc-400 dark:decoration-zinc-700 dark:hover:text-accent-300 dark:hover:decoration-accent-300"
+        >
+          Source
+        </CustomLink>
       )}
     </div>
   </article>

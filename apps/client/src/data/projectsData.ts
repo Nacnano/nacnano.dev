@@ -5,7 +5,8 @@ import type { MarkKind } from "@/app/projects/ProjectMark";
  * sync; the résumé is the source of truth for what exists and when.
  *
  * `href` is only set where the thing is actually still reachable — an event
- * site that has been taken down gets no link rather than a dead one.
+ * site that has been taken down gets no link rather than a dead one. `repo`
+ * is the source, shown alongside `href` when both exist.
  * `imgSrc` is a real screenshot; `mark` is a drawn diagram for the projects
  * with nothing deployed to capture.
  */
@@ -17,6 +18,7 @@ export type Project = {
   imgSrc?: string;
   mark?: MarkKind;
   href?: string;
+  repo?: string;
   note?: string;
 };
 
@@ -30,6 +32,7 @@ const projectsData: Project[] = [
     category: "built",
     imgSrc: "/static/images/cugetreg-logo.png",
     href: "https://cugetreg.com",
+    repo: "https://github.com/thinc-org/cugetreg",
   },
   {
     title: "CU Get Rekt",
@@ -39,6 +42,7 @@ const projectsData: Project[] = [
     category: "built",
     imgSrc: "/static/images/cugetrekt.png",
     href: "https://cugetrekt.vercel.app/",
+    repo: "https://github.com/Nacnano/cugetrekt",
   },
   {
     title: "CU Intania Open House 2024",
@@ -55,7 +59,9 @@ const projectsData: Project[] = [
       "Freshman welcome events for the university. I built the registration module — house selection and the QR-based activities.",
     stack: ["Next.js"],
     category: "built",
-    mark: "ticket",
+    imgSrc: "/static/images/cu-first-date.png",
+    href: "https://firstdate-rpkm67-frontend.vercel.app",
+    repo: "https://github.com/isd-sgcu/firstdate-rpkm67-frontend",
   },
   {
     title: "Soul Seasons",
@@ -63,7 +69,9 @@ const projectsData: Project[] = [
       "An interactive exhibition site that a few thousand people went through. Mostly an excuse to spend real time on motion.",
     stack: ["Next.js", "Framer Motion"],
     category: "built",
-    mark: "seasons",
+    imgSrc: "/static/images/soul-seasons.png",
+    href: "https://soul-seasons.vercel.app",
+    repo: "https://github.com/CBC-soul-seasons/soul-seasons",
   },
   {
     title: "E-learning platform",
@@ -81,6 +89,7 @@ const projectsData: Project[] = [
     category: "built",
     imgSrc: "/static/images/mwit29-archive.png",
     href: "https://mwit29-archive.vercel.app/",
+    repo: "https://github.com/Nacnano/mwit29-archive",
   },
 
   // ── Things I looked into ──────────────────────────────────────────────
@@ -91,6 +100,7 @@ const projectsData: Project[] = [
     stack: ["Python", "Visual Genome"],
     category: "research",
     mark: "grid",
+    href: "https://github.com/Nacnano/thai-context-llm-benchmark",
   },
   {
     title: "Fine-tuning a diffusion language model for Thai summarisation",
@@ -99,6 +109,7 @@ const projectsData: Project[] = [
     stack: ["Python", "LLaDA", "DeepEval"],
     category: "research",
     mark: "denoise",
+    href: "https://github.com/pupipatsk/NanoLLaDA",
   },
   {
     title: "Chess move detection from video",
@@ -107,6 +118,7 @@ const projectsData: Project[] = [
     stack: ["Python", "ResNet", "InceptionV3"],
     category: "research",
     mark: "board",
+    href: "https://github.com/athensclub/chess-video-move-detection",
   },
   {
     title: "Stock return forecasting and portfolio optimisation",
@@ -115,6 +127,7 @@ const projectsData: Project[] = [
     stack: ["Python", "scikit-learn", "Pandas"],
     category: "research",
     mark: "forecast",
+    href: "https://github.com/Nacnano/stock-machine-learning-project",
   },
   {
     title: "Multimedia and how students take notes",
@@ -132,6 +145,7 @@ const projectsData: Project[] = [
     stack: ["Python", "Pandas"],
     category: "research",
     mark: "court",
+    href: "https://github.com/Nacnano/IMMC-2021",
   },
 ];
 
