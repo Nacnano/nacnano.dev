@@ -65,6 +65,13 @@ const securityHeaders = [
     key: "Cross-Origin-Opener-Policy",
     value: "same-origin",
   },
+  // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cross-Origin-Resource-Policy
+  // The natural companion to COOP: no third party embeds our assets, and
+  // `images.remotePatterns` is empty, so same-origin costs nothing here.
+  {
+    key: "Cross-Origin-Resource-Policy",
+    value: "same-origin",
+  },
 ];
 
 /**
