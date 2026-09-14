@@ -5,6 +5,7 @@ import {
   shouldUseSeed,
 } from "@/lib/activity";
 import { readActivityFeed } from "@/lib/activityRedis";
+import { captureError } from "@/lib/observability";
 import { seedVisits } from "@/data/activityData";
 
 // The feed reflects recent visits, so it is never baked into the static build;
@@ -34,8 +35,15 @@ export async function GET(request: Request) {
       // empty result. Never substitute the seed on a real deployment.
       const payload = await readActivityFeed(limit, before);
       return NextResponse.json(payload);
-    } catch {
-      return NextResponse.json({ visits: [], count: 0, hasMore: false, nextCursor: null });
+    } catch (error) {
+      // A store failure is not an empty feed. Surface it as 5xx so the client
+      // keeps its last good page rather than rendering a fabricated zero, and
+      // log it so an outage is visible to the operator.
+      captureError(error, { route: "activity/feed" });
+      return NextResponse.json(
+        { ok: false, error: "upstream_unavailable" },
+        { status: 503 }
+      );
     }
   }
 
