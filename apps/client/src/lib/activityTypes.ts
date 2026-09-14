@@ -12,7 +12,7 @@
 
 // The day the counter starts from. Shown once in the feed header so a reader
 // knows how far back the numbers go.
-export const VISITS_TRACKED_SINCE = "2024-08-16";
+export const VISITS_TRACKED_SINCE = "2026-09-14";
 
 export type VisitEvent = {
   id: string;
@@ -29,11 +29,17 @@ export type VisitEvent = {
   /** Coordinates for the globe marker, when geo resolution gave us any. */
   lat?: number;
   lng?: number;
+  /** The Redis stream entry id, used as an opaque pagination cursor. */
+  cursor?: string;
 };
 
 export type VisitFeedPayload = {
   visits: VisitEvent[];
   count: number;
+  /** Cursor (oldest returned stream id) to ask for the next older page. */
+  nextCursor?: string | null;
+  /** Whether more, older visits exist beyond this page. */
+  hasMore?: boolean;
 };
 
 export type VisitMarker = {
