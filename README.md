@@ -57,7 +57,7 @@ bun run build        # next build + RSS postbuild
 | Essays | `apps/client/src/data/blogs/*.mdx` |
 | Projects | `apps/client/src/data/projectsData.ts` |
 | Work and education | `apps/client/src/data/timelineData.ts` |
-| Name, status, socials | `apps/client/src/data/siteMetadata.js` |
+| Name, status, socials | `apps/client/src/data/siteMetadata.ts` |
 | Author bio | `apps/client/src/data/authors/default.mdx` |
 
 Essay frontmatter needs `title`, `date` and `summary`; set `draft: true` to
