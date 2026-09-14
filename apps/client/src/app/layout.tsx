@@ -2,7 +2,7 @@ import "@/styles/tailwind.css";
 
 import { Inter } from "next/font/google";
 
-import { Metadata } from "next";
+import { Metadata, Viewport } from "next";
 import siteMetadata from "@/data/siteMetadata";
 import SectionContainer from "@/components/SectionContainer";
 import { ThemeProviders } from "./theme-provider";
@@ -74,6 +74,13 @@ const directionContract = `
   FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review.
 `;
 
+export const viewport: Viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
+    { media: "(prefers-color-scheme: dark)", color: "#09090b" },
+  ],
+};
+
 export default function RootLayout({
   children,
 }: {
@@ -99,16 +106,6 @@ export default function RootLayout({
         />
         <link rel="manifest" href="/static/favicons/site.webmanifest" />
         <meta name="msapplication-TileColor" content="#09090b" />
-        <meta
-          name="theme-color"
-          media="(prefers-color-scheme: light)"
-          content="#ffffff"
-        />
-        <meta
-          name="theme-color"
-          media="(prefers-color-scheme: dark)"
-          content="#09090b"
-        />
         <link rel="alternate" type="application/rss+xml" href="/feed.xml" />
       </head>
       <body className="bg-white font-sans text-zinc-900 antialiased dark:bg-zinc-950 dark:text-zinc-100">
