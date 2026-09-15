@@ -19,6 +19,7 @@
     "check:versions": "bun ./src/scripts/checkRuntimeVersions.ts",
     "typecheck": "tsc --noEmit",
     "test": "bun test",
+    "test:live": "bun test ./live-store/activity.contract.suite.ts",
     "ama:inbox": "bun ./src/scripts/amaInbox.ts",
     "verify:csp": "bun ./src/scripts/verifyCsp.ts",
     "perf": "bunx @lhci/cli@0.14.0 autorun",

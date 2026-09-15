@@ -1,0 +1,69 @@
+name: Live store contract
+
+# Proves the Redis adapter, rate limiters, and AMA inbox against a REAL Upstash
+# store — the boundary the fake-client unit tests cannot reach. Runs only on a
+# schedule and manual dispatch, NEVER on pull_request: these credentials must
+# not be reachable from untrusted or forked code.
+#
+# It targets the production Upstash *instance* but every key is namespaced under
+# a unique per-run prefix (see live-store/activity.contract.suite.ts), so it
+# cannot collide with the live feed's keys and teardown deletes only that prefix.
+
+on:
+  workflow_dispatch:
+  schedule:
+    # Nightly at 03:17 UTC (off the top of the hour to avoid the busiest minute).
+    - cron: "17 3 * * *"
+
+permissions:
+  contents: read
+
+# Serialise: overlapping runs against one store would race the rate-limit and
+# cursor assertions.
+concurrency:
+  group: live-store-contract
+  cancel-in-progress: true
+
+jobs:
+  contract:
+    name: live store · bun test
+    # Belt-and-braces so a fork cannot run this even if it carried the workflow.
+    if: github.repository == 'Nacnano/nacnano.dev'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.3.14
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+
+      - name: Cache bun install
+        uses: actions/cache@v6
+        with:
+          path: ~/.bun/install/cache
+          key: ${{ runner.os }}-bun-1.3.14-${{ hashFiles('bun.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-bun-1.3.14-
+
+      - name: Install
+        run: bun install --frozen-lockfile
+
+      # A unique, validated namespace per run isolates every write; the suite
+      # hard-fails if the prefix is missing or unsafe rather than writing
+      # un-prefixed into the production keys. The salt only salts throwaway,
+      # prefix-isolated rate-limit buckets, so a static value is fine here.
+      - name: Live store contract suite
+        working-directory: apps/client
+        env:
+          NODE_ENV: test
+          LIVE_STORE_TESTS: "1"
+          UPSTASH_REDIS_REST_URL: ${{ secrets.LIVE_STORE_UPSTASH_REDIS_REST_URL }}
+          UPSTASH_REDIS_REST_TOKEN: ${{ secrets.LIVE_STORE_UPSTASH_REDIS_REST_TOKEN }}
+          UPSTASH_KEY_PREFIX: live-ci-${{ github.run_id }}
+          VISIT_IP_SALT: live-store-ci-static-salt-32+-chars-0000000000000000
+        run: bun run test:live
