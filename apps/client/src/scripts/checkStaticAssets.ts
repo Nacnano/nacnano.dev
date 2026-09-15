@@ -22,6 +22,11 @@ import path from "node:path";
 
 const PNG_SIGNATURE = [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a];
 
+// Every icon this repo ships is a PNG, and everything below — the IHDR read, the
+// filename-size cross-check, the directory sweep — assumes it, so PNG is the
+// honest rule for the declared MIME type, not merely "some string".
+const MANIFEST_ICON_TYPE = "image/png";
+
 // A favicon class is tiny by definition; anything larger is the 3.5 MB mistake
 // wearing a different filename.
 export const PER_FILE_BUDGET_BYTES = 100 * 1024;
@@ -115,8 +120,14 @@ export function checkManifestIcons(
       problems.push(`manifest references a missing file: /${rel}`);
       continue;
     }
-    if (typeof type !== "string" || type.startsWith(" ")) {
-      problems.push(`manifest icon ${rel} has an invalid MIME type`);
+    // Every icon this repo ships is a PNG, and everything above and below — the
+    // IHDR read, the filename-size cross-check, the directory sweep — assumes it.
+    // The old check rejected only a non-string or a leading space, so any other
+    // string (`application/x-nonsense`) passed.
+    if (type !== MANIFEST_ICON_TYPE) {
+      problems.push(
+        `manifest icon ${rel} declares type ${JSON.stringify(type)}; it must be ${JSON.stringify(MANIFEST_ICON_TYPE)}`
+      );
     }
     const actual = pngDimensions(bytes);
     if (!actual) {

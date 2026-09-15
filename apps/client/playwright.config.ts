@@ -26,7 +26,10 @@ export default defineConfig({
     // Capture enough to debug a CI failure from the uploaded artifact alone.
     trace: "on-first-retry",
     screenshot: "only-on-failure",
-    video: "retain-on-failure",
+    // Match the trace setting: `retain-on-failure` still RECORDS every test and
+    // only deletes the passes afterwards, so `on-first-retry` is the honest
+    // "record only when we might actually need it" choice.
+    video: "on-first-retry",
   },
   projects: [
     {

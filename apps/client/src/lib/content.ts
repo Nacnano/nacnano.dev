@@ -418,18 +418,20 @@ function checkAsset(
     problems.push(`${label}: protocol-relative asset path ${asset}`);
     return;
   }
-  // A local asset must be a site-absolute path (no traversal, no backslash, no
-  // filesystem escape) that actually resolves under `public/`.
-  if (!asset.startsWith("/") || asset.includes("..") || asset.includes("\\")) {
+  // A local asset must be a site-absolute path with no filesystem escape.
+  if (!asset.startsWith("/") || asset.includes("\\")) {
     problems.push(`${label}: unsafe local asset path ${asset}`);
     return;
   }
   // Drop any cache-busting query or fragment before resolving on disk — the
-  // browser fetches `/static/x.png?v=2` from `public/static/x.png`, so the
-  // probe must too. `decodeURIComponent` un-escapes a percent-encoded filename,
-  // guarded against a malformed `%` sequence.
+  // browser fetches `/static/x.png?v=2` from `public/static/x.png`, so the probe
+  // must too.
   const [pathOnly] = asset.split(/[?#]/);
   const rel = (pathOnly ?? "").replace(/^\/+/, "");
+  // Decode BEFORE screening for traversal. `%2e%2e` decodes to `..`, so checking
+  // the raw string alone lets an encoded escape reach the disk probe — the same
+  // reasoning `isInternalPath` spells out. A malformed `%` falls back to the raw
+  // path and reports "missing" like any other absent file, rather than throwing.
   const resolved = (() => {
     try {
       return decodeURIComponent(rel);
@@ -437,6 +439,10 @@ function checkAsset(
       return rel;
     }
   })();
+  if (rel.includes("..") || resolved.includes("..") || resolved.includes("\\")) {
+    problems.push(`${label}: unsafe local asset path ${asset}`);
+    return;
+  }
   if (!probe.exists(resolved)) {
     problems.push(`${label}: missing file public/${rel}`);
   }

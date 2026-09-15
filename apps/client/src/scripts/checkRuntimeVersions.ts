@@ -11,8 +11,10 @@
  * It checks, against the single Node major in `.nvmrc`:
  *   - root and client `engines.node` agree with it,
  *   - `@types/node` is the same major (types must match the runtime),
- *   - CI `node-version` is the same major,
- *   - CI `bun-version` matches the root `packageManager` bun version,
+ *   - CI `node-version` is the same major, across EVERY job that pins it
+ *     (`verify` and `e2e`) — a value that differs between jobs is itself drift,
+ *   - CI `bun-version` matches the root `packageManager` bun version, likewise
+ *     across every job,
  *   - the lockfile is still `lockfileVersion` 1 (Vercel's Bun 1.3.x cannot read
  *     a v2 lockfile — see the root README).
  *
@@ -54,12 +56,25 @@ export function bunFromPackageManager(packageManager: unknown): string {
   return match ? (match[1] ?? "") : "";
 }
 
-/** Pull a `key: value` scalar out of a YAML workflow without a YAML dependency. */
+/** Every `key: value` scalar a workflow declares for `key`, in file order. */
+export function yamlValues(source: string, key: string): string[] {
+  const pattern = new RegExp(`^\\s*${key}:\\s*["']?([^"'\\n#]+)["']?\\s*$`, "gm");
+  return [...source.matchAll(pattern)].map((m) => (m[1] ?? "").trim());
+}
+
+/**
+ * The single value a workflow commits to for `key`, or "" when it declares none.
+ *
+ * `ci.yml` pins node/bun in BOTH the `verify` and `e2e` jobs, and reading only
+ * the first occurrence meant the second could drift off the runtime unnoticed —
+ * an e2e job on a Node the site never ships. Two different values for one key is
+ * itself drift, so it returns a marker that can never match the expected value
+ * and names what it found.
+ */
 function yamlValue(source: string, key: string): string {
-  const match = new RegExp(`^\\s*${key}:\\s*["']?([^"'\\n#]+)["']?\\s*$`, "m").exec(
-    source
-  );
-  return match ? (match[1] ?? "").trim() : "";
+  const unique = [...new Set(yamlValues(source, key))];
+  if (unique.length === 0) return "";
+  return unique.length === 1 ? (unique[0] ?? "") : `inconsistent: ${unique.join(", ")}`;
 }
 
 export function checkRuntimeVersions(v: ReleaseVersions): VersionMismatch[] {
@@ -89,15 +104,21 @@ export function checkRuntimeVersions(v: ReleaseVersions): VersionMismatch[] {
     majorOf(String(client.devDependencies?.["@types/node"] ?? ""))
   );
 
+  // A workflow that declares two different values for one key is itself drift.
+  // Compare the RAW value for that marker first — `majorOf` would regex out the
+  // first digit run of "inconsistent: 22, 20" and hand back "22", hiding the
+  // very mismatch this guard exists to catch.
+  const ciNode = yamlValue(v.ciWorkflow, "node-version");
   add(
     "CI node-version vs .nvmrc",
     nodeMajor,
-    majorOf(yamlValue(v.ciWorkflow, "node-version"))
+    ciNode.startsWith("inconsistent") ? ciNode : majorOf(ciNode)
   );
+  const ciBun = yamlValue(v.ciWorkflow, "bun-version");
   add(
     "CI bun-version vs packageManager",
     bunFromPackageManager(root.packageManager),
-    yamlValue(v.ciWorkflow, "bun-version")
+    ciBun
   );
 
   // bun.lock is a JSONC-ish format (not strict JSON), so the one field we care

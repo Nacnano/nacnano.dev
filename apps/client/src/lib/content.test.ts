@@ -309,6 +309,15 @@ describe("validateContentGraph", () => {
       present([])
     );
     expect(traversal.join("\n")).toMatch(/unsafe local asset path/);
+
+    // Percent-encoded traversal: `%2e%2e` decodes to `..`, so a raw-string check
+    // alone would pass this straight through to the disk probe.
+    const encoded = validateContentGraph(
+      [blogFixture({ summary: "s", images: ["/static/%2e%2e/%2e%2e/etc/passwd"] })],
+      [],
+      present([])
+    );
+    expect(encoded.join("\n")).toMatch(/unsafe local asset path/);
   });
 
   it("rejects a remote asset — this site cannot serve remote images", () => {
