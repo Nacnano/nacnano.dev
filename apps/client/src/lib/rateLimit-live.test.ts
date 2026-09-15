@@ -1,7 +1,8 @@
-import { describe, expect, it, mock, afterAll } from "bun:test";
+import { describe, expect, it, mock, beforeAll, afterAll } from "bun:test";
 import * as activityRedisReal from "./activityRedis";
 import * as observabilityReal from "./observability";
 import * as upstashRatelimitReal from "@upstash/ratelimit";
+import { resetRuntimeConfigCache } from "./runtimeConfig";
 
 const originalRedis = { ...activityRedisReal };
 const originalObservability = { ...observabilityReal };
@@ -47,6 +48,22 @@ mock.module("@/lib/observability", () => ({
 
 import { allowFeed, allowVisit } from "./rateLimit";
 
+// A configured store needs valid credentials + a salt so `limitKey` (via
+// `getRuntimeConfig`) produces a bucket; the store client itself is faked above.
+const SALT = "live-suite-salt-with-at-least-32-characters-of-entropy";
+beforeAll(() => {
+  process.env.UPSTASH_REDIS_REST_URL = "https://fake.upstash.example";
+  process.env.UPSTASH_REDIS_REST_TOKEN = "fake-token";
+  process.env.VISIT_IP_SALT = SALT;
+  resetRuntimeConfigCache();
+});
+afterAll(() => {
+  delete process.env.UPSTASH_REDIS_REST_URL;
+  delete process.env.UPSTASH_REDIS_REST_TOKEN;
+  delete process.env.VISIT_IP_SALT;
+  resetRuntimeConfigCache();
+});
+
 describe("allowVisit against a live store", () => {
   it("keys the limiter by a salted digest, never the raw IP", async () => {
     seenKey = "";
@@ -54,6 +71,19 @@ describe("allowVisit against a live store", () => {
     await allowVisit("203.0.113.9");
     expect(seenKey).toMatch(/^[0-9a-f]{64}$/);
     expect(seenKey).not.toContain("203.0.113.9");
+    expect(seenKey).not.toContain(SALT);
+  });
+
+  it("produces different buckets for different salts", async () => {
+    behavior = async () => ({ success: true });
+    await allowVisit("203.0.113.9");
+    const withFirstSalt = seenKey;
+    process.env.VISIT_IP_SALT = `${SALT}-rotated`;
+    resetRuntimeConfigCache();
+    await allowVisit("203.0.113.9");
+    expect(seenKey).not.toBe(withFirstSalt);
+    process.env.VISIT_IP_SALT = SALT;
+    resetRuntimeConfigCache();
   });
 
   it("throttles when the limiter says no", async () => {

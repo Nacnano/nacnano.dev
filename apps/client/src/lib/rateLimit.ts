@@ -16,6 +16,7 @@
 import { Ratelimit } from "@upstash/ratelimit";
 import { getActivityClient } from "./activityRedis";
 import { captureError } from "./observability";
+import { getRuntimeConfig, namespacedKey } from "./runtimeConfig";
 
 const WINDOW = "60 s";
 const WINDOW_SECONDS = 60;
@@ -52,7 +53,7 @@ function buildLimiter(
   return new Ratelimit({
     redis: client,
     limiter: Ratelimit.slidingWindow(limit, window),
-    prefix,
+    prefix: namespacedKey(prefix),
     analytics: false,
     // In-process deny cache: an already-blocked key is rejected without a
     // round trip, so a flood does not double Upstash traffic on the hot path.
@@ -93,9 +94,18 @@ export function clientIp(headers: Headers): string {
   return first || headers.get("x-real-ip") || "local";
 }
 
-/** Salted SHA-256 of the IP — a good limit bucket that leaks no raw address. */
+/**
+ * Salted SHA-256 of the IP — a good limit bucket that leaks no raw address.
+ *
+ * The salt comes only from the validated server runtime configuration; the old
+ * `"nacnano.dev"` fallback is gone because a public, predictable salt let an
+ * attacker precompute a victim's bucket key. `getRuntimeConfig` has already
+ * refused to return a configured result without a >=32-char salt, and it is
+ * never reached in static mode (the limiter is null before this runs).
+ */
 async function limitKey(ip: string): Promise<string> {
-  const salt = process.env.VISIT_IP_SALT ?? "nacnano.dev";
+  const config = getRuntimeConfig();
+  const salt = config.mode === "configured" ? config.ipSalt : "";
   const bytes = new TextEncoder().encode(`${ip}:${salt}`);
   const digest = await crypto.subtle.digest("SHA-256", bytes);
   return Array.from(new Uint8Array(digest))

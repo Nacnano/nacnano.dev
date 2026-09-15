@@ -18,7 +18,7 @@ import {
 } from "@/lib/activity";
 import {
   VISITS_TRACKED_SINCE,
-  isVisitFeedPayload,
+  parseFeedPayload,
   type VisitEvent,
   type VisitFeedPayload,
 } from "@/lib/activityTypes";
@@ -73,7 +73,9 @@ async function fetchPage(before: string | null): Promise<VisitFeedPayload | null
   });
   if (!response.ok) return null;
   const payload: unknown = await response.json();
-  return isVisitFeedPayload(payload) ? payload : null;
+  // Strict parse: an unusable envelope reads as `null` so the poll keeps the
+  // last-known-good feed instead of replacing it with malformed rows.
+  return parseFeedPayload(payload);
 }
 
 type Props = {

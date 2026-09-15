@@ -37,14 +37,17 @@ class FakeRedis {
 
 mock.module("@upstash/redis", () => ({ Redis: FakeRedis }));
 
-// getActivityClient gates on these; set them so the fake client is constructed.
+// getActivityClient gates on these; set them (with a valid salt, since a
+// configured deployment is required to have one) so the fake client is built.
 beforeAll(() => {
   process.env.UPSTASH_REDIS_REST_URL = "https://fake.upstash.example";
   process.env.UPSTASH_REDIS_REST_TOKEN = "fake-token";
+  process.env.VISIT_IP_SALT = "test-salt-value-that-is-long-enough-32";
 });
 afterAll(() => {
   delete process.env.UPSTASH_REDIS_REST_URL;
   delete process.env.UPSTASH_REDIS_REST_TOKEN;
+  delete process.env.VISIT_IP_SALT;
 });
 
 import { getActivityClient, readActivityFeed, recordVisit } from "./activityRedis";
