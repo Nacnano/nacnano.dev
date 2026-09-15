@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { buildFeedPayload, isActivityLive, shouldUseSeed } from "@/lib/activity";
+import { buildPublicFeedPage, isActivityLive, shouldUseSeed } from "@/lib/activity";
 import { readActivityFeed } from "@/lib/activityRedis";
 import { allowFeed, clientIp, RETRY_AFTER_SECONDS } from "@/lib/rateLimit";
 import { captureError } from "@/lib/observability";
@@ -92,12 +92,13 @@ export async function GET(request: Request) {
     headers: { "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300" },
   };
   if (shouldUseSeed()) {
+    // Same public projection as the live path: k-anonymous city, coordinates
+    // only ever as aggregated globe markers, never per-visit.
     return NextResponse.json(
-      {
-        ...buildFeedPayload(seedVisits, seedVisits.length),
+      buildPublicFeedPage(seedVisits, seedVisits.length, {
         hasMore: false,
         nextCursor: null,
-      },
+      }),
       staticHeaders
     );
   }

@@ -12,12 +12,14 @@
  * id doubles as the pagination cursor for the client's infinite scroll.
  */
 
+import "server-only";
+
 import { Redis } from "@upstash/redis";
-import { isInternalPath, sortVisitsDesc } from "./activity";
-import { parseVisitEvent } from "./activityTypes";
+import { buildPublicFeedPage, isInternalPath } from "./activity";
+import { parseStoredVisit } from "./activityTypes";
 import { captureError } from "./observability";
 import { getRuntimeConfig, namespacedKey } from "./runtimeConfig";
-import type { VisitEvent, VisitFeedPayload } from "./activityTypes";
+import type { PrivateVisitEventV2, VisitFeedPayload } from "./activityTypes";
 
 // Logical keys; the configured namespace (see `runtimeConfig.namespacedKey`) is
 // applied at each use so an opted-in prefix isolates test workspaces without
@@ -33,6 +35,8 @@ export const STREAM_MAXLEN = 1500;
 // the site staying live to keep the age limit honest.
 const RETENTION_SECONDS = 180 * 24 * 60 * 60;
 const RETENTION_MS = RETENTION_SECONDS * 1000;
+/** Stated on /privacy so the policy never advertises a window the store isn't keeping. */
+export const RETENTION_DAYS = RETENTION_SECONDS / (24 * 60 * 60);
 
 export type VisitInput = {
   path: string;
@@ -110,8 +114,8 @@ export function __resetCachedClientForTests(): void {
   reportedConfigFaults.clear();
 }
 
-export function coerceVisit(raw: unknown): VisitEvent | null {
-  return parseVisitEvent(raw);
+export function coerceVisit(raw: unknown): PrivateVisitEventV2 | null {
+  return parseStoredVisit(raw);
 }
 
 type StreamEntry = { id: string; fields: Record<string, unknown> };
@@ -203,7 +207,7 @@ export async function readActivityFeed(
 
   const parsed = parseStreamEntries(entries);
 
-  const visits: VisitEvent[] = [];
+  const visits: PrivateVisitEventV2[] = [];
   const corruptIds: string[] = [];
   for (const entry of parsed) {
     const visit = coerceVisit(entry.fields.data);
@@ -233,19 +237,18 @@ export async function readActivityFeed(
     });
   }
 
-  const ordered = sortVisitsDesc(visits);
-  return {
-    visits: ordered,
-    count: count ?? ordered.length,
-    // Paging is decided by the RAW page Redis returned, not the filtered one —
-    // otherwise a single dropped row makes a full page look short, ends the walk
-    // early, and strands all older history (a durable denial worse than the
-    // injection this filter exists to stop). A full raw page ⇒ older entries
-    // likely remain; the cursor is the oldest RAW id, so the next page never
-    // re-reads rows we already discarded.
+  // Project the private page down to what a browser may see (k-anonymous city,
+  // coordinates aggregated into server-side markers) before it is serialised.
+  // Paging is decided by the RAW page Redis returned, not the filtered one —
+  // otherwise a single dropped row makes a full page look short, ends the walk
+  // early, and strands all older history (a durable denial worse than the
+  // injection this filter exists to stop). A full raw page ⇒ older entries
+  // likely remain; the cursor is the oldest RAW id, so the next page never
+  // re-reads rows we already discarded.
+  return buildPublicFeedPage(visits, count ?? visits.length, {
     hasMore: parsed.length === limit,
     nextCursor: parsed.at(-1)?.id ?? null,
-  };
+  });
 }
 
 /**
@@ -288,9 +291,10 @@ function coordinatePair(
   return {};
 }
 
-export function visitEvent(input: VisitInput): VisitEvent {
+export function visitEvent(input: VisitInput): PrivateVisitEventV2 {
   const coords = coordinatePair(input.lat, input.lng);
   return {
+    v: 2,
     id: crypto.randomUUID(),
     ts: new Date().toISOString(),
     page: input.path,

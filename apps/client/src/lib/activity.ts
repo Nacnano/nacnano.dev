@@ -8,10 +8,15 @@
  * globe-marker rules.
  */
 
-import type { VisitEvent, VisitFeedPayload, VisitMarker } from "./activityTypes";
+import type {
+  PublicVisit,
+  VisitEvent,
+  VisitFeedPayload,
+  VisitMarker,
+} from "./activityTypes";
 
 /** Newest first. A stable sort keeps authored order inside one second. */
-export function sortVisitsDesc(visits: readonly VisitEvent[]): VisitEvent[] {
+export function sortVisitsDesc<T extends { ts: string }>(visits: readonly T[]): T[] {
   return [...visits].sort((a, b) => new Date(b.ts).getTime() - new Date(a.ts).getTime());
 }
 
@@ -21,10 +26,10 @@ export function sortVisitsDesc(visits: readonly VisitEvent[]): VisitEvent[] {
  * the row (and a page the reader scrolled to is never reordered underneath
  * them). Shared by the live poll and the infinite-scroll pager in the feed.
  */
-export function mergeById(
-  existing: readonly VisitEvent[],
-  incoming: readonly VisitEvent[]
-): VisitEvent[] {
+export function mergeById<T extends { id: string; ts: string }>(
+  existing: readonly T[],
+  incoming: readonly T[]
+): T[] {
   const map = new Map(existing.map((visit) => [visit.id, visit]));
   for (const visit of incoming) {
     if (!map.has(visit.id)) map.set(visit.id, visit);
@@ -205,12 +210,84 @@ export function countCountries(visits: readonly VisitEvent[]): number {
   return codes.size;
 }
 
-/** The public feed body: newest-first visits plus the running total. */
-export function buildFeedPayload(
+/**
+ * How many visits a city needs, within the window being projected, before its
+ * name is safe to publish. Below it a row degrades to country (then "somewhere").
+ * One constant, so the strictness is tunable later without touching the stored
+ * shape — the private record always keeps `city`, this only gates the projection.
+ */
+export const CITY_VISIBILITY_THRESHOLD = 5;
+
+/** Grouping key for a city: trimmed and case-folded so casing never splits a bucket. */
+function cityKey(city: string): string {
+  return city.trim().toLowerCase();
+}
+
+/**
+ * The set of city keys safe to publish — those with at least `k` visits in this
+ * page. A single visitor from a small town is a re-identifying detail; the same
+ * town behind hundreds of people is not, so only the latter clears the bar.
+ */
+export function visibleCities(
   visits: readonly VisitEvent[],
-  count: number
+  k = CITY_VISIBILITY_THRESHOLD
+): Set<string> {
+  const counts = new Map<string, number>();
+  for (const visit of visits) {
+    if (!visit.city) continue;
+    const key = cityKey(visit.city);
+    if (!key) continue;
+    counts.set(key, (counts.get(key) ?? 0) + 1);
+  }
+  const visible = new Set<string>();
+  for (const [key, n] of counts) if (n >= k) visible.add(key);
+  return visible;
+}
+
+/**
+ * Project a stored (private) row down to the public shape. City survives only
+ * when it cleared the threshold; coordinates are dropped unconditionally — the
+ * `PublicVisit` type has no field for them, so this function physically cannot
+ * leak one even if asked to.
+ */
+export function toPublicVisit(visit: VisitEvent, visible: Set<string>): PublicVisit {
+  const projected: PublicVisit = {
+    id: visit.id,
+    ts: visit.ts,
+    page: visit.page,
+  };
+  if (visit.title) projected.title = visit.title;
+  if (visit.countryCode) projected.countryCode = visit.countryCode;
+  if (visit.city && visible.has(cityKey(visit.city))) projected.city = visit.city;
+  if (visit.cursor) projected.cursor = visit.cursor;
+  return projected;
+}
+
+/**
+ * Build the public feed body from the private rows the store returned: sort
+ * newest-first, aggregate the globe markers from the full-fidelity coordinates
+ * (which therefore never travel to the browser per-visit), and project every row
+ * through the k-anonymity gate. Shared by the live read path and the static seed
+ * so the same policy holds for real and sample data alike.
+ */
+export function buildPublicFeedPage(
+  rows: readonly VisitEvent[],
+  count: number,
+  page?: { hasMore?: boolean; nextCursor?: string | null }
 ): VisitFeedPayload {
-  return { visits: sortVisitsDesc(visits), count };
+  const ordered = sortVisitsDesc(rows);
+  const markers = visitMarkers(ordered);
+  const visible = visibleCities(ordered);
+  const payload: VisitFeedPayload = {
+    visits: ordered.map((row) => toPublicVisit(row, visible)),
+    count,
+  };
+  if (markers.length > 0) payload.markers = markers;
+  if (page) {
+    if (page.hasMore !== undefined) payload.hasMore = page.hasMore;
+    if ("nextCursor" in page) payload.nextCursor = page.nextCursor;
+  }
+  return payload;
 }
 
 /**

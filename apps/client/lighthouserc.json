@@ -9,7 +9,8 @@
         "http://localhost:3000/blogs/dating-app",
         "http://localhost:3000/projects",
         "http://localhost:3000/ama",
-        "http://localhost:3000/activity"
+        "http://localhost:3000/activity",
+        "http://localhost:3000/privacy"
       ],
       "numberOfRuns": 1,
       "settings": {

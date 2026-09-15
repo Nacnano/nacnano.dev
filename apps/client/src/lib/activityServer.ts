@@ -7,7 +7,7 @@
  * it last had; this decides only the first paint.
  */
 
-import { buildFeedPayload, shouldUseSeed } from "./activity";
+import { buildPublicFeedPage, shouldUseSeed } from "./activity";
 import { readActivityFeed } from "./activityRedis";
 import { seedVisits } from "@/data/activityData";
 import { captureError } from "./observability";
@@ -31,14 +31,15 @@ export async function loadInitialFeed(live: boolean): Promise<InitialFeed> {
   }
 
   // Store-less local dev shows the sample; a deploy without Redis shows empty.
+  // Both go through the same public projection the live path uses, so the seed
+  // obeys the k-anonymity rule and never ships raw coordinates either.
   if (shouldUseSeed()) {
     return {
       status: "ok",
-      payload: {
-        ...buildFeedPayload(seedVisits, seedVisits.length),
+      payload: buildPublicFeedPage(seedVisits, seedVisits.length, {
         hasMore: false,
         nextCursor: null,
-      },
+      }),
     };
   }
   return {

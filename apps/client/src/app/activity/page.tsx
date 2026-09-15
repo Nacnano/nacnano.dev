@@ -33,6 +33,7 @@ export default async function Activity() {
   return (
     <ActivityFeed
       initialVisits={initial.payload.visits}
+      initialMarkers={initial.payload.markers ?? []}
       initialCount={initial.payload.count}
       initialHasMore={initial.payload.hasMore ?? false}
       initialCursor={initial.payload.nextCursor ?? null}

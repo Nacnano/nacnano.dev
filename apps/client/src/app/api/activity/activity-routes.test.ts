@@ -123,6 +123,23 @@ describe("GET /api/activity/feed", () => {
     expect(body.hasMore).toBe(false);
   });
 
+  it("never exposes per-visit coordinates or an under-threshold city", async () => {
+    // The seed is projected through the real public path (only the store/live
+    // collaborators are mocked), so this is the acceptance check the curl in the
+    // plan describes: a public feed row carries no `lat`/`lng`, and every seed
+    // city sits below the k-anonymity threshold so none of them is published.
+    const body = await (await getFeed(feedRequest())).json();
+    expect(body.visits.length).toBeGreaterThan(0);
+    for (const visit of body.visits) {
+      expect(visit).not.toHaveProperty("lat");
+      expect(visit).not.toHaveProperty("lng");
+      expect(visit).not.toHaveProperty("city");
+    }
+    // Coordinates come back to the globe only as aggregated markers.
+    expect(Array.isArray(body.markers)).toBe(true);
+    expect(body.markers.length).toBeGreaterThan(0);
+  });
+
   it("serves an honest empty feed on a deploy with no store", async () => {
     ctrl.seed = false;
     const body = await (await getFeed(feedRequest())).json();

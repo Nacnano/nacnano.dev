@@ -31,6 +31,7 @@ const SURFACES: ReadonlyArray<{ path: string; label: string }> = [
   { path: "/projects", label: "projects" },
   { path: "/ama", label: "ama" },
   { path: "/activity", label: "activity" },
+  { path: "/privacy", label: "privacy" },
   { path: "/this-route-does-not-exist", label: "not-found" },
 ];
 

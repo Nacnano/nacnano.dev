@@ -11,6 +11,7 @@ export const PAGE_TITLES = {
   projects: "Things I've made",
   link: "Links",
   activity: "Activity",
+  privacy: "Privacy",
 } as const;
 
 export type PageTitleKey = keyof typeof PAGE_TITLES;

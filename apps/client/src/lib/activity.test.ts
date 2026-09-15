@@ -1,6 +1,8 @@
 import { describe, expect, it } from "bun:test";
 import {
   aggregateByCountry,
+  buildPublicFeedPage,
+  CITY_VISIBILITY_THRESHOLD,
   countCountries,
   countryFlag,
   formatRelative,
@@ -8,9 +10,11 @@ import {
   isInternalPath,
   mergeById,
   sortVisitsDesc,
+  toPublicVisit,
   topPages,
   trackedDays,
   visitMarkers,
+  visibleCities,
 } from "./activity";
 import type { VisitEvent } from "./activityTypes";
 
@@ -247,5 +251,105 @@ describe("isInternalPath", () => {
   it("rejects non-strings", () => {
     expect(isInternalPath(undefined)).toBe(false);
     expect(isInternalPath(42)).toBe(false);
+  });
+});
+
+// A handful of visits sharing one city, at/around the publication threshold.
+function cityed(count: number, city: string, start = 0): VisitEvent[] {
+  return Array.from({ length: count }, (_, i) =>
+    visit({ id: `${city}-${start + i}`, city, countryCode: "TH" })
+  );
+}
+
+describe("visibleCities (k-anonymity)", () => {
+  const k = CITY_VISIBILITY_THRESHOLD;
+
+  it("excludes a city with fewer than k visits", () => {
+    expect(visibleCities(cityed(k - 1, "Lagos"), k).has("lagos")).toBe(false);
+  });
+
+  it("includes a city with exactly k visits", () => {
+    expect(visibleCities(cityed(k, "Lagos"), k).has("lagos")).toBe(true);
+  });
+
+  it("includes a city with more than k visits", () => {
+    expect(visibleCities(cityed(k + 1, "Lagos"), k).has("lagos")).toBe(true);
+  });
+
+  it("folds case so 'Bangkok' and 'bangkok' share one bucket", () => {
+    const rows = [
+      visit({ id: "a", city: "Bangkok" }),
+      visit({ id: "b", city: "bangkok" }),
+      visit({ id: "c", city: " BANGKOK " }),
+      visit({ id: "d", city: "Bangkok" }),
+      visit({ id: "e", city: "bangkok" }),
+    ];
+    expect(visibleCities(rows, k).has("bangkok")).toBe(true);
+  });
+
+  it("ignores visits with no city", () => {
+    expect(visibleCities([visit({ id: "x" })], 1).size).toBe(0);
+  });
+});
+
+describe("toPublicVisit", () => {
+  it("keeps the city only when it cleared the threshold", () => {
+    const visible = new Set(["bangkok"]);
+    const keep = toPublicVisit(visit({ id: "1", city: "Bangkok" }), visible);
+    expect(keep.city).toBe("Bangkok");
+    const drop = toPublicVisit(visit({ id: "2", city: "Lagos" }), visible);
+    expect(drop).not.toHaveProperty("city");
+  });
+
+  it("always drops coordinates, even for a visible city", () => {
+    const projected = toPublicVisit(
+      visit({ id: "1", city: "Bangkok", lat: 13.7, lng: 100.5 }),
+      new Set(["bangkok"])
+    );
+    expect(projected).not.toHaveProperty("lat");
+    expect(projected).not.toHaveProperty("lng");
+  });
+});
+
+describe("buildPublicFeedPage", () => {
+  it("aggregates markers server-side while shipping no per-visit coordinates", () => {
+    const rows: VisitEvent[] = [
+      visit({
+        id: "1",
+        city: "Bangkok",
+        lat: 13.75,
+        lng: 100.5,
+        ts: "2026-09-14T02:00:00Z",
+      }),
+      visit({
+        id: "2",
+        city: "Bangkok",
+        lat: 13.75,
+        lng: 100.5,
+        ts: "2026-09-14T01:00:00Z",
+      }),
+    ];
+    const page = buildPublicFeedPage(rows, 2, { hasMore: false, nextCursor: null });
+    // Below the default k, so the city is not published...
+    expect(page.visits.every((v) => v.city === undefined)).toBe(true);
+    // ...but the globe still lights up, from aggregated blobs, not per-visit coords.
+    expect(page.markers?.length).toBeGreaterThan(0);
+    for (const visit of page.visits) {
+      expect(visit).not.toHaveProperty("lat");
+      expect(visit).not.toHaveProperty("lng");
+    }
+    // Newest-first is preserved through the projection.
+    expect(page.visits.map((v) => v.id)).toEqual(["1", "2"]);
+    expect(page.hasMore).toBe(false);
+  });
+
+  it("publishes a city once enough visits back it", () => {
+    const page = buildPublicFeedPage(cityed(CITY_VISIBILITY_THRESHOLD, "Bangkok"), 10);
+    expect(page.visits.every((v) => v.city === "Bangkok")).toBe(true);
+  });
+
+  it("omits markers entirely when no row carries coordinates", () => {
+    const page = buildPublicFeedPage([visit({ id: "1" })], 1);
+    expect(page.markers).toBeUndefined();
   });
 });

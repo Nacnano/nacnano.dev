@@ -165,6 +165,43 @@ describe("readActivityFeed", () => {
     expect(page.hasMore).toBe(true); // full RAW page → keep paging
     expect(page.nextCursor).toBe("1-0"); // oldest RAW id, filtered row included
   });
+
+  it("projects rows to the public shape: no coordinates, sub-threshold city dropped", async () => {
+    // The privacy guarantee on the READ path (option B): even a fully-populated
+    // stored row must serialise without lat/lng, and a lone city name below the
+    // k-anonymity threshold must not survive. The globe still gets points, via
+    // aggregated markers computed from the (private) coordinates.
+    const shared = (n: number, id: string) =>
+      Array.from({ length: n }, (_, i) => ({
+        id: `${id}-${i}`,
+        ts: `2026-09-14T0${i % 9}:00:00.000Z`,
+        page: "/blogs/x",
+        countryCode: "TH",
+        city: id,
+        lat: 13.7,
+        lng: 100.5,
+      }));
+    // 2 "Lagos" (below k=5) + 5 "Bangkok" (at k) in one page.
+    const rows = [...shared(2, "Lagos"), ...shared(5, "Bangkok")];
+    const obj: Record<string, { data: unknown }> = {};
+    rows.forEach((r, i) => {
+      obj[`${1700000000000 + i}-0`] = { data: r };
+    });
+    xrevrangeReturn = obj;
+    getReturn = 7;
+
+    const page = await readActivityFeed(30);
+    // No public row ever carries a coordinate or an under-threshold city.
+    for (const visit of page.visits) {
+      expect(visit).not.toHaveProperty("lat");
+      expect(visit).not.toHaveProperty("lng");
+      if (visit.id.startsWith("Lagos")) expect(visit.city).toBeUndefined();
+    }
+    // Bangkok clears the threshold, so its name survives on its rows.
+    expect(page.visits.find((v) => v.id.startsWith("Bangkok"))?.city).toBe("Bangkok");
+    // Coordinates returned to the globe only as aggregated markers.
+    expect(page.markers?.length).toBeGreaterThan(0);
+  });
 });
 
 describe("recordVisit", () => {

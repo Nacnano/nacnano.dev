@@ -14,13 +14,13 @@ import {
   mergeById,
   topPages,
   trackedDays,
-  visitMarkers,
 } from "@/lib/activity";
 import {
   VISITS_TRACKED_SINCE,
   parseFeedPayload,
-  type VisitEvent,
+  type PublicVisit,
   type VisitFeedPayload,
+  type VisitMarker,
 } from "@/lib/activityTypes";
 
 // One page size for both the live head and infinite-scroll pages. Paused while
@@ -57,10 +57,12 @@ function GlobeShell({ children }: { children?: React.ReactNode }) {
   );
 }
 
-function locationLabel(visit: VisitEvent): string {
+function locationLabel(visit: PublicVisit): string {
   const country = visit.countryCode
     ? `${countryFlag(visit.countryCode)} ${visit.countryCode}`
     : "";
+  // `city` is present only when it cleared the k-anonymity threshold server-side;
+  // otherwise the row degrades to country, and finally to "somewhere".
   return [visit.city, country].filter(Boolean).join(" · ") || "somewhere";
 }
 
@@ -79,7 +81,8 @@ async function fetchPage(before: string | null): Promise<VisitFeedPayload | null
 }
 
 type Props = {
-  initialVisits: VisitEvent[];
+  initialVisits: PublicVisit[];
+  initialMarkers: VisitMarker[];
   initialCount: number;
   initialHasMore: boolean;
   initialCursor: string | null;
@@ -88,12 +91,16 @@ type Props = {
 
 export default function ActivityFeed({
   initialVisits,
+  initialMarkers,
   initialCount,
   initialHasMore,
   initialCursor,
   live,
 }: Props) {
-  const [visits, setVisits] = useState<VisitEvent[]>(initialVisits);
+  const [visits, setVisits] = useState<PublicVisit[]>(initialVisits);
+  // Globe points arrive pre-aggregated on the server (from the private rows), so
+  // the browser never receives per-visit coordinates — only density blobs.
+  const [markers, setMarkers] = useState<VisitMarker[]>(initialMarkers);
   const [count, setCount] = useState<number>(initialCount);
   const [cursor, setCursor] = useState<string | null>(initialCursor);
   const [hasMore, setHasMore] = useState<boolean>(initialHasMore);
@@ -133,6 +140,9 @@ export default function ActivityFeed({
         if (active && payload) {
           setVisits((current) => mergeById(current, payload.visits));
           setCount(payload.count);
+          // The head page re-carries the whole aggregate; a fresh page of
+          // markers replaces the globe without any per-visit coordinate in sight.
+          if (payload.markers) setMarkers(payload.markers);
         }
       } catch {
         // A failed poll keeps the last good feed on screen.
@@ -185,7 +195,6 @@ export default function ActivityFeed({
     return () => observer.disconnect();
   }, [hasMore, loadMore]);
 
-  const markers = useMemo(() => visitMarkers(visits), [visits]);
   const aggregateSource = useMemo(() => visits.slice(0, AGGREGATE_WINDOW), [visits]);
   const countries = useMemo(() => aggregateByCountry(aggregateSource), [aggregateSource]);
   const pages = useMemo(() => topPages(aggregateSource), [aggregateSource]);
@@ -393,7 +402,7 @@ function VisitRow({
   now,
   mounted,
 }: {
-  visit: VisitEvent;
+  visit: PublicVisit;
   now: number;
   mounted: boolean;
 }) {

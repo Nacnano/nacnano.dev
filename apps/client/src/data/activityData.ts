@@ -1,4 +1,4 @@
-import type { VisitEvent } from "@/lib/activityTypes";
+import type { PrivateVisitEventV2 } from "@/lib/activityTypes";
 
 /**
  * The static seed of site visits, shown when the feed is not wired to a live
@@ -14,7 +14,7 @@ import type { VisitEvent } from "@/lib/activityTypes";
  * reader expects. A few countries repeat so the aggregation (marker sizes, the
  * country tally, most-viewed pages) has something to show.
  */
-export const seedVisits: VisitEvent[] = [
+const SEED_ROWS: Omit<PrivateVisitEventV2, "v">[] = [
   {
     id: "v01",
     ts: "2026-09-14T03:12:00.000Z",
@@ -196,3 +196,14 @@ export const seedVisits: VisitEvent[] = [
     lng: 3.3792,
   },
 ];
+
+/**
+ * The authored rows, tagged at the current schema version. Stamped here rather
+ * than in the literals so a future bump to the stored shape is one edit, exactly
+ * as `visitEvent()` tags real writes — and so this sample is provably the same
+ * shape the live store holds, exercising the versioned parser end to end.
+ */
+export const seedVisits: PrivateVisitEventV2[] = SEED_ROWS.map((row) => ({
+  v: 2,
+  ...row,
+}));

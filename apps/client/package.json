@@ -45,6 +45,7 @@
     "rehype-prism-plus": "^2",
     "rehype-slug": "^6",
     "remark-gfm": "^4",
+    "server-only": "0.0.1",
     "tailwindcss": "^4.3.3"
   },
   "devDependencies": {
