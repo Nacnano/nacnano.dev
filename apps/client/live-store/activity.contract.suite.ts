@@ -94,6 +94,17 @@ afterAll(async () => {
   // Delete ONLY this run's namespace. `${PREFIX}` is validated non-empty and
   // `:*` is scoped to it, so this can never reach the production keyspace.
   const keys = await client.keys(`${PREFIX}:*`);
+  // A single run creates only a few dozen prefixed keys. A large blow-up here
+  // means the prefix isolation failed and `keys("*")`-scale scope leaked into
+  // this namespace — so refuse to issue an unbounded `del(...keys)` over a
+  // surprise-sized set (which would also push the command past a sane arg limit)
+  // rather than trusting it blindly. Tune the ceiling up if the suite grows.
+  if (keys.length > 500) {
+    throw new Error(
+      `live-store: refusing unbounded teardown — ${keys.length} keys under ${PREFIX}:* ` +
+        `(expected a few dozen); the prefix isolation may have failed.`
+    );
+  }
   if (keys.length > 0) await client.del(...keys);
 });
 

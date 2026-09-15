@@ -12,8 +12,11 @@ name: Live store contract
 on:
   workflow_dispatch:
   schedule:
-    # Nightly at 03:17 UTC (off the top of the hour to avoid the busiest minute).
-    - cron: "17 3 * * *"
+    # Weekly (Mondays) at 03:17 UTC (off the top of the hour to avoid the busiest
+    # minute). Deliberately weekly, not nightly: this suite runs against the
+    # production Upstash *free* tier, and 365 runs/year against a personal-site
+    # quota is needless burn for a contract check whose shape rarely changes.
+    - cron: "17 3 * * 1"
 
 permissions:
   contents: read
@@ -55,8 +58,13 @@ jobs:
 
       # A unique, validated namespace per run isolates every write; the suite
       # hard-fails if the prefix is missing or unsafe rather than writing
-      # un-prefixed into the production keys. The salt only salts throwaway,
-      # prefix-isolated rate-limit buckets, so a static value is fine here.
+      # un-prefixed into the production keys.
+      #
+      # VISIT_IP_SALT is NOT a secret and must not read like one to a scanner. It
+      # only salts throwaway, prefix-isolated rate-limit buckets that teardown
+      # deletes after the run — nothing whose secrecy matters. The fixed suffix
+      # keeps the value comfortably over the 32-char minimum the runtime config
+      # requires regardless of how short `github.run_id` is.
       - name: Live store contract suite
         working-directory: apps/client
         env:
@@ -65,5 +73,5 @@ jobs:
           UPSTASH_REDIS_REST_URL: ${{ secrets.LIVE_STORE_UPSTASH_REDIS_REST_URL }}
           UPSTASH_REDIS_REST_TOKEN: ${{ secrets.LIVE_STORE_UPSTASH_REDIS_REST_TOKEN }}
           UPSTASH_KEY_PREFIX: live-ci-${{ github.run_id }}
-          VISIT_IP_SALT: live-store-ci-static-salt-32+-chars-0000000000000000
+          VISIT_IP_SALT: live-store-ci-${{ github.run_id }}-not-a-secret-throwaway-ip-salt-padding
         run: bun run test:live
