@@ -76,10 +76,10 @@ export default function AskForm({
         for it. Questions are deleted after {retentionDays} days.
       </p>
 
-      <form ref={formRef} action={formAction} className="mt-5 max-w-measure">
+      <form ref={formRef} action={formAction} className="max-w-measure mt-5">
         <label
           htmlFor={questionId}
-          className="block text-xs uppercase tracking-[0.08em] text-zinc-500 dark:text-zinc-400"
+          className="block text-xs tracking-[0.08em] text-zinc-500 uppercase dark:text-zinc-400"
         >
           Your question
         </label>
@@ -94,16 +94,16 @@ export default function AskForm({
         />
         <p
           id={countId}
-          className="tabular mt-1 font-mono text-xs uppercase tracking-[0.08em] text-zinc-500 dark:text-zinc-400"
+          className="tabular mt-1 font-mono text-xs tracking-[0.08em] text-zinc-500 uppercase dark:text-zinc-400"
         >
           Up to {maxQuestion} characters
         </p>
 
         <label
           htmlFor={contactId}
-          className="mt-4 block text-xs uppercase tracking-[0.08em] text-zinc-500 dark:text-zinc-400"
+          className="mt-4 block text-xs tracking-[0.08em] text-zinc-500 uppercase dark:text-zinc-400"
         >
-          Name or email <span className="normal-case tracking-normal">(optional)</span>
+          Name or email <span className="tracking-normal normal-case">(optional)</span>
         </label>
         <input
           id={contactId}
@@ -145,7 +145,7 @@ export default function AskForm({
             Or email{" "}
             <a
               href={`mailto:${email}`}
-              className="rounded text-zinc-900 underline decoration-zinc-300 underline-offset-4 transition-colors hover:text-accent-600 hover:decoration-accent-600 dark:text-zinc-100 dark:decoration-zinc-700 dark:hover:text-accent-300 dark:hover:decoration-accent-300"
+              className="hover:text-accent-600 hover:decoration-accent-600 dark:hover:text-accent-300 dark:hover:decoration-accent-300 rounded text-zinc-900 underline decoration-zinc-300 underline-offset-4 transition-colors dark:text-zinc-100 dark:decoration-zinc-700"
             >
               {email}
             </a>

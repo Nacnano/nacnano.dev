@@ -271,7 +271,7 @@ export default function ProjectMark({ kind }: { kind: MarkKind }) {
       role="img"
       aria-hidden="true"
       focusable="false"
-      className="h-40 w-full bg-zinc-50 dark:bg-zinc-900 sm:h-24"
+      className="h-40 w-full bg-zinc-50 sm:h-24 dark:bg-zinc-900"
       preserveAspectRatio="xMidYMid meet"
     >
       <Shape kind={kind} />

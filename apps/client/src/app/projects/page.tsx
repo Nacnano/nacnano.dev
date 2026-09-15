@@ -15,10 +15,10 @@ const research = projectsData.filter((p) => p.category === "research");
 export default function Projects() {
   return (
     <div className="py-12 sm:py-16">
-      <h1 className="text-[1.75rem] font-semibold leading-[1.2] tracking-[-0.022em] text-zinc-900 dark:text-zinc-100 sm:text-[2.125rem]">
+      <h1 className="text-[1.75rem] leading-[1.2] font-semibold tracking-[-0.022em] text-zinc-900 sm:text-[2.125rem] dark:text-zinc-100">
         Things I&rsquo;ve made
       </h1>
-      <p className="mt-4 max-w-measure text-[1.0625rem] leading-[1.75] text-zinc-600 dark:text-zinc-400">
+      <p className="max-w-measure mt-4 text-[1.0625rem] leading-[1.75] text-zinc-600 dark:text-zinc-400">
         Mostly built with other people, mostly for students. Some of it is still running,
         some of it was only ever meant to last a weekend.
       </p>
@@ -44,7 +44,7 @@ export default function Projects() {
         >
           Things I looked into
         </h2>
-        <p className="mt-2 max-w-measure text-[0.9375rem] leading-7 text-zinc-600 dark:text-zinc-400">
+        <p className="max-w-measure mt-2 text-[0.9375rem] leading-7 text-zinc-600 dark:text-zinc-400">
           Coursework and research. Most of this lives in a notebook somewhere rather than
           on the internet.
         </p>

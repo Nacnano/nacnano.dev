@@ -20,7 +20,7 @@ const ProjectCard = ({
 
   return (
     <article className="group relative flex flex-col gap-4 py-7 sm:flex-row sm:gap-7">
-      <div className="shrink-0 self-start overflow-hidden rounded border border-zinc-200 dark:border-zinc-800 sm:w-44">
+      <div className="shrink-0 self-start overflow-hidden rounded border border-zinc-200 sm:w-44 dark:border-zinc-800">
         {imgSrc ? (
           <Image
             src={imgSrc}
@@ -29,7 +29,7 @@ const ProjectCard = ({
             width={352}
             height={198}
             sizes="(min-width: 640px) 176px, 100vw"
-            className="h-40 w-full bg-zinc-50 object-contain dark:bg-zinc-900 sm:h-24"
+            className="h-40 w-full bg-zinc-50 object-contain sm:h-24 dark:bg-zinc-900"
           />
         ) : (
           <ProjectMark kind={mark ?? "grid"} />
@@ -37,7 +37,7 @@ const ProjectCard = ({
       </div>
 
       <div className="min-w-0">
-        <h3 className="text-[1.0625rem] font-semibold leading-7 tracking-[-0.011em] text-zinc-900 transition-colors group-hover:text-accent-600 dark:text-zinc-100 dark:group-hover:text-accent-300">
+        <h3 className="group-hover:text-accent-600 dark:group-hover:text-accent-300 text-[1.0625rem] leading-7 font-semibold tracking-[-0.011em] text-zinc-900 transition-colors dark:text-zinc-100">
           {primary ? (
             <CustomLink href={primary} className="rounded">
               {/* Stretched link: the whole row is the target, with one
@@ -50,12 +50,12 @@ const ProjectCard = ({
           )}
         </h3>
 
-        <p className="mt-1.5 max-w-measure text-[0.9375rem] leading-7 text-zinc-600 dark:text-zinc-400">
+        <p className="max-w-measure mt-1.5 text-[0.9375rem] leading-7 text-zinc-600 dark:text-zinc-400">
           {description}
         </p>
 
         {note && (
-          <p className="mt-1.5 max-w-measure text-[0.9375rem] leading-7 text-zinc-500 dark:text-zinc-400">
+          <p className="max-w-measure mt-1.5 text-[0.9375rem] leading-7 text-zinc-500 dark:text-zinc-400">
             {note}
           </p>
         )}
@@ -65,7 +65,7 @@ const ProjectCard = ({
             {stack.map((tech) => (
               <li
                 key={tech}
-                className="text-xs uppercase tracking-[0.08em] text-zinc-500 dark:text-zinc-400"
+                className="text-xs tracking-[0.08em] text-zinc-500 uppercase dark:text-zinc-400"
               >
                 {tech}
               </li>
@@ -78,7 +78,7 @@ const ProjectCard = ({
           // clickable rather than being swallowed by the title's hit area.
           <CustomLink
             href={repo as string}
-            className="relative mt-2.5 inline-block rounded text-sm text-zinc-500 underline decoration-zinc-300 underline-offset-4 transition-colors hover:text-accent-600 hover:decoration-accent-600 dark:text-zinc-400 dark:decoration-zinc-700 dark:hover:text-accent-300 dark:hover:decoration-accent-300"
+            className="hover:text-accent-600 hover:decoration-accent-600 dark:hover:text-accent-300 dark:hover:decoration-accent-300 relative mt-2.5 inline-block rounded text-sm text-zinc-500 underline decoration-zinc-300 underline-offset-4 transition-colors dark:text-zinc-400 dark:decoration-zinc-700"
           >
             Source
           </CustomLink>

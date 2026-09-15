@@ -6,7 +6,7 @@
 const Tag = ({ text }: { text: string }) => (
   // A separator keeps adjacent tags from reading as one phrase
   // ("TEACHING REFLECTION").
-  <li className="text-xs uppercase tracking-[0.08em] text-zinc-500 before:mr-3 before:text-zinc-300 before:content-['·'] first:before:hidden dark:text-zinc-400 dark:before:text-zinc-700">
+  <li className="text-xs tracking-[0.08em] text-zinc-500 uppercase before:mr-3 before:text-zinc-300 before:content-['·'] first:before:hidden dark:text-zinc-400 dark:before:text-zinc-700">
     {text}
   </li>
 );

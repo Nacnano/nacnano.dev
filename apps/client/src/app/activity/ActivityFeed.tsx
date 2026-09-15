@@ -229,7 +229,7 @@ export default function ActivityFeed({
           {live && visits.length > 0 ? (
             <span className="inline-flex items-center gap-1.5">
               <span
-                className="ml-1 inline-block h-1.5 w-1.5 rounded-full bg-accent-500 motion-safe:animate-pulse"
+                className="bg-accent-500 ml-1 inline-block h-1.5 w-1.5 rounded-full motion-safe:animate-pulse"
                 aria-hidden="true"
               />
               live now
@@ -259,7 +259,7 @@ export default function ActivityFeed({
                 >
                   <CustomLink
                     href={page.page}
-                    className="min-w-0 truncate text-[0.9375rem] text-zinc-800 transition-colors hover:text-accent-600 dark:text-zinc-200 dark:hover:text-accent-300"
+                    className="hover:text-accent-600 dark:hover:text-accent-300 min-w-0 truncate text-[0.9375rem] text-zinc-800 transition-colors dark:text-zinc-200"
                   >
                     {page.title ?? page.page}
                   </CustomLink>
@@ -300,7 +300,7 @@ export default function ActivityFeed({
               >
                 {hasMore ? (
                   <>
-                    <span className="flex items-center gap-2 font-mono text-xs uppercase tracking-[0.08em] text-zinc-400 dark:text-zinc-600">
+                    <span className="flex items-center gap-2 font-mono text-xs tracking-[0.08em] text-zinc-400 uppercase dark:text-zinc-600">
                       {loadingMore ? (
                         <>
                           <Spinner />
@@ -317,7 +317,7 @@ export default function ActivityFeed({
                       type="button"
                       onClick={() => void loadMore()}
                       disabled={loadingMore}
-                      className="rounded border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-700 transition-colors hover:border-zinc-400 hover:text-accent-600 disabled:cursor-default disabled:opacity-60 dark:border-zinc-700 dark:text-zinc-300 dark:hover:border-zinc-600 dark:hover:text-accent-300"
+                      className="hover:text-accent-600 dark:hover:text-accent-300 rounded border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-700 transition-colors hover:border-zinc-400 disabled:cursor-default disabled:opacity-60 dark:border-zinc-700 dark:text-zinc-300 dark:hover:border-zinc-600"
                     >
                       {loadingMore ? "Loading…" : "Load more visits"}
                     </button>
@@ -328,7 +328,7 @@ export default function ActivityFeed({
                     ) : null}
                   </>
                 ) : (
-                  <span className="font-mono text-xs uppercase tracking-[0.08em] text-zinc-400 dark:text-zinc-600">
+                  <span className="font-mono text-xs tracking-[0.08em] text-zinc-400 uppercase dark:text-zinc-600">
                     That&rsquo;s every visit we&rsquo;ve tracked
                   </span>
                 )}
@@ -337,7 +337,7 @@ export default function ActivityFeed({
           )}
         </section>
 
-        <p className="mt-8 font-mono text-xs uppercase tracking-[0.08em] text-zinc-400 dark:text-zinc-600">
+        <p className="mt-8 font-mono text-xs tracking-[0.08em] text-zinc-400 uppercase dark:text-zinc-600">
           {mounted
             ? `over ${trackedDays(VISITS_TRACKED_SINCE, new Date(now).toISOString())} days`
             : ""}
@@ -350,7 +350,7 @@ export default function ActivityFeed({
 function Stat({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <dt className="font-mono text-xs uppercase tracking-[0.08em] text-zinc-500 dark:text-zinc-400">
+      <dt className="font-mono text-xs tracking-[0.08em] text-zinc-500 uppercase dark:text-zinc-400">
         {label}
       </dt>
       <dd className="tabular mt-1 text-2xl font-semibold tracking-[-0.022em] text-zinc-900 dark:text-zinc-100">
@@ -400,7 +400,7 @@ function VisitRow({
       <div className="min-w-0 flex-1">
         <CustomLink
           href={visit.page}
-          className="block min-w-0 truncate text-[0.9375rem] text-zinc-800 transition-colors hover:text-accent-600 dark:text-zinc-200 dark:hover:text-accent-300"
+          className="hover:text-accent-600 dark:hover:text-accent-300 block min-w-0 truncate text-[0.9375rem] text-zinc-800 transition-colors dark:text-zinc-200"
         >
           {visit.title ?? visit.page}
         </CustomLink>
