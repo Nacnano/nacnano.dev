@@ -2,7 +2,7 @@
 
 import { headers } from "next/headers";
 import { after } from "next/server";
-import { askAma, isInboxLive, submitAsk, type AskState } from "@/lib/amaInbox";
+import { askAma, isInboxLive, submitAsk, textField, type AskState } from "@/lib/amaInbox";
 import { allowAsk, clientIp } from "@/lib/rateLimit";
 import { notifyNewQuestion } from "@/lib/amaNotify";
 import { captureError } from "@/lib/observability";
@@ -31,9 +31,9 @@ export async function askQuestion(
 
   return submitAsk(
     {
-      question: String(formData.get("question") ?? ""),
-      contact: String(formData.get("contact") ?? ""),
-      honeypot: String(formData.get("website") ?? ""),
+      question: textField(formData, "question"),
+      contact: textField(formData, "contact"),
+      honeypot: textField(formData, "website"),
     },
     {
       isLive: isInboxLive,

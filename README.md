@@ -19,6 +19,7 @@ apps/client                 the site
   src/scripts               postbuild (RSS)
 packages/tsconfig           shared TypeScript config
 biome.jsonc                 lint rules (Prettier still owns formatting)
+apps/client/.oxlintrc.json  oxlint, two react-hooks rules Biome lacks (see its comment)
 ```
 
 ## Getting started
@@ -48,7 +49,7 @@ These four run in CI on every pull request, and are the same commands locally:
 
 ```bash
 bun run typecheck    # tsc --noEmit, strict
-bun run lint         # biome, warnings fail (use lint:fix to write)
+bun run lint         # oxlint + biome, warnings fail (use lint:fix to write)
 bun run test         # bun test
 bun run build        # next build + RSS postbuild
 ```

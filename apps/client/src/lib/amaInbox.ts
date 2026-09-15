@@ -46,6 +46,23 @@ export type AskInput = {
 
 export type AskRejection = "empty" | "too_long" | "contact_too_long";
 
+/**
+ * Read a text field off a submitted form, refusing anything that is not a
+ * string.
+ *
+ * `FormData.get` is typed `FormDataEntryValue | null`, and a `FormDataEntryValue`
+ * is `string | File`. A browser submits a file part as a `File`, so the naive
+ * `String(form.get(name) ?? "")` collapses a multipart POST that sends a file
+ * for `question` into the literal `"[object File]"` — thirteen characters that
+ * then sail past `normaliseAsk` (which only bounds length) and get stored and
+ * notified as a real question. Treating any non-string as absent is what the
+ * text fields actually mean.
+ */
+export function textField(form: Pick<FormData, "get">, name: string): string {
+  const value = form.get(name);
+  return typeof value === "string" ? value : "";
+}
+
 export type NormalisedAsk =
   { ok: true; value: AskInput } | { ok: false; reason: AskRejection };
 

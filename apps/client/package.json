@@ -12,8 +12,8 @@
     "build": "bun run build:next && bun run build:csp-hashes && bun run build:next && bun run build:csp-hashes -- --check && bun ./src/scripts/postbuild.ts",
     "build:next": "cross-env INIT_CWD=$PWD next build",
     "build:csp-hashes": "bun ./src/scripts/cspScriptHashes.ts",
-    "lint": "biome lint --error-on-warnings .",
-    "lint:fix": "biome lint --write .",
+    "lint": "oxlint --deny-warnings . && biome lint --error-on-warnings . && bun ./src/scripts/checkEnvVars.ts",
+    "lint:fix": "oxlint --fix . && biome lint --write .",
     "typecheck": "tsc --noEmit",
     "test": "bun test",
     "ama:inbox": "bun ./src/scripts/amaInbox.ts",
@@ -52,6 +52,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "cross-env": "^7.0.3",
+    "oxlint": "1.82.0",
     "prettier": "^3.0.0",
     "tsconfig": "workspace:*",
     "typescript": "^5.1.3"
