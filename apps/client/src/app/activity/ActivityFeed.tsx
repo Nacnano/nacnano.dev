@@ -215,7 +215,7 @@ export default function ActivityFeed({
               >
                 <span aria-hidden="true">{countryFlag(country.countryCode)}</span>
                 <span>{country.countryCode}</span>
-                <span className="tabular text-zinc-400 dark:text-zinc-500">
+                <span className="tabular text-zinc-500 dark:text-zinc-400">
                   ×{country.count}
                 </span>
               </li>
@@ -302,7 +302,7 @@ export default function ActivityFeed({
               >
                 {hasMore ? (
                   <>
-                    <span className="flex items-center gap-2 font-mono text-xs tracking-[0.08em] text-zinc-400 uppercase dark:text-zinc-600">
+                    <span className="flex items-center gap-2 font-mono text-xs tracking-[0.08em] text-zinc-500 uppercase dark:text-zinc-400">
                       {loadingMore ? (
                         <>
                           <Spinner />
@@ -330,7 +330,7 @@ export default function ActivityFeed({
                     ) : null}
                   </>
                 ) : (
-                  <span className="font-mono text-xs tracking-[0.08em] text-zinc-400 uppercase dark:text-zinc-600">
+                  <span className="font-mono text-xs tracking-[0.08em] text-zinc-500 uppercase dark:text-zinc-400">
                     That&rsquo;s every visit we&rsquo;ve tracked
                   </span>
                 )}
@@ -339,7 +339,7 @@ export default function ActivityFeed({
           )}
         </section>
 
-        <p className="mt-8 font-mono text-xs tracking-[0.08em] text-zinc-400 uppercase dark:text-zinc-600">
+        <p className="mt-8 font-mono text-xs tracking-[0.08em] text-zinc-500 uppercase dark:text-zinc-400">
           {mounted
             ? `over ${trackedDays(VISITS_TRACKED_SINCE, new Date(now).toISOString())} days`
             : ""}
