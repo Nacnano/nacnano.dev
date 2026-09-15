@@ -34,6 +34,12 @@ const ASK_WINDOW = "1 h";
 const ASK_WINDOW_SECONDS = 60 * 60;
 const ASK_LIMIT_PER_WINDOW = 5;
 
+// The browser error-report endpoint. A single tab can throw a burst (one bad
+// render in a list is a row's worth of identical errors), so the ceiling is per
+// minute rather than per hour, and generous enough that honest reporting on a
+// flaky page is not silently dropped while still capping an outbound flood.
+const REPORT_LIMIT_PER_WINDOW = 10;
+
 /** Shared with the route so the advertised `Retry-After` can never drift. */
 export const RETRY_AFTER_SECONDS = WINDOW_SECONDS;
 /** Same contract for the ask box, which throttles over a much longer window. */
@@ -42,6 +48,7 @@ export const ASK_RETRY_AFTER_SECONDS = ASK_WINDOW_SECONDS;
 let limiter: Ratelimit | null | undefined;
 let readLimiter: Ratelimit | null | undefined;
 let askLimiter: Ratelimit | null | undefined;
+let reportLimiter: Ratelimit | null | undefined;
 
 function buildLimiter(
   prefix: string,
@@ -80,6 +87,12 @@ function getAskLimiter(): Ratelimit | null {
   if (askLimiter === undefined)
     askLimiter = buildLimiter("ama:ask-rl", ASK_LIMIT_PER_WINDOW, ASK_WINDOW);
   return askLimiter;
+}
+
+function getReportLimiter(): Ratelimit | null {
+  if (reportLimiter === undefined)
+    reportLimiter = buildLimiter("report-rl", REPORT_LIMIT_PER_WINDOW);
+  return reportLimiter;
 }
 
 /**
@@ -155,4 +168,14 @@ export async function allowFeed(ip: string): Promise<boolean> {
  */
 export async function allowAsk(ip: string): Promise<boolean> {
   return throttle(getAskLimiter, ip, "rate-limit-ask");
+}
+
+/**
+ * Ceiling for `POST /api/report`, the browser error-report sink. Same fail-open
+ * contract as the others: an Upstash incident must not turn error reporting into
+ * a 5xx (which would itself be an error worth reporting — the re-entrancy the
+ * route avoids by never calling back into reporting on its own failure).
+ */
+export async function allowReport(ip: string): Promise<boolean> {
+  return throttle(getReportLimiter, ip, "rate-limit-report");
 }

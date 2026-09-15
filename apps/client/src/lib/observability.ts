@@ -3,19 +3,24 @@
  *
  * There is no APM account wired up, so this deliberately has no third-party
  * dependency: it always writes a structured line to the server log (which
- * Vercel drains) and, when `ERROR_REPORT_URL` is configured, fire-and-forgets
- * the same payload to that endpoint. Point it at Sentry, Better Stack, or a
- * Slack webhook without touching call sites. It never throws and never blocks
- * the request that failed.
+ * Vercel drains) and then forwards the same payload — server-side to
+ * `ERROR_REPORT_URL` when configured, and browser-side to our own
+ * `POST /api/report`, which re-derives a bounded copy and forwards it onward.
+ * Point the server endpoint at Better Stack, Slack, or any webhook without
+ * touching call sites. It never throws and never blocks the request that failed.
  */
 
 type Context = Record<string, unknown>;
 
-// This MUST stay non-`NEXT_PUBLIC_`. The module is imported by `error.tsx` /
-// `global-error.tsx` (client), and only the missing `NEXT_PUBLIC_` prefix keeps
-// Next from inlining the real URL into the browser bundle — renaming it would
-// leak the reporting endpoint to every visitor.
-const endpoint = process.env.ERROR_REPORT_URL;
+// The browser's destination: our own origin, so the shipped `connect-src 'self'`
+// covers it with no CSP change — the same same-origin argument `ama/actions.ts`
+// makes for its server action. The real endpoint never travels to the client.
+const REPORT_PATH = "/api/report";
+
+// Matched to the convention `discord.ts` and `amaNotify.ts` already hold: a
+// fire-and-forget report must never hang a request, and must not keep a
+// serverless function alive waiting on an unresponsive peer.
+const TIMEOUT_MS = 2_000;
 
 function serialize(error: unknown): Record<string, unknown> {
   if (error instanceof Error) {
@@ -28,25 +33,70 @@ function serialize(error: unknown): Record<string, unknown> {
   return { message: String(error) };
 }
 
+// A report must never loop. If `ERROR_REPORT_URL` were pointed back at our own
+// `/api/report` (an operator footgun), the server handler would call
+// `captureError`, which would POST to `/api/report` again — a self-sustaining
+// fan-out of outbound traffic, the exact failure mode `activityRedis` guards
+// against for corrupt rows. This flag short-circuits a re-entrant call made
+// while a dispatch is in flight, mirroring that de-dup discipline.
+let reporting = false;
+
+function dispatch(url: string, body: Record<string, unknown>): void {
+  void fetch(url, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify(body),
+    // `keepalive` lets the browser report survive the page unloading around an
+    // error boundary; ignored on the server.
+    keepalive: true,
+    signal: AbortSignal.timeout(TIMEOUT_MS),
+  }).catch(() => {
+    /* a failed report must never surface */
+  });
+}
+
 /** Report an unexpected error. Safe from both the server and the browser. */
 export function captureError(error: unknown, context: Context = {}): void {
-  const payload = { ...context, ...serialize(error) };
+  if (reporting) return;
+
+  const serialized = serialize(error);
+  const payload = { ...context, ...serialized };
 
   // The log is the reliable sink on a serverless deploy.
   console.error("[error]", JSON.stringify(payload));
 
   const isServer = typeof window === "undefined";
-  if (!isServer || !endpoint) return;
 
+  reporting = true;
   try {
-    void fetch(endpoint, {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify(payload),
-    }).catch(() => {
-      /* a failed report must never surface */
-    });
+    if (isServer) {
+      // Read lazily (not at module scope) so a runtime that sets the env after
+      // boot — and the unit tests — actually reach it. This read stays non-
+      // `NEXT_PUBLIC_`: the missing prefix is what keeps Next from inlining the
+      // real URL into the browser bundle, so renaming it would leak the
+      // reporting endpoint to every visitor. (On the client this expression is
+      // statically replaced with `undefined`, and the browser branch below is
+      // taken anyway.)
+      const endpoint = process.env.ERROR_REPORT_URL;
+      if (endpoint) dispatch(endpoint, payload);
+    } else {
+      // Ship only bounded, non-secret fields to our own origin. `stack` is
+      // deliberately withheld — it is attacker-influenced text (a thrown
+      // message can embed request data) and the server re-derives its own;
+      // forwarding a client stack would put arbitrary text in the operator's
+      // log. `url` is the page it happened on, read here rather than trusted
+      // from the body.
+      dispatch(REPORT_PATH, {
+        name: serialized.name,
+        message: serialized.message,
+        scope: context.scope,
+        digest: context.digest,
+        url: typeof location !== "undefined" ? location.href : undefined,
+      });
+    }
   } catch {
     /* never let reporting break the caller */
+  } finally {
+    reporting = false;
   }
 }
