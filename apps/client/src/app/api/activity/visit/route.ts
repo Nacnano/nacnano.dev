@@ -109,7 +109,7 @@ export async function POST(request: Request) {
   } catch (error) {
     // A store failure is logged for the operator but never surfaces as a page
     // error — the beacon is fire-and-forget by design.
-    captureError(error, { route: "activity/visit" });
+    captureError(error, { scope: "activity/visit" });
     return NextResponse.json({ ok: true, skipped: true });
   }
 }

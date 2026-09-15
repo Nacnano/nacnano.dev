@@ -40,7 +40,7 @@ export async function askQuestion(
       allow: () => allowAsk(clientIp(requestHeaders)),
       store: askAma,
       notify: (record) => after(() => notifyNewQuestion(record)),
-      onError: (error) => captureError(error, { route: "ama/ask" }),
+      onError: (error) => captureError(error, { scope: "ama/ask" }),
     }
   );
 }

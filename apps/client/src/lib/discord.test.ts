@@ -108,7 +108,11 @@ describe("sendDiscordMessage", () => {
   it("does nothing at all when unconfigured", async () => {
     configure({});
     const discord = fakeDiscord();
-    await sendDiscordMessage({ content: "hi" }, { apiBase: discord.apiBase });
+    // `false`, not a silent success: a caller that de-dupes on delivery must be
+    // able to tell "nothing was configured" from "Discord has it".
+    expect(
+      await sendDiscordMessage({ content: "hi" }, { apiBase: discord.apiBase })
+    ).toBe(false);
     discord.stop();
     expect(discord.calls).toHaveLength(0);
   });
@@ -116,7 +120,9 @@ describe("sendDiscordMessage", () => {
   it("posts to the channel with the bot auth scheme", async () => {
     configure({ DISCORD_BOT_TOKEN: "secret-token", DISCORD_CHANNEL_ID: "999" });
     const discord = fakeDiscord();
-    await sendDiscordMessage({ content: "hi" }, { apiBase: discord.apiBase });
+    expect(
+      await sendDiscordMessage({ content: "hi" }, { apiBase: discord.apiBase })
+    ).toBe(true);
     discord.stop();
 
     expect(discord.calls).toHaveLength(1);
@@ -171,7 +177,7 @@ describe("sendDiscordMessage", () => {
     const discord = fakeDiscord(() => new Response("forbidden", { status: 403 }));
     expect(
       await sendDiscordMessage({ content: "hi" }, { apiBase: discord.apiBase })
-    ).toBeUndefined();
+    ).toBe(false);
     discord.stop();
   });
 
@@ -180,7 +186,7 @@ describe("sendDiscordMessage", () => {
     const discord = fakeDiscord(() => new Response("nope", { status: 400 }));
     expect(
       await sendDiscordMessage({ content: "hi" }, { apiBase: discord.apiBase })
-    ).toBeUndefined();
+    ).toBe(false);
     discord.stop();
     // The failed handshake must not be cached as a usable channel.
     expect(discord.calls).toHaveLength(1);
@@ -191,7 +197,7 @@ describe("sendDiscordMessage", () => {
     const discord = fakeDiscord(() => Response.json({ unexpected: true }));
     expect(
       await sendDiscordMessage({ content: "hi" }, { apiBase: discord.apiBase })
-    ).toBeUndefined();
+    ).toBe(false);
     discord.stop();
     expect(discord.calls).toHaveLength(1);
   });
@@ -200,6 +206,6 @@ describe("sendDiscordMessage", () => {
     configure({ DISCORD_BOT_TOKEN: "t", DISCORD_CHANNEL_ID: "999" });
     expect(
       await sendDiscordMessage({ content: "hi" }, { apiBase: "http://localhost:1" })
-    ).toBeUndefined();
+    ).toBe(false);
   });
 });

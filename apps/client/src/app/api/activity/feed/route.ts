@@ -76,7 +76,7 @@ export async function GET(request: Request) {
       // A store failure is not an empty feed. Surface it as 5xx so the client
       // keeps its last good page rather than rendering a fabricated zero, and
       // log it so an outage is visible to the operator.
-      captureError(error, { route: "activity/feed" });
+      captureError(error, { scope: "activity/feed" });
       return NextResponse.json(
         { ok: false, error: "upstream_unavailable" },
         // Never cache an outage: the next request should retry the store.
