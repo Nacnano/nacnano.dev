@@ -14,6 +14,8 @@
  * told so honestly rather than being shown a success it did not get.
  */
 
+import "server-only";
+
 import type { Redis } from "@upstash/redis";
 import {
   getActivityClient,

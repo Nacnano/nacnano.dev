@@ -69,6 +69,18 @@ The site runs in one of two modes, chosen entirely by environment:
   Redis stream and the feed and ask box go live. Setting exactly one credential
   is a hard configuration error, not a silent fallback — see `docs/architecture.md`.
 
+## Deploys and rollback
+
+`main` is the deploy trigger: a push to `main` promotes the Vercel **Production**
+environment; every other branch gets a **Preview** URL. To roll back, open the
+deploy in the Vercel dashboard and **Promote to Production** the last known-good
+one — rollback is instant and needs no redeploy. A degraded live config is now
+visible to an uptime monitor at `GET /api/health` (it reports
+`mode` and a `store` reachability check rather than failing silently as an empty
+feed). As a break-glass for stored data only, deleting the feed's Redis keys —
+`DEL activity:stream` (and `activity:count`) — purges every stored visit; the
+store refills from new traffic and re-applies its retention on the next write.
+
 ## Docs
 
 - [CONTRIBUTING.md](CONTRIBUTING.md) — the contribution bar and what each CI guard enforces.

@@ -3,6 +3,9 @@
 # Report coverage and fail the run if any COVERED file drops below the floor.
 coverage = true
 coverageThreshold = 0.6
+# Stub the build-time-only `server-only` guard so unit tests can import the
+# server modules (see the file's own comment). Runs before any test file loads.
+preload = ["./src/test/server-only.preload.ts"]
 
 # What this floor actually does (learned the hard way — see the review):
 # - Enforced PER FILE, not against the aggregate "All files" row.
