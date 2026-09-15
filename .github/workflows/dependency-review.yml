@@ -1,0 +1,27 @@
+name: Dependency review
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  review:
+    name: review new dependencies
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+
+      # Fails a PR that introduces a dependency with a known security advisory,
+      # an unapproved license, or one pulled from an unexpected origin. Complements
+      # the `bun audit --audit-level=high` gate in CI: that audits the whole tree,
+      # this audits only what a pull request *adds*.
+      - name: Review dependencies
+        uses: actions/dependency-review-action@v4
+        with:
+          fail-on-severity: high
+          # Bun is not yet understood by the checker's ecosystem auto-detect; the
+          # lockfile diff is still reviewed against the advisory databases.
+          license-checking: false

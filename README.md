@@ -16,10 +16,12 @@ apps/client                 the site
   src/layouts               page-level compositions
   src/lib                   pure helpers, unit tested
   src/data                  content: essays, projects, timeline, site metadata
-  src/scripts               postbuild (RSS)
+  src/scripts               build/CI tools: RSS, CSP hashes, and the guards
 packages/tsconfig           shared TypeScript config
 biome.jsonc                 lint rules (Prettier still owns formatting)
 apps/client/.oxlintrc.json  oxlint, two react-hooks rules Biome lacks (see its comment)
+docs/architecture.md        layer boundaries and the client/server split
+.conductor/settings.toml    shared Conductor workspace scripts
 ```
 
 ## Getting started
@@ -49,10 +51,29 @@ These four run in CI on every pull request, and are the same commands locally:
 
 ```bash
 bun run typecheck    # tsc --noEmit, strict
-bun run lint         # oxlint + biome + env-var guard, warnings fail (use lint:fix to write)
-bun run test         # bun test
-bun run build        # next build + RSS postbuild
+bun run lint         # oxlint + biome + env-var, runtime-version, and static-asset guards (lint:fix to write)
+bun run test         # bun test (unit + route-level, with a per-file coverage floor)
+bun run build        # next build + CSP hash two-pass + content-graph check + RSS/sitemap
 ```
+
+## Modes
+
+The site runs in one of two modes, chosen entirely by environment:
+
+- **Static** — no `UPSTASH_REDIS_REST_*`. Zero backend: the visit beacon no-ops,
+  the activity page shows sample data in dev / an honest empty state on Vercel,
+  and the `/ama` box points visitors at email rather than faking a send. This is
+  the default and a fully supported deployment.
+- **Live** — both Upstash credentials plus a strong `VISIT_IP_SALT` (generate one
+  with `openssl rand -base64 32`). Visits are recorded to a capped, expiring
+  Redis stream and the feed and ask box go live. Setting exactly one credential
+  is a hard configuration error, not a silent fallback — see `docs/architecture.md`.
+
+## Docs
+
+- [CONTRIBUTING.md](CONTRIBUTING.md) — the contribution bar and what each CI guard enforces.
+- [docs/architecture.md](docs/architecture.md) — layer boundaries, the client/server split, and the two-pass CSP build.
+- `apps/client/PRODUCT.md` records product truth and `apps/client/DESIGN.md` the built visual system.
 
 ## Editing content
 

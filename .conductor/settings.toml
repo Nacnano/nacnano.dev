@@ -1,0 +1,31 @@
+"$schema" = "https://conductor.build/schemas/settings.repo.schema.json"
+
+# Shared Conductor workspace configuration.
+#
+# Setup and run scripts execute from the workspace root in a non-interactive
+# shell (local scripts use zsh, cloud scripts use bash). Conductor gives each
+# local workspace its own port via $CONDUCTOR_PORT, but does NOT give each
+# workspace its own Redis database — so live-mode workspaces would otherwise
+# share one store. That is why run_mode starts "nonconcurrent".
+
+[scripts]
+setup = "bun install --frozen-lockfile"
+# Multiple workspaces can share the same (production) Upstash credentials via the
+# copied .env files. Until dev/test keys are namespaced per workspace (see
+# UPSTASH_KEY_PREFIX / CONDUCTOR_WORKSPACE_ID in the root README) or workspaces
+# default to static mode, keep run runs serialized.
+run_mode = "nonconcurrent"
+
+[scripts.run.dev]
+available_in = ["local"]
+command = "bun --cwd apps/client run dev --port $CONDUCTOR_PORT"
+default = true
+icon = "play"
+
+[scripts.run.test]
+command = "bun run test"
+icon = "test-tube"
+
+[scripts.run.verify]
+command = "bun run format:check && bun run typecheck && bun run lint && bun run test"
+icon = "badge-check"
