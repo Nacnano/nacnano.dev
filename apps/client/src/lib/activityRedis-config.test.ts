@@ -60,6 +60,23 @@ describe("getActivityClientOrNull", () => {
     expect(errors).toHaveLength(1);
   });
 
+  it("reports a persistent misconfiguration once, not once per call", () => {
+    // The beacon hits the resolver on every page view. Without de-duplication a
+    // single weak-salt config fans out one ERROR_REPORT_URL POST per page view,
+    // indefinitely — the exact failure the corrupt-row batching prevents. The
+    // route answers `{ ok: true, skipped: true }` throughout, so nothing looks
+    // wrong from outside; the report is the only signal it is broken.
+    setEnv({
+      UPSTASH_REDIS_REST_URL: "https://fake.upstash.example",
+      UPSTASH_REDIS_REST_TOKEN: "fake-token",
+      VISIT_IP_SALT: "short",
+    });
+    for (let i = 0; i < 5; i += 1) {
+      expect(getActivityClientOrNull("test/beacon")).toBeNull();
+    }
+    expect(errors).toHaveLength(1);
+  });
+
   it("returns null with no report in static mode (neither credential)", () => {
     setEnv({});
     expect(getActivityClientOrNull("test/static")).toBeNull();

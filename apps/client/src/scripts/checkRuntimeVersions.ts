@@ -11,10 +11,10 @@
  * It checks, against the single Node major in `.nvmrc`:
  *   - root and client `engines.node` agree with it,
  *   - `@types/node` is the same major (types must match the runtime),
- *   - CI `node-version` is the same major, across EVERY job that pins it
- *     (`verify` and `e2e`) — a value that differs between jobs is itself drift,
- *   - CI `bun-version` matches the root `packageManager` bun version, likewise
- *     across every job,
+ *   - CI `node-version` resolves to the same major across EVERY job that pins it
+ *     (`verify` and `e2e`) — two different majors is itself drift,
+ *   - CI `bun-version` matches the root `packageManager` bun version exactly,
+ *     likewise across every job,
  *   - the lockfile is still `lockfileVersion` 1 (Vercel's Bun 1.3.x cannot read
  *     a v2 lockfile — see the root README).
  *
@@ -104,16 +104,26 @@ export function checkRuntimeVersions(v: ReleaseVersions): VersionMismatch[] {
     majorOf(String(client.devDependencies?.["@types/node"] ?? ""))
   );
 
-  // A workflow that declares two different values for one key is itself drift.
-  // Compare the RAW value for that marker first — `majorOf` would regex out the
-  // first digit run of "inconsistent: 22, 20" and hand back "22", hiding the
-  // very mismatch this guard exists to catch.
-  const ciNode = yamlValue(v.ciWorkflow, "node-version");
+  // Compare Node by MAJOR across every job that pins it. `setup-node` accepts
+  // both `22` and `22.x`, and `engines.node` is already written `22.x`, so
+  // deduping the raw strings would flag `22` vs `22.x` as drift when both mean
+  // Node 22. Reducing each occurrence through `majorOf` FIRST makes the
+  // comparison agree on the thing the guard actually cares about. Two genuinely
+  // different majors collapse to a marker that can never equal `.nvmrc` — and
+  // because the marker is built from already-reduced majors, `majorOf` can never
+  // regex its way back over the mismatch it is reporting.
+  const ciNodeMajors = [
+    ...new Set(yamlValues(v.ciWorkflow, "node-version").map(majorOf)),
+  ];
   add(
     "CI node-version vs .nvmrc",
     nodeMajor,
-    ciNode.startsWith("inconsistent") ? ciNode : majorOf(ciNode)
+    ciNodeMajors.length === 1
+      ? (ciNodeMajors[0] ?? "")
+      : `inconsistent: ${ciNodeMajors.join(", ")}`
   );
+  // bun has no equivalent range form — it is pinned as an exact version in both
+  // jobs — so it is compared verbatim, and two different pins is itself drift.
   const ciBun = yamlValue(v.ciWorkflow, "bun-version");
   add(
     "CI bun-version vs packageManager",

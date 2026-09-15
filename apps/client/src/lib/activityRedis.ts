@@ -63,6 +63,14 @@ export function getActivityClient(): Redis | null {
   return cachedClient;
 }
 
+// A persistent misconfiguration throws on every store call, and the beacon path
+// reaches the resolver below on every page view — so reporting each throw verbatim
+// fans out one ERROR_REPORT_URL POST per view, indefinitely, the same "data
+// problem becomes an outbound-traffic problem" the corrupt-row batching prevents.
+// Report once per process per distinct (route, fault); a different variable, or a
+// corrected-then-broken env, has a different signature and reports again.
+const reportedConfigFaults = new Set<string>();
+
 /**
  * `getActivityClient()` for the callers that must degrade rather than throw.
  *
@@ -71,14 +79,20 @@ export function getActivityClient(): Redis | null {
  * response for "no store" — the /ama box reports `unavailable`, the beacon
  * acknowledges and drops, the feed answers 503 — and none of them can honour
  * that if resolving the client throws first. They call this instead: the
- * configuration error is still reported through `captureError`, and the caller
- * gets the `null` its existing branch already handles.
+ * configuration error is still reported through `captureError` (once, per the
+ * de-dup set above), and the caller gets the `null` its branch already handles.
  */
 export function getActivityClientOrNull(scope: string): Redis | null {
   try {
     return getActivityClient();
   } catch (error) {
-    captureError(error, { scope });
+    const fault =
+      error instanceof Error ? `${error.name}:${error.message}` : String(error);
+    const signature = `${scope}|${fault}`;
+    if (!reportedConfigFaults.has(signature)) {
+      reportedConfigFaults.add(signature);
+      captureError(error, { scope });
+    }
     return null;
   }
 }
@@ -87,10 +101,13 @@ export function getActivityClientOrNull(scope: string): Redis | null {
  * Drop the memoised client so a test can re-derive one after mutating env, in
  * the same spirit as `resetRuntimeConfigCache`. Mirrors the runtime-config
  * cache: only a *successfully constructed* client is cached, and this is the
- * only lever to clear it. Production never calls this.
+ * only lever to clear it. Also clears the config-fault dedup set, so a test can
+ * re-exercise a report that this process already made. Production never calls
+ * this.
  */
 export function __resetCachedClientForTests(): void {
   cachedClient = undefined;
+  reportedConfigFaults.clear();
 }
 
 export function coerceVisit(raw: unknown): VisitEvent | null {

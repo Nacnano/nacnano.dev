@@ -218,10 +218,13 @@ export function buildFeedPayload(
  * deliberately reads the raw environment (not `runtimeConfig`) and never throws,
  * because this boolean is handed to the client as a prop: the client must learn
  * only "poll or don't", never a credential or the salt. The authoritative,
- * throwing validation lives in `getActivityClient`/`getRuntimeConfig` — so an
+ * throwing validation lives in `getActivityClient`/`getRuntimeConfig`, so an
  * operator who sets exactly one credential (or a weak salt) does NOT silently
- * fall back to static here; the intent is "live," and the first store call
- * surfaces the misconfiguration loudly instead.
+ * fall back to static here — the intent is "live." How that misconfiguration
+ * then surfaces is per-route, by design: the feed reports it and answers 503 so
+ * the client keeps its last good page, while the fire-and-forget beacon reports
+ * it to the operator and answers `{ ok: true, skipped: true }`, because a visitor
+ * must never see a tracking failure.
  */
 export function isActivityLive(): boolean {
   return !!process.env.UPSTASH_REDIS_REST_URL || !!process.env.UPSTASH_REDIS_REST_TOKEN;

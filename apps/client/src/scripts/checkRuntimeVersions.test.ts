@@ -78,6 +78,19 @@ describe("checkRuntimeVersions", () => {
     ).toMatch(/inconsistent/);
   });
 
+  it("treats 22 and 22.x as the same Node major across jobs, not drift", () => {
+    // setup-node accepts both forms and engines.node is written `22.x`; comparing
+    // the raw strings would have flagged a job using the range form against one
+    // using the bare major. Reducing through majorOf first makes them agree.
+    const mismatches = checkRuntimeVersions(
+      fixture({
+        ciWorkflow:
+          "node-version: 22\nbun-version: 1.3.14\nnode-version: 22.x\nbun-version: 1.3.14\n",
+      })
+    );
+    expect(mismatches.map((m) => m.check)).not.toContain("CI node-version vs .nvmrc");
+  });
+
   it("catches a lockfile bumped past v1", () => {
     const mismatches = checkRuntimeVersions(
       fixture({ bunLock: JSON.stringify({ lockfileVersion: 2 }) })
