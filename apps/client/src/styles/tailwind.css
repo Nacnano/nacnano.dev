@@ -35,7 +35,10 @@
     scrollbar-color: theme('colors.zinc.300') transparent;
   }
 
-  .dark html,
+  /* `dark` lives on the root <html>, so the root selector is `html.dark`, not
+     `.dark html` (which can never match and left Firefox with a light root
+     scrollbar in dark mode). `.dark body` is kept for nested scroll surfaces. */
+  html.dark,
   .dark body {
     scrollbar-color: theme('colors.zinc.700') transparent;
   }
