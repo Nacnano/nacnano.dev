@@ -1,41 +1,25 @@
-# nacnano.dev
+# apps/client
 
-Personal site and essay archive for Chotpisit Adunsehawat.
+The Next.js site. **The [repo root `README.md`](../../README.md) is the canonical
+documentation** — setup, scripts, checks, content authoring, and the design docs
+live there.
 
-Next.js 14 (App Router) · TypeScript · Tailwind CSS · Contentlayer + MDX.
-Bun workspaces + Turborepo.
+This file exists only so tools landing in this directory are pointed at the right
+place. Concretely:
 
-## Develop
+- **Stack:** Next.js 16 (App Router) · React 19 · TypeScript · Tailwind CSS 4 ·
+  MDX via `next-mdx-remote`, in a Bun workspace driven by Turborepo. (This file
+  previously claimed Next 14 and Contentlayer; both are long gone — Contentlayer
+  was replaced by the loader in `src/lib/content.ts`.)
+- **Common commands** (run from the repo root unless noted):
 
-```bash
-bun install
-bun run dev       # from the repo root, or `bun run dev` in apps/client
-```
+  ```bash
+  bun run dev          # next dev
+  bun run build        # next build + CSP hash two-pass + RSS/sitemap postbuild
+  bun run test         # bun test (unit + route-level)
+  bun run lint         # oxlint + biome + env-var guard + runtime-version guard
+  bun run verify:csp   # check the served CSP against emitted markup
+  bun run e2e          # Playwright, against a production `next start`
+  ```
 
-Bun is required: `curl -fsSL https://bun.sh/install | bash`
-
-> **Keep `bun.lock` at `lockfileVersion: 1`.** Vercel's build image ships Bun
-> 1.3.x, which cannot parse the `lockfileVersion: 2` file that Bun >= 1.4
-> writes — it fails to read it, silently resolves everything fresh, and the
-> deploy stops being reproducible. Both 1.3.x and 1.4.x read a v1 lockfile and
-> neither rewrites it, so regenerate with `bunx bun@1.3.14 install` (or any
-> 1.3.x) if the lockfile ever needs rebuilding from scratch.
-
-## Build
-
-```bash
-bun run build     # next build + RSS (/feed.xml, /ama/rss.xml) and sitemap postbuild
-```
-
-## Content
-
-- Essays: `src/data/blogs/*.mdx`. Frontmatter needs `title`, `date` and `summary`; set `draft: true` to hide one.
-  Each essay closes on a single `#### ...` line, which renders as the takeaway block.
-- Projects: `src/data/projectsData.ts`
-- Work and education: `src/data/timelineData.ts` — **keep this in sync with
-  <https://resume.nacnano.dev>, which is the canonical CV.**
-- Site-wide facts, including the status line shown on the home page: `src/data/siteMetadata.ts`
-
-## Design
-
-See `PRODUCT.md` for product truth and `DESIGN.md` for the visual system.
+See the root README for the full, authoritative list.
