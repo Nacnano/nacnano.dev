@@ -36,7 +36,7 @@ const Main = ({ posts }: { posts: Blog[] }) => (
         </div>
       </div>
 
-      <p className="max-w-measure mt-6 text-[1.0625rem] leading-[1.75] text-zinc-600 dark:text-zinc-400">
+      <p className="mt-6 max-w-measure text-[1.0625rem] leading-[1.75] text-zinc-600 dark:text-zinc-400">
         {siteMetadata.description}
       </p>
 
@@ -45,7 +45,7 @@ const Main = ({ posts }: { posts: Blog[] }) => (
           <CustomLink
             key={link.title}
             href={link.href}
-            className="hover:text-accent-600 dark:hover:text-accent-300 rounded border border-zinc-200 px-3.5 py-2 text-sm font-medium text-zinc-700 transition-colors hover:border-zinc-300 dark:border-zinc-800 dark:text-zinc-300 dark:hover:border-zinc-700"
+            className="rounded border border-zinc-200 px-3.5 py-2 text-sm font-medium text-zinc-700 transition-colors hover:border-zinc-300 hover:text-accent-600 dark:border-zinc-800 dark:text-zinc-300 dark:hover:border-zinc-700 dark:hover:text-accent-300"
           >
             {link.title}
           </CustomLink>
@@ -64,7 +64,7 @@ const Main = ({ posts }: { posts: Blog[] }) => (
         Writing
       </h2>
 
-      <p className="max-w-measure mt-2 text-[0.9375rem] leading-7 text-zinc-600 dark:text-zinc-400">
+      <p className="mt-2 max-w-measure text-[0.9375rem] leading-7 text-zinc-600 dark:text-zinc-400">
         Mostly things that went sideways and what I made of them afterwards. I write when
         something is bothering me, so: not often.
       </p>
