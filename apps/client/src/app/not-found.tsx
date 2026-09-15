@@ -7,7 +7,7 @@ export default function NotFound() {
       <h1 className="text-[1.75rem] font-semibold leading-[1.2] tracking-[-0.022em] text-zinc-900 dark:text-zinc-100 sm:text-[2.125rem]">
         Nothing here
       </h1>
-      <p className="max-w-measure mt-4 text-[1.0625rem] leading-[1.75] text-zinc-600 dark:text-zinc-400">
+      <p className="mt-4 max-w-measure text-[1.0625rem] leading-[1.75] text-zinc-600 dark:text-zinc-400">
         Either the link is stale or I moved something and forgot to leave a note. If you
         were after something in particular, just ask me.
       </p>

@@ -229,7 +229,7 @@ export default function ActivityFeed({
           {live && visits.length > 0 ? (
             <span className="inline-flex items-center gap-1.5">
               <span
-                className="bg-accent-500 ml-1 inline-block h-1.5 w-1.5 rounded-full motion-safe:animate-pulse"
+                className="ml-1 inline-block h-1.5 w-1.5 rounded-full bg-accent-500 motion-safe:animate-pulse"
                 aria-hidden="true"
               />
               live now
@@ -259,7 +259,7 @@ export default function ActivityFeed({
                 >
                   <CustomLink
                     href={page.page}
-                    className="hover:text-accent-600 dark:hover:text-accent-300 min-w-0 truncate text-[0.9375rem] text-zinc-800 transition-colors dark:text-zinc-200"
+                    className="min-w-0 truncate text-[0.9375rem] text-zinc-800 transition-colors hover:text-accent-600 dark:text-zinc-200 dark:hover:text-accent-300"
                   >
                     {page.title ?? page.page}
                   </CustomLink>
@@ -317,7 +317,7 @@ export default function ActivityFeed({
                       type="button"
                       onClick={() => void loadMore()}
                       disabled={loadingMore}
-                      className="hover:text-accent-600 dark:hover:text-accent-300 rounded border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-700 transition-colors hover:border-zinc-400 disabled:cursor-default disabled:opacity-60 dark:border-zinc-700 dark:text-zinc-300 dark:hover:border-zinc-600"
+                      className="rounded border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-700 transition-colors hover:border-zinc-400 hover:text-accent-600 disabled:cursor-default disabled:opacity-60 dark:border-zinc-700 dark:text-zinc-300 dark:hover:border-zinc-600 dark:hover:text-accent-300"
                     >
                       {loadingMore ? "Loading…" : "Load more visits"}
                     </button>
@@ -400,7 +400,7 @@ function VisitRow({
       <div className="min-w-0 flex-1">
         <CustomLink
           href={visit.page}
-          className="hover:text-accent-600 dark:hover:text-accent-300 block min-w-0 truncate text-[0.9375rem] text-zinc-800 transition-colors dark:text-zinc-200"
+          className="block min-w-0 truncate text-[0.9375rem] text-zinc-800 transition-colors hover:text-accent-600 dark:text-zinc-200 dark:hover:text-accent-300"
         >
           {visit.title ?? visit.page}
         </CustomLink>

@@ -27,7 +27,7 @@ export default function Page() {
             <li key={key}>
               <CustomLink
                 href={link as string}
-                className="hover:text-accent-600 dark:hover:text-accent-300 flex items-center justify-between gap-4 py-4 text-[0.9375rem] font-medium text-zinc-900 transition-colors dark:text-zinc-100"
+                className="flex items-center justify-between gap-4 py-4 text-[0.9375rem] font-medium text-zinc-900 transition-colors hover:text-accent-600 dark:text-zinc-100 dark:hover:text-accent-300"
               >
                 {key}
                 <svg

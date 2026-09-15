@@ -34,7 +34,7 @@ const Entry = ({ item }: { item: TimelineItem }) => (
       )}
     </p>
     {item.description && (
-      <p className="max-w-measure mt-2 text-[0.9375rem] leading-7 text-zinc-600 dark:text-zinc-400">
+      <p className="mt-2 max-w-measure text-[0.9375rem] leading-7 text-zinc-600 dark:text-zinc-400">
         {item.description}
       </p>
     )}
