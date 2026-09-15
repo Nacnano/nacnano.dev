@@ -17,6 +17,7 @@ import { loadInitialFeed } from "@/lib/activityServer";
 import { seedVisits } from "@/data/activityData";
 import type { VisitInput } from "@/lib/activityRedis";
 import type { VisitFeedPayload } from "@/lib/activityTypes";
+import { RedisConfigError } from "@/lib/runtimeConfig";
 import { GET as getFeed } from "./feed/route";
 import { POST as postVisit } from "./visit/route";
 
@@ -64,6 +65,7 @@ mock.module("@/lib/activity", () => ({
 mock.module("@/lib/activityRedis", () => ({
   ...originalRedis,
   getActivityClient: () => (ctrl.client ? {} : null),
+  getActivityClientOrNull: () => (ctrl.client ? {} : null),
   readActivityFeed: (limit: number, before?: string | null) => {
     readCalls.push([limit, before]);
     return ctrl.read(limit, before);
@@ -163,6 +165,20 @@ describe("GET /api/activity/feed", () => {
     // An outage must never be cached, or a 2s blip would serve empty for a while.
     expect(res.headers.get("cache-control")).toBe("no-store");
     expect(errors).toHaveLength(1);
+  });
+
+  it("answers 503, not 500, when the store is misconfigured", async () => {
+    // A partial/weak live config throws out of the runtime configuration. The
+    // route's job is to turn that into the same uncached 503 an outage gets, so
+    // the client keeps its last good page. The 429 gate now lives under this
+    // same handler, so a config error resolving the limiter lands here too.
+    ctrl.live = true;
+    ctrl.read = async () => {
+      throw new RedisConfigError("VISIT_IP_SALT", "too short");
+    };
+    const res = await getFeed(feedRequest());
+    expect(res.status).toBe(503);
+    expect(res.headers.get("cache-control")).toBe("no-store");
   });
 
   it("clamps the limit to the 1..100 window", async () => {
@@ -305,6 +321,19 @@ describe("POST /api/activity/visit", () => {
   it("short-circuits in static mode before parsing or limiting", async () => {
     ctrl.live = false;
     const res = await postVisit(visitRequest("not json"));
+    expect(res.status).toBe(200);
+    expect(await res.json()).toEqual({ ok: true, skipped: true });
+    expect(recordCalls).toHaveLength(0);
+  });
+
+  it("acknowledges and drops a beacon when the store is misconfigured", async () => {
+    // A broken *live* configuration (a throw out of the runtime config) must take
+    // the same fire-and-forget branch as static mode, not 500 the visitor's
+    // beacon. `ctrl.client = false` models `getActivityClientOrNull` reporting
+    // the error and returning null.
+    ctrl.live = true;
+    ctrl.client = false;
+    const res = await postVisit(visitRequest(JSON.stringify({ path: "/about" })));
     expect(res.status).toBe(200);
     expect(await res.json()).toEqual({ ok: true, skipped: true });
     expect(recordCalls).toHaveLength(0);

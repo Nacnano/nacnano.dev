@@ -11,9 +11,9 @@
 [scripts]
 setup = "bun install --frozen-lockfile"
 # Multiple workspaces can share the same (production) Upstash credentials via the
-# copied .env files. Until dev/test keys are namespaced per workspace (see
-# UPSTASH_KEY_PREFIX / CONDUCTOR_WORKSPACE_ID in the root README) or workspaces
-# default to static mode, keep run runs serialized.
+# copied .env files. Until dev/test keys are namespaced per workspace (set a
+# distinct UPSTASH_KEY_PREFIX, documented in apps/client/.env.example) or
+# workspaces default to static mode, keep runs serialized.
 run_mode = "nonconcurrent"
 
 [scripts.run.dev]

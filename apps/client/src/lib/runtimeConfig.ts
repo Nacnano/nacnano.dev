@@ -110,8 +110,12 @@ function validate(env: Env): RedisRuntimeConfig {
 
 // Cached against the exact env tuple it was derived from, so a test that mutates
 // the environment is re-validated rather than served a stale verdict — while the
-// hot path (unchanged env) still avoids re-parsing.
-let cache: { key: string; config: RedisRuntimeConfig } | undefined;
+// hot path (unchanged env) still avoids re-parsing. The cache holds a successful
+// config OR a memoised failure, so a persistent misconfiguration is not
+// re-derived (and its Error not re-allocated) on every request — the beacon hits
+// this on every page view.
+type ConfigCache = { key: string; config?: RedisRuntimeConfig; error?: unknown };
+let cache: ConfigCache | undefined;
 
 function envKey(env: Env): string {
   return [
@@ -131,10 +135,24 @@ function envKey(env: Env): string {
  */
 export function getRuntimeConfig(env: Env = process.env): RedisRuntimeConfig {
   const key = envKey(env);
-  if (cache && cache.key === key) return cache.config;
-  const config = validate(env);
-  cache = { key, config };
-  return config;
+  if (cache && cache.key === key) {
+    // Re-throw the memoised failure rather than re-running `validate()` — the
+    // beacon reaches this on every page view, and re-deriving an unchanged
+    // verdict is pure waste.
+    if (cache.error !== undefined) throw cache.error;
+    return cache.config as RedisRuntimeConfig;
+  }
+  try {
+    const config = validate(env);
+    cache = { key, config };
+    return config;
+  } catch (error) {
+    // The failed verdict is cached under the same env key as a good one, so this
+    // can never latch a fixed config off forever: correcting the environment
+    // changes the key and `validate` runs again.
+    cache = { key, error };
+    throw error;
+  }
 }
 
 /** Drop the cached verdict so tests can re-derive config after mutating env. */

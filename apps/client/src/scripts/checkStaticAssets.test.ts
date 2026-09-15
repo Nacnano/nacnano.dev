@@ -106,6 +106,28 @@ describe("checkManifestIcons", () => {
     );
     expect(problems.join("\n")).toMatch(/absolute/);
   });
+
+  it("rejects an icon whose declared MIME type is not image/png", () => {
+    // The old check rejected only a non-string or a leading space, so
+    // `application/x-nonsense` sailed through despite everything downstream
+    // assuming PNG.
+    const probe = probeWith({
+      "static/favicons/android-chrome-192x192.png": pngHeader(192, 192),
+    });
+    const problems = checkManifestIcons(
+      {
+        icons: [
+          {
+            src: "/static/favicons/android-chrome-192x192.png",
+            sizes: "192x192",
+            type: "application/x-nonsense",
+          },
+        ],
+      },
+      probe
+    );
+    expect(problems.join("\n")).toMatch(/must be "image\/png"/);
+  });
 });
 
 describe("checkFaviconBudget", () => {

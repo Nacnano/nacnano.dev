@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { isActivityLive, isInternalPath } from "@/lib/activity";
-import { getActivityClient, recordVisit } from "@/lib/activityRedis";
+import { getActivityClientOrNull, recordVisit } from "@/lib/activityRedis";
 import { allowVisit, clientIp, RETRY_AFTER_SECONDS } from "@/lib/rateLimit";
 import { captureError } from "@/lib/observability";
 import { resolveVisitTitle } from "@/lib/visitTitles";
@@ -55,8 +55,10 @@ function readGeo(headers: Headers) {
 
 export async function POST(request: Request) {
   // Static mode has nowhere to write, so a visit is acknowledged and dropped
-  // rather than throwing at the caller's fetch.
-  if (!isActivityLive() || !getActivityClient()) {
+  // rather than throwing at the caller's fetch. A broken *live* configuration
+  // takes the same branch — reported to the operator by the resolver, but never
+  // surfaced to a visitor, because the beacon is fire-and-forget by design.
+  if (!isActivityLive() || !getActivityClientOrNull("activity/visit")) {
     return NextResponse.json({ ok: true, skipped: true });
   }
 

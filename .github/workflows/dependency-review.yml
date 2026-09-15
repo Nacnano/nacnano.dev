@@ -23,5 +23,8 @@ jobs:
         with:
           fail-on-severity: high
           # Bun is not yet understood by the checker's ecosystem auto-detect; the
-          # lockfile diff is still reviewed against the advisory databases.
-          license-checking: false
+          # lockfile diff is still reviewed against the advisory databases. The
+          # input is `license-check` (verified against the action's own
+          # action.yml) — the previous `license-checking` was an unknown key and
+          # was silently ignored, leaving license checking on at its default.
+          license-check: false

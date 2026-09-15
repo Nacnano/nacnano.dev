@@ -7,6 +7,7 @@ import {
   RETENTION_SECONDS,
   type AskRecord,
 } from "./amaInbox";
+import { resetRuntimeConfigCache } from "./runtimeConfig";
 
 /**
  * The store half of the /ama inbox — the half `amaInbox.test.ts` deliberately
@@ -143,5 +144,54 @@ describe("isInboxLive", () => {
   it("is the store gate and nothing more", () => {
     expect(isInboxLive(null)).toBe(false);
     expect(isInboxLive(fakeStore().client)).toBe(true);
+  });
+});
+
+describe("key namespacing", () => {
+  // `UPSTASH_KEY_PREFIX` must namespace the inbox too, not just the activity
+  // stream and rate-limit buckets — otherwise two prefixed workspaces sharing
+  // one instance collide on one inbox and its 500-entry cap. Production sets no
+  // prefix, so the resolved key stays byte-identical to `ama:inbox`.
+  const PREFIX = "ws-42";
+  const SALT = "namespacing-test-salt-with-at-least-32-characters-of-entropy";
+  function withPrefix(run: () => void) {
+    const had = {
+      UPSTASH_KEY_PREFIX: process.env.UPSTASH_KEY_PREFIX,
+      UPSTASH_REDIS_REST_URL: process.env.UPSTASH_REDIS_REST_URL,
+      UPSTASH_REDIS_REST_TOKEN: process.env.UPSTASH_REDIS_REST_TOKEN,
+      VISIT_IP_SALT: process.env.VISIT_IP_SALT,
+    };
+    process.env.UPSTASH_KEY_PREFIX = PREFIX;
+    process.env.UPSTASH_REDIS_REST_URL = "https://fake.upstash.example";
+    process.env.UPSTASH_REDIS_REST_TOKEN = "fake-token";
+    process.env.VISIT_IP_SALT = SALT;
+    resetRuntimeConfigCache();
+    try {
+      run();
+    } finally {
+      for (const [key, value] of Object.entries(had)) {
+        if (value === undefined) delete process.env[key];
+        else process.env[key] = value;
+      }
+      resetRuntimeConfigCache();
+    }
+  }
+
+  it("writes to the prefixed key when a prefix is configured", async () => {
+    const { client, calls } = fakeStore();
+    withPrefix(() => {
+      void askAma({ question: "Why zinc?" }, client);
+    });
+    const xadd = calls.find((c) => c.cmd === "xadd");
+    expect(xadd?.args[0]).toBe(`${PREFIX}:ama:inbox`);
+  });
+
+  it("reads from the prefixed key when a prefix is configured", async () => {
+    const { client, calls } = fakeStore({});
+    withPrefix(() => {
+      void readInbox(10, client);
+    });
+    const read = calls.find((c) => c.cmd === "xrevrange");
+    expect(read?.args[0]).toBe(`${PREFIX}:ama:inbox`);
   });
 });

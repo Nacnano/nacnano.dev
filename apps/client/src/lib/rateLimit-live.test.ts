@@ -40,6 +40,7 @@ mock.module("@upstash/ratelimit", () => ({
 mock.module("@/lib/activityRedis", () => ({
   // A truthy client so `getLimiter` builds the (faked) limiter above.
   getActivityClient: () => ({}),
+  getActivityClientOrNull: () => ({}),
 }));
 const errors: unknown[] = [];
 mock.module("@/lib/observability", () => ({

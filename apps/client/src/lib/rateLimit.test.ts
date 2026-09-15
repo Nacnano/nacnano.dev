@@ -6,7 +6,10 @@ const originalRedis = { ...activityRedisReal };
 // State the premise explicitly rather than inheriting it from an unset
 // `UPSTASH_*`: on a machine with a live `.env.local` (which bun auto-loads) the
 // unmocked path would make a real outbound call and flake the suite.
-mock.module("@/lib/activityRedis", () => ({ getActivityClient: () => null }));
+mock.module("@/lib/activityRedis", () => ({
+  getActivityClient: () => null,
+  getActivityClientOrNull: () => null,
+}));
 
 import { allowVisit, clientIp } from "./rateLimit";
 

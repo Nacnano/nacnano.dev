@@ -90,6 +90,12 @@ Essay frontmatter needs `title`, `date` and `summary`; set `draft: true` to
 hide one. Each essay closes on a single `#### ...` line, which renders as the
 takeaway block rather than a heading.
 
+Author frontmatter (`src/data/authors/*.mdx`) requires `name`; `email` must be a
+real address and `twitter`, `linkedin` and `github` must each be an **absolute
+`http(s)` URL**, not a bare handle. The content-graph check enforces this at
+`bun run lint` and again at build, so a handle like `twitter: Nacnano1` fails
+the build rather than shipping as a broken `href` later.
+
 The `/ama` answers are authored content. The ask box writes to a private Redis
 inbox that no page and no route reads back. Read it with `bun run ama:inbox`
 from `apps/client`, then write the ones worth answering into `amaData.ts` by

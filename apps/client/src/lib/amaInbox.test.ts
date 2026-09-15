@@ -122,6 +122,18 @@ describe("submitAsk", () => {
     expect(stored).toHaveLength(0);
   });
 
+  it("reports unavailable rather than rejecting when the store is misconfigured", async () => {
+    // isInboxLive() is read outside any try in submitAsk, so a throw there used
+    // to reject the server action instead of rendering the documented state.
+    // `getActivityClientOrNull` turns a broken config into `false`, which must
+    // surface as `unavailable` — not a rejected action.
+    const state = await submitAsk(
+      { question: "hi" },
+      { ...deps().deps, isLive: () => false }
+    );
+    expect(state).toEqual({ status: "error", reason: "unavailable" });
+  });
+
   // Throttling before the body is read is the whole point of the ordering: a
   // malformed flood must cost the same as a well-formed one.
   it("throttles before validating or storing", async () => {

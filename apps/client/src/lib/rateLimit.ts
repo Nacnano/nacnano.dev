@@ -14,7 +14,7 @@
  */
 
 import { Ratelimit } from "@upstash/ratelimit";
-import { getActivityClient } from "./activityRedis";
+import { getActivityClientOrNull } from "./activityRedis";
 import { captureError } from "./observability";
 import { getRuntimeConfig, namespacedKey } from "./runtimeConfig";
 
@@ -48,7 +48,10 @@ function buildLimiter(
   limit: number,
   window: Parameters<typeof Ratelimit.slidingWindow>[1] = WINDOW
 ): Ratelimit | null {
-  const client = getActivityClient();
+  // Not `getActivityClient()`: a RedisConfigError raised here would escape
+  // `throttle`'s try and 500 the very request the limiter exists to protect.
+  // Reported by the resolver, then null — which is the fail-open path.
+  const client = getActivityClientOrNull(`rate-limit:${prefix}`);
   if (!client) return null;
   return new Ratelimit({
     redis: client,
@@ -124,9 +127,9 @@ async function throttle(
   ip: string,
   scope: string
 ): Promise<boolean> {
-  const rl = getLimiterFn();
-  if (!rl) return true;
   try {
+    const rl = getLimiterFn();
+    if (!rl) return true;
     const { success } = await rl.limit(await limitKey(ip));
     return success;
   } catch (error) {

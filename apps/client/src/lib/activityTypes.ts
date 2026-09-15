@@ -47,26 +47,17 @@ export type VisitMarker = {
   size: number;
 };
 
-/** Runtime guard for anything arriving over the network (poll response). */
-export function isVisitFeedPayload(value: unknown): value is VisitFeedPayload {
-  if (!value || typeof value !== "object") return false;
-  const record = value as Record<string, unknown>;
-  return (
-    Array.isArray(record.visits) &&
-    typeof record.count === "number" &&
-    Number.isFinite(record.count)
-  );
-}
-
 /* -------------------------------------------------------------------------- *
  * Canonical runtime schema
  *
- * The two guards above only check the *shape*; they let a malformed `title`, a
- * bogus coordinate pair, or a `countryCode` that isn't a country straight
- * through to rendering. Everything below re-derives each field from validated
- * primitives rather than trusting what arrived, so React never sees an arbitrary
- * object where it expects a string/number, and an unparseable *envelope* reads
- * as an upstream failure (keep last-known-good) instead of a fabricated feed.
+ * `isValidCursor` only checks the *shape* of a stream id, and the coarse
+ * public-path screen below only rejects the obvious outbound-link shapes;
+ * together they'd still let a malformed `title`, a bogus coordinate pair, or a
+ * `countryCode` that isn't a country through to rendering. Everything from
+ * `parseVisitEvent` down re-derives each field from validated primitives rather
+ * than trusting what arrived, so React never sees an arbitrary object where it
+ * expects a string/number, and an unparseable *envelope* reads as an upstream
+ * failure (keep last-known-good) instead of a fabricated feed.
  * -------------------------------------------------------------------------- */
 
 // Mirrors the write route's cap; a longer `page` is not a path we ever stored.

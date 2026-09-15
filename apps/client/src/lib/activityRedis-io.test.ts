@@ -6,6 +6,19 @@ import { describe, expect, it, beforeAll, afterAll, mock } from "bun:test";
  * is the store-failure / pagination / write-shape coverage that can't be reached
  * through the mocked boundary in the route tests.
  */
+import * as observabilityReal from "./observability";
+
+const originalObservability = { ...observabilityReal };
+
+type Captured = { error: unknown; context: Record<string, unknown> };
+const capturedErrors: Captured[] = [];
+
+mock.module("./observability", () => ({
+  captureError: (error: unknown, context: Record<string, unknown> = {}) => {
+    capturedErrors.push({ error, context });
+  },
+}));
+
 type PipeCall = { cmd: string; args: unknown[] };
 const pipeCalls: PipeCall[] = [];
 let xrevrangeReturn: unknown = {};
@@ -48,6 +61,8 @@ afterAll(() => {
   delete process.env.UPSTASH_REDIS_REST_URL;
   delete process.env.UPSTASH_REDIS_REST_TOKEN;
   delete process.env.VISIT_IP_SALT;
+  // `mock.module` is process-global — put observability back for the next file.
+  mock.module("./observability", () => originalObservability);
 });
 
 import { getActivityClient, readActivityFeed, recordVisit } from "./activityRedis";
@@ -88,6 +103,26 @@ describe("readActivityFeed", () => {
     expect(page.visits).toHaveLength(1);
     expect(page.count).toBe(1);
     expect(page.hasMore).toBe(false);
+  });
+
+  it("reports corrupt rows as ONE captured error per read, not per row", async () => {
+    // The feed is polled every ~2.5s per open tab; a page of unparseable rows
+    // must fan out a single report, not one POST per row, or a data problem
+    // becomes an outbound-traffic problem.
+    capturedErrors.length = 0;
+    xrevrangeReturn = {
+      "8-0": { data: { broken: 1 } },
+      "7-0": { data: { broken: 2 } },
+      "6-0": { data: { broken: 3 } },
+    };
+    getReturn = 3;
+    const page = await readActivityFeed(30);
+    expect(page.visits).toHaveLength(0);
+    expect(capturedErrors).toHaveLength(1);
+    expect(capturedErrors[0]?.context).toMatchObject({
+      scope: "activity-feed",
+      total: 3,
+    });
   });
 
   it("drops a well-formed row whose page is not an internal path", async () => {

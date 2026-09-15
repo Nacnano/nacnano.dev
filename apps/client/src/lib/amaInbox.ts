@@ -14,8 +14,18 @@
  * told so honestly rather than being shown a success it did not get.
  */
 
-import { getActivityClient, parseStreamEntries } from "./activityRedis";
+import type { Redis } from "@upstash/redis";
+import {
+  getActivityClient,
+  getActivityClientOrNull,
+  parseStreamEntries,
+} from "./activityRedis";
+import { namespacedKey } from "./runtimeConfig";
 
+// Logical key; the configured namespace (see `runtimeConfig.namespacedKey`) is
+// applied at each use so an opted-in prefix isolates test workspaces without
+// changing production keys when no prefix is set — the same contract the
+// activity stream and the rate-limit buckets already honour.
 const STREAM_KEY = "ama:inbox";
 
 // Questions are read by a human, not paged through by a UI, so the cap is a
@@ -100,9 +110,19 @@ export function askRecord(input: AskInput): AskRecord {
   };
 }
 
-/** True when a store is configured and a question can actually be delivered. */
-export function isInboxLive(client = getActivityClient()): boolean {
-  return client !== null;
+/**
+ * True when a store is configured and a question can actually be delivered.
+ *
+ * `undefined` (the no-argument call from `actions.ts`) resolves the configured
+ * client *without* throwing: this is the gate `submitAsk` reads to decide
+ * between "sent" and "unavailable", so a misconfiguration has to read as
+ * unavailable — reported to the operator, and honest to the asker — rather than
+ * rejecting the action. An explicit `null` still means static mode, which is how
+ * the tests drive it.
+ */
+export function isInboxLive(client?: Redis | null): boolean {
+  const resolved = client === undefined ? getActivityClientOrNull("ama/is-live") : client;
+  return resolved !== null;
 }
 
 /**
@@ -128,20 +148,24 @@ export async function askAma(
 
   const record = askRecord(input);
   const oldestAllowed = `${Date.now() - RETENTION_MS}-0`;
+  // Resolved once, above the pipeline. `namespacedKey` reads the runtime
+  // configuration, which can throw — but we are past the `!client` gate, so the
+  // configuration is known valid here.
+  const streamKey = namespacedKey(STREAM_KEY);
 
   const pipeline = client.pipeline();
   pipeline.xadd(
-    STREAM_KEY,
+    streamKey,
     "*",
     { data: JSON.stringify(record) },
     { trim: { type: "MAXLEN", comparison: "~", threshold: STREAM_MAXLEN } }
   );
-  pipeline.xtrim(STREAM_KEY, {
+  pipeline.xtrim(streamKey, {
     strategy: "MINID",
     exactness: "~",
     threshold: oldestAllowed,
   });
-  pipeline.expire(STREAM_KEY, RETENTION_SECONDS);
+  pipeline.expire(streamKey, RETENTION_SECONDS);
   await pipeline.exec();
 
   return record;
@@ -238,7 +262,7 @@ export async function readInbox(
 ): Promise<AskRecord[]> {
   if (!client) return [];
 
-  const entries = await client.xrevrange(STREAM_KEY, "+", "-", limit);
+  const entries = await client.xrevrange(namespacedKey(STREAM_KEY), "+", "-", limit);
   const records: AskRecord[] = [];
   for (const entry of parseStreamEntries(entries)) {
     const raw = entry.fields.data;

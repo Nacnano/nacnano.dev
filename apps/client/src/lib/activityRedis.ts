@@ -63,6 +63,53 @@ export function getActivityClient(): Redis | null {
   return cachedClient;
 }
 
+// A persistent misconfiguration throws on every store call, and the beacon path
+// reaches the resolver below on every page view — so reporting each throw verbatim
+// fans out one ERROR_REPORT_URL POST per view, indefinitely, the same "data
+// problem becomes an outbound-traffic problem" the corrupt-row batching prevents.
+// Report once per process per distinct (route, fault); a different variable, or a
+// corrected-then-broken env, has a different signature and reports again.
+const reportedConfigFaults = new Set<string>();
+
+/**
+ * `getActivityClient()` for the callers that must degrade rather than throw.
+ *
+ * The throw is deliberate: a partial or weak live configuration is a bug, and an
+ * operator should see it. But three entry points each document a *degraded*
+ * response for "no store" — the /ama box reports `unavailable`, the beacon
+ * acknowledges and drops, the feed answers 503 — and none of them can honour
+ * that if resolving the client throws first. They call this instead: the
+ * configuration error is still reported through `captureError` (once, per the
+ * de-dup set above), and the caller gets the `null` its branch already handles.
+ */
+export function getActivityClientOrNull(scope: string): Redis | null {
+  try {
+    return getActivityClient();
+  } catch (error) {
+    const fault =
+      error instanceof Error ? `${error.name}:${error.message}` : String(error);
+    const signature = `${scope}|${fault}`;
+    if (!reportedConfigFaults.has(signature)) {
+      reportedConfigFaults.add(signature);
+      captureError(error, { scope });
+    }
+    return null;
+  }
+}
+
+/**
+ * Drop the memoised client so a test can re-derive one after mutating env, in
+ * the same spirit as `resetRuntimeConfigCache`. Mirrors the runtime-config
+ * cache: only a *successfully constructed* client is cached, and this is the
+ * only lever to clear it. Also clears the config-fault dedup set, so a test can
+ * re-exercise a report that this process already made. Production never calls
+ * this.
+ */
+export function __resetCachedClientForTests(): void {
+  cachedClient = undefined;
+  reportedConfigFaults.clear();
+}
+
 export function coerceVisit(raw: unknown): VisitEvent | null {
   return parseVisitEvent(raw);
 }
@@ -157,16 +204,14 @@ export async function readActivityFeed(
   const parsed = parseStreamEntries(entries);
 
   const visits: VisitEvent[] = [];
+  const corruptIds: string[] = [];
   for (const entry of parsed) {
     const visit = coerceVisit(entry.fields.data);
     if (!visit) {
       // A row we can't parse must never truncate or loop pagination (the paging
       // decision below uses the RAW page), but it is worth surfacing so a store
       // corruption or a schema drift is visible rather than silently missing.
-      captureError(new Error("corrupt activity row skipped"), {
-        scope: "activity-feed",
-        entryId: entry.id,
-      });
+      corruptIds.push(entry.id);
       continue;
     }
     // The write endpoint enforces the path, but the feed renders `page` as a
@@ -174,6 +219,18 @@ export async function readActivityFeed(
     // through a path that bypasses it) keeps rendering as an outbound link.
     // Dropping the row here means the guarantee holds for data we didn't write.
     if (isInternalPath(visit.page)) visits.push({ ...visit, cursor: entry.id });
+  }
+
+  if (corruptIds.length > 0) {
+    // One report per READ, not per row. This path is polled every ~2.5s per open
+    // tab, so a page of unparseable rows would otherwise fan out a hundred
+    // ERROR_REPORT_URL POSTs on every poll — turning a data problem into an
+    // outbound traffic problem. A handful of ids is enough to go and look.
+    captureError(new Error(`${corruptIds.length} corrupt activity row(s) skipped`), {
+      scope: "activity-feed",
+      total: corruptIds.length,
+      entryIds: corruptIds.slice(0, 5),
+    });
   }
 
   const ordered = sortVisitsDesc(visits);

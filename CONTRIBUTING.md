@@ -45,7 +45,8 @@ These are not decoration — know them so a red build is obvious to fix:
   stay within budget.
 - **Content-graph guard** (`validateContentGraph`, run in `postbuild`): a
   typo'd author slug, layout, date, duplicate slug, or a missing local image /
-  author avatar fails the build naming the file.
+  author avatar fails the build naming the file. Author `twitter`/`linkedin`/
+  `github` must each be an absolute `http(s)` URL, not a bare handle.
 - **Coverage floor**: each covered lib file must stay at ≥ 60% (bun enforces it
   silently — trust the exit code, not the printed table).
 
@@ -68,5 +69,7 @@ belongs only in your deployment provider's secrets store.
 
 Shared workspace scripts live in `.conductor/settings.toml`. It starts with
 `run_mode = "nonconcurrent"` because parallel local workspaces would otherwise
-share one Upstash store; see the root README for the `UPSTASH_KEY_PREFIX` /
-`CONDUCTOR_WORKSPACE_ID` namespacing needed before concurrent runs are safe.
+share one Upstash store. `UPSTASH_KEY_PREFIX` (documented in
+`apps/client/.env.example`) is what isolates them: give each workspace its own
+prefix before switching to concurrent runs, or leave the workspaces in static
+mode with no Upstash credentials at all.

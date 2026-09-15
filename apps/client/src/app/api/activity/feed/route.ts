@@ -47,22 +47,27 @@ export async function GET(request: Request) {
   const { limit, before } = readPageParams(request);
 
   if (isActivityLive()) {
-    // The read path costs two Upstash ops per call and had no ceiling; a public
-    // `?limit=100` flood is the larger quota bill. Same salted-key limiter as
-    // the write, with a far looser window so honest polling never trips it.
-    if (!(await allowFeed(clientIp(request.headers)))) {
-      return NextResponse.json(
-        { ok: false, error: "rate_limited" },
-        {
-          status: 429,
-          headers: {
-            "Retry-After": String(RETRY_AFTER_SECONDS),
-            "Cache-Control": "no-store",
-          },
-        }
-      );
-    }
     try {
+      // The read path costs two Upstash ops per call and had no ceiling; a public
+      // `?limit=100` flood is the larger quota bill. Same salted-key limiter as
+      // the write, with a far looser window so honest polling never trips it.
+      //
+      // Inside the try, not above it: resolving the limiter reaches the runtime
+      // configuration, and a configuration error there must land on the 503 path
+      // below — the one that tells the client to keep its last good page —
+      // rather than escaping as an unhandled 500.
+      if (!(await allowFeed(clientIp(request.headers)))) {
+        return NextResponse.json(
+          { ok: false, error: "rate_limited" },
+          {
+            status: 429,
+            headers: {
+              "Retry-After": String(RETRY_AFTER_SECONDS),
+              "Cache-Control": "no-store",
+            },
+          }
+        );
+      }
       // Whatever the store actually holds for this page, including an honest
       // empty result. Never substitute the seed on a real deployment.
       const payload = await readActivityFeed(limit, before);
