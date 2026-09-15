@@ -15,13 +15,13 @@ const Entry = ({ item }: { item: TimelineItem }) => (
     {/* The marker pins to the first line rather than floating to the middle
         of a seven-line entry. */}
     <span
-      className="absolute left-0 top-[1.55rem] h-1.5 w-1.5 -translate-y-1/2 rounded-full bg-zinc-300 dark:bg-zinc-700"
+      className="absolute top-[1.55rem] left-0 h-1.5 w-1.5 -translate-y-1/2 rounded-full bg-zinc-300 dark:bg-zinc-700"
       aria-hidden="true"
     />
-    <p className="font-mono text-xs uppercase tracking-[0.08em] text-zinc-500 dark:text-zinc-400">
+    <p className="font-mono text-xs tracking-[0.08em] text-zinc-500 uppercase dark:text-zinc-400">
       {item.period}
     </p>
-    <h3 className="mt-1.5 text-[0.9375rem] font-semibold leading-6 tracking-[-0.011em] text-zinc-900 dark:text-zinc-100">
+    <h3 className="mt-1.5 text-[0.9375rem] leading-6 font-semibold tracking-[-0.011em] text-zinc-900 dark:text-zinc-100">
       {item.title}
     </h3>
     <p className="text-[0.9375rem] leading-6 text-zinc-700 dark:text-zinc-300">
@@ -34,7 +34,7 @@ const Entry = ({ item }: { item: TimelineItem }) => (
       )}
     </p>
     {item.description && (
-      <p className="mt-2 max-w-measure text-[0.9375rem] leading-7 text-zinc-600 dark:text-zinc-400">
+      <p className="max-w-measure mt-2 text-[0.9375rem] leading-7 text-zinc-600 dark:text-zinc-400">
         {item.description}
       </p>
     )}
@@ -57,7 +57,7 @@ const Timeline = ({
           <li> children. */}
       <div className="relative">
         <span
-          className="absolute bottom-0 left-[2.5px] top-0 w-px bg-zinc-200 dark:bg-zinc-800"
+          className="absolute top-0 bottom-0 left-[2.5px] w-px bg-zinc-200 dark:bg-zinc-800"
           aria-hidden="true"
         />
         <ul className="divide-y divide-zinc-200 dark:divide-zinc-800">
@@ -71,7 +71,7 @@ const Timeline = ({
           type="button"
           onClick={() => setExpanded((v) => !v)}
           aria-expanded={expanded}
-          className="ml-7 mt-4 rounded border border-zinc-200 px-3 py-1.5 text-sm font-medium text-zinc-700 transition-colors hover:border-zinc-300 hover:text-zinc-900 dark:border-zinc-800 dark:text-zinc-300 dark:hover:border-zinc-700 dark:hover:text-zinc-100 sm:ml-8"
+          className="mt-4 ml-7 rounded border border-zinc-200 px-3 py-1.5 text-sm font-medium text-zinc-700 transition-colors hover:border-zinc-300 hover:text-zinc-900 sm:ml-8 dark:border-zinc-800 dark:text-zinc-300 dark:hover:border-zinc-700 dark:hover:text-zinc-100"
         >
           {expanded ? "Show fewer" : `Show ${hidden} ${moreLabel}`}
         </button>

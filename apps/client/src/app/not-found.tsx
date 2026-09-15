@@ -4,10 +4,10 @@ import siteMetadata from "@/data/siteMetadata";
 export default function NotFound() {
   return (
     <div className="py-24 sm:py-32">
-      <h1 className="text-[1.75rem] font-semibold leading-[1.2] tracking-[-0.022em] text-zinc-900 dark:text-zinc-100 sm:text-[2.125rem]">
+      <h1 className="text-[1.75rem] leading-[1.2] font-semibold tracking-[-0.022em] text-zinc-900 sm:text-[2.125rem] dark:text-zinc-100">
         Nothing here
       </h1>
-      <p className="mt-4 max-w-measure text-[1.0625rem] leading-[1.75] text-zinc-600 dark:text-zinc-400">
+      <p className="max-w-measure mt-4 text-[1.0625rem] leading-[1.75] text-zinc-600 dark:text-zinc-400">
         Either the link is stale or I moved something and forgot to leave a note. If you
         were after something in particular, just ask me.
       </p>

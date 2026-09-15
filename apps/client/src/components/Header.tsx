@@ -42,7 +42,7 @@ const Header = () => {
                 aria-current={active ? "page" : undefined}
                 className={`rounded px-2.5 py-2 text-sm transition-colors ${
                   active
-                    ? "font-medium text-accent-600 dark:text-accent-300"
+                    ? "text-accent-600 dark:text-accent-300 font-medium"
                     : "text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
                 }`}
               >

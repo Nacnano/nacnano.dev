@@ -14,7 +14,7 @@ export default function Page() {
 
   return (
     <div className="py-12 sm:py-16">
-      <h1 className="text-[1.75rem] font-semibold leading-[1.2] tracking-[-0.022em] text-zinc-900 dark:text-zinc-100 sm:text-[2.125rem]">
+      <h1 className="text-[1.75rem] leading-[1.2] font-semibold tracking-[-0.022em] text-zinc-900 sm:text-[2.125rem] dark:text-zinc-100">
         Links
       </h1>
       {entries.length === 0 ? (
@@ -27,7 +27,7 @@ export default function Page() {
             <li key={key}>
               <CustomLink
                 href={link as string}
-                className="flex items-center justify-between gap-4 py-4 text-[0.9375rem] font-medium text-zinc-900 transition-colors hover:text-accent-600 dark:text-zinc-100 dark:hover:text-accent-300"
+                className="hover:text-accent-600 dark:hover:text-accent-300 flex items-center justify-between gap-4 py-4 text-[0.9375rem] font-medium text-zinc-900 transition-colors dark:text-zinc-100"
               >
                 {key}
                 <svg

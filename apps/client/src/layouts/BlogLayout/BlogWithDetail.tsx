@@ -30,10 +30,10 @@ export default function BlogWithDetail({ content, newer, older, children }: Prop
       <ScrollTop />
       <article className="py-12 sm:py-16">
         <header className="max-w-measure">
-          <h1 className="text-[1.75rem] font-semibold leading-[1.2] tracking-[-0.022em] text-zinc-900 dark:text-zinc-100 sm:text-[2.125rem]">
+          <h1 className="text-[1.75rem] leading-[1.2] font-semibold tracking-[-0.022em] text-zinc-900 sm:text-[2.125rem] dark:text-zinc-100">
             {title}
           </h1>
-          <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-xs uppercase tracking-[0.08em] text-zinc-500 dark:text-zinc-400">
+          <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-xs tracking-[0.08em] text-zinc-500 uppercase dark:text-zinc-400">
             <time dateTime={date}>
               {new Date(date).toLocaleDateString(siteMetadata.locale, postDateTemplate)}
             </time>
@@ -49,14 +49,14 @@ export default function BlogWithDetail({ content, newer, older, children }: Prop
           )}
         </header>
 
-        <div className="prose prose-zinc mt-10 max-w-measure dark:prose-invert">
+        <div className="prose prose-zinc max-w-measure dark:prose-invert mt-10">
           {children}
         </div>
 
         <div className="mt-12 border-t border-zinc-200 pt-6 dark:border-zinc-800">
           <CustomLink
             href={githubUrl(filePath)}
-            className="rounded text-sm text-zinc-500 underline decoration-zinc-300 underline-offset-4 transition-colors hover:text-accent-600 hover:decoration-accent-600 dark:text-zinc-400 dark:decoration-zinc-700 dark:hover:text-accent-300 dark:hover:decoration-accent-300"
+            className="hover:text-accent-600 hover:decoration-accent-600 dark:hover:text-accent-300 dark:hover:decoration-accent-300 rounded text-sm text-zinc-500 underline decoration-zinc-300 underline-offset-4 transition-colors dark:text-zinc-400 dark:decoration-zinc-700"
           >
             Edit this page on GitHub
           </CustomLink>
@@ -81,10 +81,10 @@ export default function BlogWithDetail({ content, newer, older, children }: Prop
                   rel={rel}
                   className="group flex flex-col gap-1 py-4 sm:flex-row sm:items-baseline sm:gap-6"
                 >
-                  <span className="w-14 shrink-0 text-xs uppercase tracking-[0.08em] text-zinc-500 dark:text-zinc-400">
+                  <span className="w-14 shrink-0 text-xs tracking-[0.08em] text-zinc-500 uppercase dark:text-zinc-400">
                     {label}
                   </span>
-                  <span className="text-[0.9375rem] font-medium leading-6 text-zinc-900 transition-colors group-hover:text-accent-600 dark:text-zinc-100 dark:group-hover:text-accent-300">
+                  <span className="group-hover:text-accent-600 dark:group-hover:text-accent-300 text-[0.9375rem] leading-6 font-medium text-zinc-900 transition-colors dark:text-zinc-100">
                     {post!.title}
                   </span>
                 </CustomLink>

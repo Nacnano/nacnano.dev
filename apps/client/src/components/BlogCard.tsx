@@ -11,13 +11,13 @@ export default function BlogCard({ post }: { post: Blog }) {
       <div className="flex flex-col gap-2 sm:flex-row sm:gap-8">
         <dl className="sm:w-36 sm:shrink-0 sm:pt-1">
           <dt className="sr-only">Published</dt>
-          <dd className="font-mono text-xs uppercase tracking-[0.08em] text-zinc-500 dark:text-zinc-400">
+          <dd className="font-mono text-xs tracking-[0.08em] text-zinc-500 uppercase dark:text-zinc-400">
             <time dateTime={date}>{formatDate(date, siteMetadata.locale)}</time>
           </dd>
         </dl>
 
         <div className="min-w-0">
-          <h3 className="text-[1.0625rem] font-semibold leading-7 tracking-[-0.011em] text-zinc-900 transition-colors group-hover:text-accent-600 dark:text-zinc-100 dark:group-hover:text-accent-300">
+          <h3 className="group-hover:text-accent-600 dark:group-hover:text-accent-300 text-[1.0625rem] leading-7 font-semibold tracking-[-0.011em] text-zinc-900 transition-colors dark:text-zinc-100">
             <CustomLink href={`/blogs/${slug}`} className="rounded">
               {/* Stretched link: the whole row is the target, with one
                   accessible name and no nested anchors. */}

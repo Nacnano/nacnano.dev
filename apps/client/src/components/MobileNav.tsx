@@ -58,7 +58,7 @@ const MobileNav = () => {
         aria-label="Open menu"
         aria-expanded={open}
         onClick={() => setOpen(true)}
-        className="-mr-2 flex h-11 w-11 items-center justify-center rounded text-zinc-700 hover:text-zinc-900 dark:text-zinc-300 dark:hover:text-zinc-100 sm:hidden"
+        className="-mr-2 flex h-11 w-11 items-center justify-center rounded text-zinc-700 hover:text-zinc-900 sm:hidden dark:text-zinc-300 dark:hover:text-zinc-100"
       >
         <svg
           viewBox="0 0 24 24"
@@ -81,7 +81,7 @@ const MobileNav = () => {
           role="dialog"
           aria-modal="true"
           aria-label="Site menu"
-          className="fixed inset-0 z-50 bg-white dark:bg-zinc-950 sm:hidden"
+          className="fixed inset-0 z-50 bg-white sm:hidden dark:bg-zinc-950"
         >
           <div className="mx-auto flex h-full max-w-3xl flex-col px-5">
             <div className="flex justify-end py-5">
