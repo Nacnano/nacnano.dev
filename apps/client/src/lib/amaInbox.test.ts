@@ -3,6 +3,7 @@ import {
   askRecord,
   normaliseAsk,
   submitAsk,
+  textField,
   MAX_CONTACT,
   MAX_QUESTION,
   RETENTION_DAYS,
@@ -71,6 +72,29 @@ describe("normaliseAsk", () => {
       ok: false,
       reason: "contact_too_long",
     });
+  });
+});
+
+describe("textField", () => {
+  it("returns a submitted string as-is and an absent field as empty", () => {
+    const form = new FormData();
+    form.set("question", "Why zinc?");
+    expect(textField(form, "question")).toBe("Why zinc?");
+    expect(textField(form, "contact")).toBe("");
+  });
+
+  // A multipart POST can send a `File` for a text field. `String()` would turn
+  // it into the literal "[object File]" — 13 chars that pass the length-only
+  // validation and get stored. Refuse it instead, so it reads as an empty ask.
+  it('refuses a File rather than stringifying it to "[object File]"', async () => {
+    const form = new FormData();
+    form.set("question", new File(["payload"], "attack.txt"));
+    expect(textField(form, "question")).toBe("");
+
+    const { deps: d, stored } = deps();
+    const result = await submitAsk({ question: textField(form, "question") }, d);
+    expect(result).toEqual({ status: "error", reason: "empty" });
+    expect(stored).toHaveLength(0);
   });
 });
 
