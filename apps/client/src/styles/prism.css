@@ -5,6 +5,11 @@
  * https://github.com/PrismJS/prism-themes
  */
 
+/* This file is bundled separately from tailwind.css, so under v4 its `@apply`
+   calls (rounded-t, border-accent-400, font-mono, …) can't see the theme or
+   custom utilities until they're pulled in by reference. */
+@reference "./tailwind.css";
+
 /* Code title styles */
 .remark-code-title {
   @apply rounded-t border border-b-0 border-zinc-800 bg-zinc-900 px-5 py-3 font-mono text-xs uppercase tracking-[0.08em] text-zinc-300;

@@ -1,8 +1,16 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+/* The design system's theme (custom colors, radii, the prose config, keyframes)
+   still lives in the JS config; v4 keeps it working through @config. */
+@config "../../tailwind.config.js";
 
 @layer base {
+  /* v4 Preflight made buttons `cursor: default`; restore the pointer affordance
+     the site has always shipped for its theme toggle, links-as-buttons, etc. */
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+
   :root {
     --ring: theme('colors.accent.600');
     --selection-bg: theme('colors.accent.100');
