@@ -174,10 +174,27 @@ describe("GET /api/activity/feed", () => {
     expect(readCalls.map(([limit]) => limit)).toEqual([100, 1, 50, 30]);
   });
 
+  it("defaults to the full page size when the limit is omitted or unusable", async () => {
+    // Regression: `Number(null) === 0` collapsed the default 30-row page to 1.
+    ctrl.live = true;
+    await getFeed(feedRequest()); // no query string at all
+    await getFeed(feedRequest("?limit=")); // explicitly blank
+    await getFeed(feedRequest("?limit=abc")); // non-numeric
+    await getFeed(feedRequest("?limit=10.9")); // decimal, truncated down
+    await getFeed(feedRequest("?limit=-5")); // negative, clamped to the floor
+    expect(readCalls.map(([limit]) => limit)).toEqual([30, 30, 30, 10, 1]);
+  });
+
   it("passes the cursor through for older pages", async () => {
     ctrl.live = true;
     await getFeed(feedRequest("?before=1700000000000-0"));
     expect(readCalls[0]?.[1]).toBe("1700000000000-0");
+  });
+
+  it("reads the head page with a null cursor when `before` is absent", async () => {
+    ctrl.live = true;
+    await getFeed(feedRequest());
+    expect(readCalls[0]?.[1]).toBeNull();
   });
 });
 

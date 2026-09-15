@@ -1,14 +1,22 @@
 {
-  "name": "",
-  "short_name": "",
+  "name": "Nacnano",
+  "short_name": "Nacnano",
+  "description": "I build things on the internet and write about the bits I got wrong, which is usually the interesting part.",
+  "start_url": "/",
+  "scope": "/",
   "icons": [
     {
-      "src": "/android-chrome-96x96.png",
-      "sizes": "96x96",
+      "src": "/static/favicons/android-chrome-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/static/favicons/android-chrome-512x512.png",
+      "sizes": "512x512",
       "type": "image/png"
     }
   ],
-  "theme_color": "#000000",
-  "background_color": "#000000",
+  "theme_color": "#09090b",
+  "background_color": "#09090b",
   "display": "standalone"
 }

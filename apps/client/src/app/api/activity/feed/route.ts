@@ -18,13 +18,28 @@ const MAX_LIMIT = 100;
 // without showing anything visibly staler than the feed intends to be.
 const FEED_CACHE = "public, s-maxage=2, stale-while-revalidate=10";
 
+/**
+ * Resolve the requested page size to a value in the inclusive `1..100` window.
+ *
+ * The raw query value is inspected *before* numeric conversion. `Number(null)`
+ * is `0` and `0` is finite, so the previous one-liner turned an omitted `limit`
+ * into `0` and then clamped the whole first page down to a single row — a
+ * no-query request returned 1 result while the client (which sends
+ * `limit=30`) saw 30. A missing, blank, or non-numeric value now falls back to
+ * `DEFAULT_LIMIT`; a finite number is truncated then clamped into range.
+ */
+export function parseLimit(raw: string | null): number {
+  if (raw === null || raw.trim() === "") return DEFAULT_LIMIT;
+  const value = Number(raw);
+  if (!Number.isFinite(value)) return DEFAULT_LIMIT;
+  return Math.min(MAX_LIMIT, Math.max(1, Math.trunc(value)));
+}
+
 function readPageParams(request: Request) {
   const params = new URL(request.url).searchParams;
-  const rawLimit = Number(params.get("limit"));
-  const limit = Number.isFinite(rawLimit)
-    ? Math.min(MAX_LIMIT, Math.max(1, Math.trunc(rawLimit)))
-    : DEFAULT_LIMIT;
-  const before = params.get("before");
+  const limit = parseLimit(params.get("limit"));
+  // A missing `before` is the head page (no cursor), not the string "null".
+  const before = params.get("before") ?? null;
   return { limit, before };
 }
 
