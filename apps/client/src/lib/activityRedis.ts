@@ -63,6 +63,36 @@ export function getActivityClient(): Redis | null {
   return cachedClient;
 }
 
+/**
+ * `getActivityClient()` for the callers that must degrade rather than throw.
+ *
+ * The throw is deliberate: a partial or weak live configuration is a bug, and an
+ * operator should see it. But three entry points each document a *degraded*
+ * response for "no store" — the /ama box reports `unavailable`, the beacon
+ * acknowledges and drops, the feed answers 503 — and none of them can honour
+ * that if resolving the client throws first. They call this instead: the
+ * configuration error is still reported through `captureError`, and the caller
+ * gets the `null` its existing branch already handles.
+ */
+export function getActivityClientOrNull(scope: string): Redis | null {
+  try {
+    return getActivityClient();
+  } catch (error) {
+    captureError(error, { scope });
+    return null;
+  }
+}
+
+/**
+ * Drop the memoised client so a test can re-derive one after mutating env, in
+ * the same spirit as `resetRuntimeConfigCache`. Mirrors the runtime-config
+ * cache: only a *successfully constructed* client is cached, and this is the
+ * only lever to clear it. Production never calls this.
+ */
+export function __resetCachedClientForTests(): void {
+  cachedClient = undefined;
+}
+
 export function coerceVisit(raw: unknown): VisitEvent | null {
   return parseVisitEvent(raw);
 }
