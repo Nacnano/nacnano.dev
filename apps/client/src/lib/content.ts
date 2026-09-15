@@ -222,7 +222,15 @@ export function requireAuthorEmail(
   return raw;
 }
 
-/** Social links are rendered as `href`s, so an absolute http(s) URL is the contract. */
+/**
+ * No layout reads these social fields today — `AuthorLayout` renders
+ * `siteMetadata.*`, and the only `Author` fields consumed are `name`, `avatar`
+ * and `body`. The absolute-http(s) rule is still the right contract: it matches
+ * how `authors/default.mdx` already writes them and forecloses the field being
+ * wired up later as an unvalidated `href` (a bare handle or a `javascript:` URL
+ * would then ship straight to the DOM). Requiring it now, before any consumer
+ * exists, is the cheap moment to enforce it.
+ */
 export function requireAuthorUrl(
   value: unknown,
   field: string,
@@ -388,12 +396,26 @@ function checkAsset(
   label: string,
   problems: string[]
 ): void {
-  if (/^https?:\/\//i.test(asset)) {
-    try {
-      void new URL(asset);
-    } catch {
-      problems.push(`${label}: invalid remote URL ${asset}`);
-    }
+  // A URL scheme (`http:`, `https:`, or any other) means a non-local asset, and
+  // this site cannot serve one: `next.config.js` pins `images.remotePatterns`
+  // to `[]` ("All imagery is local") and `csp.ts` sets `img-src 'self' data:
+  // blob:`. The plan only asked to validate remote URLs *if they remain
+  // supported*; they aren't, so reject the shape outright rather than bless a
+  // URL that is guaranteed to break at runtime. If remote images are ever
+  // re-enabled, validate the host against `remotePatterns` instead.
+  if (/^[a-z][a-z0-9+.-]*:/i.test(asset)) {
+    problems.push(
+      `${label}: remote asset ${asset} — images.remotePatterns is empty and CSP img-src is 'self', so only local /static paths can load`
+    );
+    return;
+  }
+  // A protocol-relative `//host/path` has no scheme, so it slips past the check
+  // above and past `startsWith("/")`; the browser resolves it against the page
+  // scheme, i.e. a remote fetch. Reject it explicitly rather than letting
+  // `replace(/^\/+/, "")` collapse it to `host/path` and fail only incidentally
+  // (or pass, if such a file ever existed under `public/`).
+  if (asset.startsWith("//")) {
+    problems.push(`${label}: protocol-relative asset path ${asset}`);
     return;
   }
   // A local asset must be a site-absolute path (no traversal, no backslash, no
@@ -402,8 +424,20 @@ function checkAsset(
     problems.push(`${label}: unsafe local asset path ${asset}`);
     return;
   }
-  const rel = asset.replace(/^\/+/, "");
-  if (!probe.exists(rel)) {
+  // Drop any cache-busting query or fragment before resolving on disk — the
+  // browser fetches `/static/x.png?v=2` from `public/static/x.png`, so the
+  // probe must too. `decodeURIComponent` un-escapes a percent-encoded filename,
+  // guarded against a malformed `%` sequence.
+  const [pathOnly] = asset.split(/[?#]/);
+  const rel = (pathOnly ?? "").replace(/^\/+/, "");
+  const resolved = (() => {
+    try {
+      return decodeURIComponent(rel);
+    } catch {
+      return rel;
+    }
+  })();
+  if (!probe.exists(resolved)) {
     problems.push(`${label}: missing file public/${rel}`);
   }
 }

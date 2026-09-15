@@ -311,13 +311,67 @@ describe("validateContentGraph", () => {
     expect(traversal.join("\n")).toMatch(/unsafe local asset path/);
   });
 
-  it("accepts a valid remote image and rejects a broken URL", () => {
-    const ok = validateContentGraph(
+  it("rejects a remote asset — this site cannot serve remote images", () => {
+    // next.config pins images.remotePatterns to [] and CSP img-src is 'self',
+    // so the only honest verdict for a scheme-carrying URL is "broken". An
+    // earlier version blessed https URLs as sound; the check now rejects them.
+    const remote = validateContentGraph(
       [blogFixture({ summary: "s", images: ["https://cdn.example/x.png"] })],
       [],
       present([])
     );
-    expect(ok).toEqual([]);
+    expect(remote.join("\n")).toMatch(/remote asset/);
+    // A non-http scheme is a remote asset too, not a silent pass.
+    const js = validateContentGraph(
+      [blogFixture({ summary: "s", images: ["javascript:alert(1)"] })],
+      [],
+      present([])
+    );
+    expect(js.join("\n")).toMatch(/remote asset/);
+  });
+
+  it("rejects a protocol-relative asset path, not just a traversal", () => {
+    // `//evil.com/x.png` passes startsWith("/") and has no "..", so without an
+    // explicit guard it collapses to `evil.com/x.png` and only fails incidentally
+    // (or passes if such a file ever lived under public/). The browser resolves
+    // it to a remote fetch — reject it by name.
+    const proto = validateContentGraph(
+      [blogFixture({ summary: "s", images: ["//evil.com/x.png"] })],
+      [],
+      present([])
+    );
+    expect(proto.join("\n")).toMatch(/protocol-relative asset path/);
+  });
+
+  it("resolves a local asset past a cache-busting query or fragment", () => {
+    // The browser fetches /static/x.png?v=2 from public/static/x.png, so the
+    // probe must strip the query before hitting disk.
+    const q = validateContentGraph(
+      [blogFixture({ summary: "s", images: ["/static/images/logo.png?v=2#top"] })],
+      [],
+      present(["static/images/logo.png"])
+    );
+    expect(q).toEqual([]);
+    // A malformed % sequence must not throw out of the probe — it falls back to
+    // the raw path and reports missing like any other absent file.
+    const bad = validateContentGraph(
+      [blogFixture({ summary: "s", images: ["/static/%.png"] })],
+      [],
+      present([])
+    );
+    expect(bad.join("\n")).toMatch(/missing file public\/static\/%\.png/);
+  });
+
+  it("may reference a missing author while a draft, but not once published", () => {
+    // Pins the deliberate decision that drafts skip the published-only author
+    // resolution, so a later refactor cannot quietly reverse it.
+    const draft = [blogFixture({ slug: "wip", draft: true, authors: ["ghost"] })];
+    expect(validateContentGraph(draft, [], present([]))).toEqual([]);
+    // The same reference on a published post is a build failure.
+    const published = [blogFixture({ slug: "live", summary: "s", authors: ["ghost"] })];
+    expect(validateContentGraph(published, [], present([])).join("\n")).toMatch(
+      /unknown author "ghost"/
+    );
   });
 
   it("the real, published corpus is internally consistent", () => {
