@@ -43,3 +43,6 @@ yarn-error.log*
 test-results/
 playwright-report/
 playwright/.cache/
+
+# Lighthouse CI reports (written by `bun run perf`; uploaded as a CI artifact)
+.lighthouseci/
