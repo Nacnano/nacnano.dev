@@ -187,16 +187,14 @@ export async function readActivityFeed(
   const parsed = parseStreamEntries(entries);
 
   const visits: VisitEvent[] = [];
+  const corruptIds: string[] = [];
   for (const entry of parsed) {
     const visit = coerceVisit(entry.fields.data);
     if (!visit) {
       // A row we can't parse must never truncate or loop pagination (the paging
       // decision below uses the RAW page), but it is worth surfacing so a store
       // corruption or a schema drift is visible rather than silently missing.
-      captureError(new Error("corrupt activity row skipped"), {
-        scope: "activity-feed",
-        entryId: entry.id,
-      });
+      corruptIds.push(entry.id);
       continue;
     }
     // The write endpoint enforces the path, but the feed renders `page` as a
@@ -204,6 +202,18 @@ export async function readActivityFeed(
     // through a path that bypasses it) keeps rendering as an outbound link.
     // Dropping the row here means the guarantee holds for data we didn't write.
     if (isInternalPath(visit.page)) visits.push({ ...visit, cursor: entry.id });
+  }
+
+  if (corruptIds.length > 0) {
+    // One report per READ, not per row. This path is polled every ~2.5s per open
+    // tab, so a page of unparseable rows would otherwise fan out a hundred
+    // ERROR_REPORT_URL POSTs on every poll — turning a data problem into an
+    // outbound traffic problem. A handful of ids is enough to go and look.
+    captureError(new Error(`${corruptIds.length} corrupt activity row(s) skipped`), {
+      scope: "activity-feed",
+      total: corruptIds.length,
+      entryIds: corruptIds.slice(0, 5),
+    });
   }
 
   const ordered = sortVisitsDesc(visits);

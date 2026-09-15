@@ -148,20 +148,24 @@ export async function askAma(
 
   const record = askRecord(input);
   const oldestAllowed = `${Date.now() - RETENTION_MS}-0`;
+  // Resolved once, above the pipeline. `namespacedKey` reads the runtime
+  // configuration, which can throw — but we are past the `!client` gate, so the
+  // configuration is known valid here.
+  const streamKey = namespacedKey(STREAM_KEY);
 
   const pipeline = client.pipeline();
   pipeline.xadd(
-    STREAM_KEY,
+    streamKey,
     "*",
     { data: JSON.stringify(record) },
     { trim: { type: "MAXLEN", comparison: "~", threshold: STREAM_MAXLEN } }
   );
-  pipeline.xtrim(STREAM_KEY, {
+  pipeline.xtrim(streamKey, {
     strategy: "MINID",
     exactness: "~",
     threshold: oldestAllowed,
   });
-  pipeline.expire(STREAM_KEY, RETENTION_SECONDS);
+  pipeline.expire(streamKey, RETENTION_SECONDS);
   await pipeline.exec();
 
   return record;
@@ -258,7 +262,7 @@ export async function readInbox(
 ): Promise<AskRecord[]> {
   if (!client) return [];
 
-  const entries = await client.xrevrange(STREAM_KEY, "+", "-", limit);
+  const entries = await client.xrevrange(namespacedKey(STREAM_KEY), "+", "-", limit);
   const records: AskRecord[] = [];
   for (const entry of parseStreamEntries(entries)) {
     const raw = entry.fields.data;
