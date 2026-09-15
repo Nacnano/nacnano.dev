@@ -142,4 +142,53 @@ jobs:
             apps/client/test-results/
             apps/client/playwright-report/
           retention-days: 7
+
+  perf:
+    name: lighthouse · budgets
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.3.14
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+
+      - name: Cache bun install
+        uses: actions/cache@v6
+        with:
+          path: ~/.bun/install/cache
+          key: ${{ runner.os }}-bun-1.3.14-${{ hashFiles('bun.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-bun-1.3.14-
+
+      - name: Install
+        run: bun install --frozen-lockfile
+
+      # Lighthouse measures the production server, so build first — the same
+      # artifact that ships, not a dev server. The runner's preinstalled Chrome
+      # is used via chrome-launcher; `--no-sandbox` is set in lighthouserc.json.
+      - name: Build
+        run: bun run build
+
+      # Report-only: every assertion is `warn`, so this records the Core Web
+      # Vitals and resource budgets and uploads them without gating the merge.
+      # Promote an individual budget to `error` only once it has proven stable
+      # across several runs (see lighthouserc.json).
+      - name: Lighthouse CI
+        working-directory: apps/client
+        run: bun run perf
+
+      - name: Upload Lighthouse reports
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: lighthouse-reports
+          path: apps/client/.lighthouseci/
+          retention-days: 7
+          if-no-files-found: ignore
           if-no-files-found: ignore
