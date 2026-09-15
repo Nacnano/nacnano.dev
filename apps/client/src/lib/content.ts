@@ -1,4 +1,4 @@
-import { readFileSync, readdirSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
 import matter from "gray-matter";
 import readingTime from "reading-time";
@@ -176,6 +176,76 @@ export function requireKnownLayout(
   return value;
 }
 
+/* -------------------------------------------------------------------------- *
+ * Author frontmatter — the same strictness rule as blogs: a malformed field is
+ * a build failure naming the file and field, never a silent `String(value)`
+ * coercion that turns an array/object/number into the string "true" or
+ * "[object Object]" and prints it on a byline.
+ * -------------------------------------------------------------------------- */
+
+export function requireAuthorName(value: unknown, file: string): string {
+  const str = typeof value === "string" ? value.trim() : "";
+  if (!str) {
+    throw new Error(
+      `authors/${file}: \`name\` must be a non-empty string, got ${describe(value)}`
+    );
+  }
+  return str;
+}
+
+export function requireAuthorOptionalString(
+  value: unknown,
+  field: string,
+  file: string
+): string | undefined {
+  if (value === undefined || value === null) return undefined;
+  if (typeof value !== "string") {
+    throw new Error(
+      `authors/${file}: \`${field}\` must be a string when present, got ${describe(value)}`
+    );
+  }
+  return value.trim() || undefined;
+}
+
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@.]+(?:\.[^\s@.]+)+$/;
+
+export function requireAuthorEmail(
+  value: unknown,
+  field: string,
+  file: string
+): string | undefined {
+  const raw = requireAuthorOptionalString(value, field, file);
+  if (raw === undefined) return undefined;
+  if (!EMAIL_PATTERN.test(raw)) {
+    throw new Error(`authors/${file}: \`${field}\` is not a valid email address`);
+  }
+  return raw;
+}
+
+/** Social links are rendered as `href`s, so an absolute http(s) URL is the contract. */
+export function requireAuthorUrl(
+  value: unknown,
+  field: string,
+  file: string
+): string | undefined {
+  const raw = requireAuthorOptionalString(value, field, file);
+  if (raw === undefined) return undefined;
+  let parsed: URL;
+  try {
+    parsed = new URL(raw);
+  } catch {
+    throw new Error(
+      `authors/${file}: \`${field}\` must be an absolute http(s) URL when present`
+    );
+  }
+  if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
+    throw new Error(
+      `authors/${file}: \`${field}\` must be an http(s) URL, got ${parsed.protocol}//`
+    );
+  }
+  return raw;
+}
+
 /** Short, safe rendering of an offending value for an error message. */
 function describe(value: unknown): string {
   if (value === null) return "null";
@@ -213,16 +283,16 @@ function toAuthor({ file, raw }: { file: string; raw: string }): Author {
   const { data, content } = matter(raw);
   return {
     slug: file.replace(/\.mdx$/, ""),
-    name: String(data.name ?? ""),
-    avatar: data.avatar ? String(data.avatar) : undefined,
-    occupation: data.occupation ? String(data.occupation) : undefined,
-    company: data.company ? String(data.company) : undefined,
-    email: data.email ? String(data.email) : undefined,
-    twitter: data.twitter ? String(data.twitter) : undefined,
-    linkedin: data.linkedin ? String(data.linkedin) : undefined,
-    github: data.github ? String(data.github) : undefined,
-    facebook: data.facebook ? String(data.facebook) : undefined,
-    youtube: data.youtube ? String(data.youtube) : undefined,
+    name: requireAuthorName(data.name, file),
+    avatar: requireAuthorOptionalString(data.avatar, "avatar", file),
+    occupation: requireAuthorOptionalString(data.occupation, "occupation", file),
+    company: requireAuthorOptionalString(data.company, "company", file),
+    email: requireAuthorEmail(data.email, "email", file),
+    twitter: requireAuthorUrl(data.twitter, "twitter", file),
+    linkedin: requireAuthorUrl(data.linkedin, "linkedin", file),
+    github: requireAuthorUrl(data.github, "github", file),
+    facebook: requireAuthorUrl(data.facebook, "facebook", file),
+    youtube: requireAuthorUrl(data.youtube, "youtube", file),
     body: content,
   };
 }
@@ -291,4 +361,118 @@ export function jsonLdScriptProps(data: unknown): {
       __html: JSON.stringify(data).replace(/</g, "\\u003c"),
     },
   };
+}
+
+/* -------------------------------------------------------------------------- *
+ * Content-graph integrity
+ *
+ * The frontmatter validators above stop a single file being malformed. This
+ * stops the *references between* files rotting: a post crediting an author that
+ * does not exist (silently downgraded to the site owner), two posts colliding on
+ * one slug, an image or avatar pointing at a file that is not on disk. None of
+ * those break a build on their own — they surface later as a broken image or a
+ * wrong byline in production. `validateContentGraph` turns them into actionable,
+ * named build-time failures; `runContentGraphCheck` runs it against the real
+ * corpus and is invoked by the postbuild step so `bun run build` is the gate.
+ * -------------------------------------------------------------------------- */
+
+/** Route-compatible slug: lowercase, digits and single hyphens, no empty segments. */
+export const SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+
+/** Existence check for a local asset, injected so the validator is disk-free/unit-testable. */
+export type ContentGraphProbe = { exists(relUnderPublic: string): boolean };
+
+function checkAsset(
+  probe: ContentGraphProbe,
+  asset: string,
+  label: string,
+  problems: string[]
+): void {
+  if (/^https?:\/\//i.test(asset)) {
+    try {
+      void new URL(asset);
+    } catch {
+      problems.push(`${label}: invalid remote URL ${asset}`);
+    }
+    return;
+  }
+  // A local asset must be a site-absolute path (no traversal, no backslash, no
+  // filesystem escape) that actually resolves under `public/`.
+  if (!asset.startsWith("/") || asset.includes("..") || asset.includes("\\")) {
+    problems.push(`${label}: unsafe local asset path ${asset}`);
+    return;
+  }
+  const rel = asset.replace(/^\/+/, "");
+  if (!probe.exists(rel)) {
+    problems.push(`${label}: missing file public/${rel}`);
+  }
+}
+
+/**
+ * Validate cross-file integrity over the whole content set. Pure over the data
+ * it is handed (plus an injected asset probe): returns a list of human-readable
+ * problems, empty when the graph is sound. Drafts skip the published-only gates
+ * (summary, author resolution) so work-in-progress never blocks a build, but are
+ * still checked for slugs, duplicate collisions, and asset existence.
+ */
+export function validateContentGraph(
+  blogs: readonly Blog[],
+  authors: readonly Author[],
+  probe: ContentGraphProbe
+): string[] {
+  const problems: string[] = [];
+
+  const authorSlugs = new Set<string>();
+  for (const author of authors) {
+    if (authorSlugs.has(author.slug)) {
+      problems.push(`duplicate author slug: ${author.slug}`);
+    }
+    authorSlugs.add(author.slug);
+    if (!SLUG_PATTERN.test(author.slug)) {
+      problems.push(`authors/${author.slug}: slug is not route-compatible`);
+    }
+    if (author.avatar) {
+      checkAsset(probe, author.avatar, `authors/${author.slug} avatar`, problems);
+    }
+  }
+
+  const blogSlugs = new Set<string>();
+  for (const blog of blogs) {
+    if (blogSlugs.has(blog.slug)) {
+      problems.push(`duplicate blog slug: ${blog.slug}`);
+    }
+    blogSlugs.add(blog.slug);
+    if (!SLUG_PATTERN.test(blog.slug)) {
+      problems.push(`blogs/${blog.slug}: slug is not route-compatible`);
+    }
+    for (const image of blog.images ?? []) {
+      checkAsset(probe, image, `blogs/${blog.slug} image`, problems);
+    }
+    if (blog.draft) continue;
+
+    for (const reference of blog.authors ?? []) {
+      if (!authorSlugs.has(reference)) {
+        problems.push(`blogs/${blog.slug}: references unknown author "${reference}"`);
+      }
+    }
+    if (!blog.summary) {
+      problems.push(
+        `blogs/${blog.slug}: published post is missing a summary (required for metadata and RSS)`
+      );
+    }
+  }
+
+  return problems;
+}
+
+/**
+ * Run the content-graph check against the corpus on disk, resolving local assets
+ * under the client's `public/` directory. Returns the problems (empty = sound).
+ */
+export function runContentGraphCheck(): string[] {
+  const publicDir = path.join(process.cwd(), "public");
+  const probe: ContentGraphProbe = {
+    exists: (rel) => existsSync(path.join(publicDir, rel)),
+  };
+  return validateContentGraph(allBlogs(), allAuthors(), probe);
 }
