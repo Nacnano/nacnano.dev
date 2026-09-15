@@ -49,7 +49,7 @@ These four run in CI on every pull request, and are the same commands locally:
 
 ```bash
 bun run typecheck    # tsc --noEmit, strict
-bun run lint         # oxlint + biome, warnings fail (use lint:fix to write)
+bun run lint         # oxlint + biome + env-var guard, warnings fail (use lint:fix to write)
 bun run test         # bun test
 bun run build        # next build + RSS postbuild
 ```

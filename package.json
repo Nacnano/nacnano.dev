@@ -19,7 +19,7 @@
     "test": "turbo run test"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.5.13",
+    "@biomejs/biome": "2.5.13",
     "@turbo/gen": "^2.5.5",
     "oxlint": "1.82.0",
     "prettier": "^3.0.0",

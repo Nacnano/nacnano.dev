@@ -1,5 +1,5 @@
 {
-  "$schema": "../../node_modules/oxlint/configuration_schema.json",
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
   // oxlint is a NARROW supplement to Biome, not a second general-purpose
   // linter. It runs exactly the two react-hooks rules Biome does not have, and
   // nothing else. Do not "consolidate" this into biome.jsonc or broaden it:
