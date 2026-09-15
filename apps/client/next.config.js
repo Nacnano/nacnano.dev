@@ -1,34 +1,17 @@
-const isDev = process.env.NODE_ENV !== "production";
-
-// Scoped to what this site actually loads: its own assets, inline styles from
-// Tailwind's runtime theme switch, and nothing third-party. The previous
-// policy allowlisted giscus.app and analytics.umami.is, neither of which is
-// used, and opened connect-src/img-src/media-src to the whole internet.
-//
-// 'unsafe-inline' in script-src is still required: the App Router and
-// next-themes both emit inline bootstrap scripts, and Next does not wire a
-// nonce through a statically exported page. 'unsafe-eval' is dev-only, where
-// React Refresh needs it.
-const ContentSecurityPolicy = [
-  "default-src 'self'",
-  `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""}`,
-  "style-src 'self' 'unsafe-inline'",
-  "img-src 'self' data: blob:",
-  "font-src 'self' data:",
-  "connect-src 'self'",
-  "object-src 'none'",
-  "base-uri 'self'",
-  "form-action 'self'",
-  "frame-ancestors 'none'",
-  "upgrade-insecure-requests",
-].join("; ");
+// Outside Vercel (CI, a local build) the commit has to come from git. A
+// checkout without history still builds; it just gets a constant ID.
+function headCommit() {
+  try {
+    return require("node:child_process").execSync("git rev-parse HEAD").toString().trim();
+  } catch {
+    return "no-git";
+  }
+}
 
 const securityHeaders = [
-  // https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP
-  {
-    key: "Content-Security-Policy",
-    value: ContentSecurityPolicy,
-  },
+  // Content-Security-Policy is deliberately absent here: it carries a
+  // per-request nonce, so `src/proxy.ts` sets it instead.
+  //
   // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Referrer-Policy
   {
     key: "Referrer-Policy",
@@ -84,6 +67,12 @@ const securityHeaders = [
  **/
 module.exports = () => {
   return {
+    // The build ID is embedded in the RSC payload of every prerendered page, so
+    // a random one would change that payload — and with it the sha256 the CSP
+    // pins — on every build. Pinning the ID to the commit makes the build
+    // reproducible, which is what lets `src/scripts/cspScriptHashes.ts` hash
+    // one build's HTML and have the next build serve the same bytes.
+    generateBuildId: () => process.env.VERCEL_GIT_COMMIT_SHA || headCommit(),
     reactStrictMode: true,
     // We ship a careful CSP; don't then advertise the framework via
     // `X-Powered-By: Next.js`.

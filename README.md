@@ -18,7 +18,8 @@ apps/client                 the site
   src/data                  content: essays, projects, timeline, site metadata
   src/scripts               postbuild (RSS)
 packages/tsconfig           shared TypeScript config
-packages/eslint-config-custom  shared ESLint config
+biome.jsonc                 lint rules (Prettier still owns formatting)
+apps/client/.oxlintrc.json  oxlint, two react-hooks rules Biome lacks (see its comment)
 ```
 
 ## Getting started
@@ -48,7 +49,7 @@ These four run in CI on every pull request, and are the same commands locally:
 
 ```bash
 bun run typecheck    # tsc --noEmit, strict
-bun run lint         # eslint, warnings fail (use lint:fix to write)
+bun run lint         # oxlint + biome + env-var guard, warnings fail (use lint:fix to write)
 bun run test         # bun test
 bun run build        # next build + RSS postbuild
 ```
@@ -62,10 +63,24 @@ bun run build        # next build + RSS postbuild
 | Work and education    | `apps/client/src/data/timelineData.ts`     |
 | Name, status, socials | `apps/client/src/data/siteMetadata.ts`     |
 | Author bio            | `apps/client/src/data/authors/default.mdx` |
+| Answered questions    | `apps/client/src/data/amaData.ts`          |
 
 Essay frontmatter needs `title`, `date` and `summary`; set `draft: true` to
 hide one. Each essay closes on a single `#### ...` line, which renders as the
 takeaway block rather than a heading.
+
+The `/ama` answers are authored content. The ask box writes to a private Redis
+inbox that no page and no route reads back. Read it with `bun run ama:inbox`
+from `apps/client`, then write the ones worth answering into `amaData.ts` by
+hand. Answers are MDX, and `draft: true` hides one without deleting it.
+Submissions expire from the inbox after 90 days, and the box is inert unless
+`UPSTASH_REDIS_REST_*` is configured. To be told when a question arrives rather
+than having to check, set `AMA_NOTIFY_URL` to a Slack or Discord webhook (or
+any JSON endpoint), or `DISCORD_BOT_TOKEN` plus `DISCORD_CHANNEL_ID` /
+`DISCORD_DM_USER_ID` to have a bot post or DM it. Either, both, or neither.
+`bun run discord:setup` validates the bot token, prints the invite URL for
+your own application and sends a test message, so the setup can be checked
+without submitting a question.
 
 `timelineData.ts` must stay in sync with <https://resume.nacnano.dev>, which is
 the source of truth for roles and dates.

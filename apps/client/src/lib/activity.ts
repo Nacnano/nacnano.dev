@@ -8,11 +8,7 @@
  * globe-marker rules.
  */
 
-import {
-  type VisitEvent,
-  type VisitFeedPayload,
-  type VisitMarker,
-} from "./activityTypes";
+import type { VisitEvent, VisitFeedPayload, VisitMarker } from "./activityTypes";
 
 /** Newest first. A stable sort keeps authored order inside one second. */
 export function sortVisitsDesc(visits: readonly VisitEvent[]): VisitEvent[] {

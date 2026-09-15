@@ -8,7 +8,7 @@ updates:
     groups:
       # One PR per ecosystem cluster rather than a PR per package.
       next:
-        patterns: ["next", "next-*", "@next/*", "eslint-config-next"]
+        patterns: ["next", "next-*", "@next/*"]
       react:
         patterns: ["react", "react-dom", "@types/react", "@types/react-dom"]
       tailwind:

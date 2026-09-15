@@ -1,5 +1,5 @@
 import { describe, expect, it } from "bun:test";
-import { postUrl, trimTrailingSlash } from "./feed";
+import { amaUrl, postUrl, trimTrailingSlash } from "./feed";
 
 describe("postUrl", () => {
   it("uses the /blogs/ prefix the route actually serves", () => {
@@ -13,6 +13,18 @@ describe("postUrl", () => {
     expect(postUrl("https://www.nacnano.dev/", "x")).toBe(
       "https://www.nacnano.dev/blogs/x"
     );
+  });
+});
+
+describe("amaUrl", () => {
+  it("anchors at the answer on the /ama index", () => {
+    expect(amaUrl("https://www.nacnano.dev", "over-engineered")).toBe(
+      "https://www.nacnano.dev/ama#over-engineered"
+    );
+  });
+
+  it("never doubles the slash when the site URL has a trailing one", () => {
+    expect(amaUrl("https://www.nacnano.dev/", "x")).toBe("https://www.nacnano.dev/ama#x");
   });
 });
 

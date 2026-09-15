@@ -10,6 +10,7 @@ import siteMetadata from "@/data/siteMetadata";
  * Next's default error screen, which carries none of the site's design or a
  * way back.
  */
+// biome-ignore lint/suspicious/noShadowRestrictedNames: Next's error-boundary convention names this export `Error`
 export default function Error({
   error,
   reset,

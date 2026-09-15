@@ -117,10 +117,9 @@ export function parseStreamEntries(entries: unknown): StreamEntry[] {
             ? recordFromFlat(entry[1])
             : ((entry[1] as Record<string, unknown>) ?? {}),
         });
-      } else if (entry && typeof entry === "object") {
-        // Some shape without an id we can use; skip rather than guess.
-        continue;
       }
+      // Anything else is a shape with no id we can use — skipped rather than
+      // guessed at, so a client or runtime change cannot invent a cursor.
     }
     return collected;
   }

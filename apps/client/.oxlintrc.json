@@ -1,0 +1,18 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  // oxlint is a NARROW supplement to Biome, not a second general-purpose
+  // linter. It runs exactly the two react-hooks rules Biome does not have, and
+  // nothing else. Do not "consolidate" this into biome.jsonc or broaden it:
+  // oxlint's jest/vitest plugins do not recognise `bun:test`, so Biome must
+  // keep owning the test domain (`noFocusedTests` is the net under CI). And
+  // Biome has neither rule enabled here. Each side covers a gap the other
+  // cannot; the split is deliberate.
+  "plugins": ["react"],
+  "categories": { "correctness": "off" },
+  "rules": {
+    // These two also make the three dead `// eslint-disable-next-line
+    // react-hooks/*` comments live again -- oxlint reads them verbatim.
+    "react/set-state-in-effect": "error",
+    "react/static-components": "error"
+  }
+}

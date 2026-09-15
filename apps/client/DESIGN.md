@@ -291,7 +291,11 @@ Icons are drawn SVG on a 24px viewBox at `stroke-width: 1.5` with round caps and
 
 ### Inputs / Fields
 
-The site ships no forms. If one is added, it inherits the outline button's material: Hairline 1px border, 4px radius, transparent ground, Reading Ink text, `caret-color` already bound to the focus ring variable, and the global focus ring as its only focus treatment.
+There is exactly one form on the site — the ask box on `/ama` — and one field material, the `.field` class. It is the outline button's material: Hairline 1px border, 4px radius, transparent ground, Reading Ink text, `caret-color` bound to the focus ring variable, and the global focus ring as its only focus treatment. Border brightens to Marker on focus, the same one-step move the outline button makes on hover.
+
+`@tailwindcss/forms` ships a blue ring of its own on fields and blanks the outline to make room for it. `.field` undoes both, so a focused field is indistinguishable from any other focused control on the site. A second focus treatment is a defect, not a variation.
+
+Every field carries a visible `<label>` above it — a placeholder is never the label. The result of a submission is announced in an `aria-live="polite"` region that is in the DOM before the submit, including the pending state; a submit that appears to do nothing is how a form like this usually breaks.
 
 ### Navigation
 

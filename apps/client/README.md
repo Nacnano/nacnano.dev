@@ -24,7 +24,7 @@ Bun is required: `curl -fsSL https://bun.sh/install | bash`
 ## Build
 
 ```bash
-bun run build     # next build + RSS/sitemap postbuild
+bun run build     # next build + RSS (/feed.xml, /ama/rss.xml) and sitemap postbuild
 ```
 
 ## Content

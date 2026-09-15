@@ -1,0 +1,58 @@
+{
+  "$schema": "https://biomejs.dev/schemas/2.5.13/schema.json",
+  // Single Biome config for the workspace. Biome walks up from the file being
+  // checked, so `biome lint .` inside apps/client picks this up — no per-app
+  // config, and no shared config package to keep in sync.
+  "vcs": { "enabled": true, "clientKind": "git", "useIgnoreFile": true },
+  "files": {
+    "includes": [
+      "**",
+      "!**/.next",
+      "!**/out",
+      "!**/build",
+      "!**/coverage",
+      "!**/*.d.ts",
+      "!apps/client/public",
+      "!bun.lock",
+      // Biome's CSS parser doesn't know Tailwind v3's at-rules and `theme()`
+      // helper, so every stylesheet reads as a parse error. Nothing linted CSS
+      // before this migration either.
+      "!**/*.css",
+    ],
+  },
+  // Formatting stays with Prettier: `prettier-plugin-tailwindcss` sorts class
+  // names and Biome has no equivalent. Enabling both would make them fight.
+  "formatter": { "enabled": false },
+  // Import sorting was never enforced; leaving it off keeps the diff honest.
+  "assist": { "enabled": false },
+  "linter": {
+    "enabled": true,
+    // `next` replaces eslint-config-next's core-web-vitals rules; `react`
+    // covers the hooks rules; `test` covers the bun:test files.
+    "domains": {
+      "next": "recommended",
+      "react": "recommended",
+      "test": "recommended",
+    },
+    "rules": {
+      "preset": "recommended",
+      "style": {
+        // `!` is used deliberately in tests and after explicit length checks.
+        "noNonNullAssertion": "off",
+      },
+      "a11y": {
+        // The SVGs here are decorative icons; callers label the control.
+        "noSvgWithoutTitle": "off",
+      },
+      "suspicious": {
+        // The three call sites render fixed-length, index-only placeholder
+        // lists, where the index is the only stable identity available.
+        "noArrayIndexKey": "off",
+      },
+    },
+  },
+  // Bun's global, used by the scripts and tests.
+  "javascript": {
+    "globals": ["Bun"],
+  },
+}
