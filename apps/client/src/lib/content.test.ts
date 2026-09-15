@@ -11,6 +11,13 @@ import {
   requireBooleanOrUndefined,
   requireOptionalString,
   requireKnownLayout,
+  requireAuthorName,
+  requireAuthorOptionalString,
+  requireAuthorEmail,
+  requireAuthorUrl,
+  validateContentGraph,
+  runContentGraphCheck,
+  type Author,
   type Blog,
 } from "./content";
 import siteMetadata from "@/data/siteMetadata";
@@ -178,5 +185,198 @@ describe("frontmatter validators", () => {
     expect(requireKnownLayout(null, "layout", "x.mdx")).toBeUndefined();
     // A required field still rejects it — null is not a date.
     expect(() => requireIsoDate(null, "date", "x.mdx")).toThrow(/must be a date/);
+  });
+});
+
+describe("author validators", () => {
+  it("requireAuthorName refuses blank and non-strings", () => {
+    expect(requireAuthorName("Nacnano", "a.mdx")).toBe("Nacnano");
+    expect(() => requireAuthorName("", "a.mdx")).toThrow(/non-empty string/);
+    expect(() => requireAuthorName(42, "a.mdx")).toThrow(/non-empty string/);
+    // The old `String(...)` coercion turned a boolean into the byline "true".
+    expect(() => requireAuthorName(true, "a.mdx")).toThrow(/non-empty string/);
+  });
+
+  it("requireAuthorOptionalString rejects coercion of foreign types", () => {
+    expect(requireAuthorOptionalString("Dev", "occupation", "a.mdx")).toBe("Dev");
+    expect(requireAuthorOptionalString(null, "occupation", "a.mdx")).toBeUndefined();
+    expect(() => requireAuthorOptionalString(["a"], "occupation", "a.mdx")).toThrow(
+      /string when present/
+    );
+  });
+
+  it("requireAuthorEmail checks shape when present", () => {
+    expect(requireAuthorEmail("a@b.co", "email", "a.mdx")).toBe("a@b.co");
+    expect(requireAuthorEmail(undefined, "email", "a.mdx")).toBeUndefined();
+    expect(() => requireAuthorEmail("nope", "email", "a.mdx")).toThrow(/valid email/);
+  });
+
+  it("requireAuthorUrl requires an absolute http(s) URL", () => {
+    expect(requireAuthorUrl("https://x.com/a", "twitter", "a.mdx")).toBe(
+      "https://x.com/a"
+    );
+    expect(requireAuthorUrl(undefined, "twitter", "a.mdx")).toBeUndefined();
+    expect(() => requireAuthorUrl("@handle", "twitter", "a.mdx")).toThrow(
+      /absolute http\(s\) URL/
+    );
+    expect(() => requireAuthorUrl("javascript:alert(1)", "twitter", "a.mdx")).toThrow(
+      /http\(s\) URL/
+    );
+  });
+});
+
+function blogFixture(overrides: Partial<Blog>): Blog {
+  return {
+    slug: "post",
+    path: "blogs/post",
+    filePath: "blogs/post.mdx",
+    title: "Post",
+    date: "2026-09-14T00:00:00.000Z",
+    tags: [],
+    readingTime: { text: "1 min", minutes: 1, time: 1000, words: 1 },
+    body: "",
+    ...overrides,
+  };
+}
+
+function authorFixture(overrides: Partial<Author>): Author {
+  return { slug: "default", name: "Nacnano", body: "", ...overrides };
+}
+
+const present = (files: string[]) => ({
+  exists: (rel: string) => files.includes(rel),
+});
+
+describe("validateContentGraph", () => {
+  it("passes on a sound graph", () => {
+    const blogs = [blogFixture({ slug: "hello", summary: "hi", authors: ["default"] })];
+    const authors = [authorFixture({ avatar: "/static/images/logo.png" })];
+    expect(
+      validateContentGraph(blogs, authors, present(["static/images/logo.png"]))
+    ).toEqual([]);
+  });
+
+  it("rejects an unknown author reference on a published post", () => {
+    const blogs = [blogFixture({ summary: "hi", authors: ["ghost"] })];
+    const problems = validateContentGraph(blogs, [authorFixture({})], present([]));
+    expect(problems.join("\n")).toMatch(/unknown author "ghost"/);
+  });
+
+  it("requires a summary on a published post but not a draft", () => {
+    const noSummary = [blogFixture({ slug: "a" })];
+    expect(validateContentGraph(noSummary, [], present([])).join("\n")).toMatch(
+      /missing a summary/
+    );
+    const draft = [blogFixture({ slug: "a", draft: true })];
+    expect(validateContentGraph(draft, [], present([]))).toEqual([]);
+  });
+
+  it("flags duplicate author and blog slugs", () => {
+    const dup = validateContentGraph(
+      [],
+      [authorFixture({}), authorFixture({})],
+      present([])
+    );
+    expect(dup.join("\n")).toMatch(/duplicate author slug/);
+    const dupBlog = validateContentGraph(
+      [blogFixture({ slug: "x" }), blogFixture({ slug: "x", summary: "s" })],
+      [],
+      present([])
+    );
+    expect(dupBlog.join("\n")).toMatch(/duplicate blog slug/);
+  });
+
+  it("rejects non-route-compatible slugs", () => {
+    const problems = validateContentGraph(
+      [blogFixture({ slug: "Bad Slug", summary: "s" })],
+      [],
+      present([])
+    );
+    expect(problems.join("\n")).toMatch(/not route-compatible/);
+  });
+
+  it("verifies local images/avatars exist and rejects traversal", () => {
+    const missing = validateContentGraph(
+      [blogFixture({ summary: "s", images: ["/static/images/gone.png"] })],
+      [],
+      present([])
+    );
+    expect(missing.join("\n")).toMatch(/missing file public\/static\/images\/gone.png/);
+
+    const traversal = validateContentGraph(
+      [blogFixture({ summary: "s", images: ["/../../etc/passwd"] })],
+      [],
+      present([])
+    );
+    expect(traversal.join("\n")).toMatch(/unsafe local asset path/);
+  });
+
+  it("rejects a remote asset — this site cannot serve remote images", () => {
+    // next.config pins images.remotePatterns to [] and CSP img-src is 'self',
+    // so the only honest verdict for a scheme-carrying URL is "broken". An
+    // earlier version blessed https URLs as sound; the check now rejects them.
+    const remote = validateContentGraph(
+      [blogFixture({ summary: "s", images: ["https://cdn.example/x.png"] })],
+      [],
+      present([])
+    );
+    expect(remote.join("\n")).toMatch(/remote asset/);
+    // A non-http scheme is a remote asset too, not a silent pass.
+    const js = validateContentGraph(
+      [blogFixture({ summary: "s", images: ["javascript:alert(1)"] })],
+      [],
+      present([])
+    );
+    expect(js.join("\n")).toMatch(/remote asset/);
+  });
+
+  it("rejects a protocol-relative asset path, not just a traversal", () => {
+    // `//evil.com/x.png` passes startsWith("/") and has no "..", so without an
+    // explicit guard it collapses to `evil.com/x.png` and only fails incidentally
+    // (or passes if such a file ever lived under public/). The browser resolves
+    // it to a remote fetch — reject it by name.
+    const proto = validateContentGraph(
+      [blogFixture({ summary: "s", images: ["//evil.com/x.png"] })],
+      [],
+      present([])
+    );
+    expect(proto.join("\n")).toMatch(/protocol-relative asset path/);
+  });
+
+  it("resolves a local asset past a cache-busting query or fragment", () => {
+    // The browser fetches /static/x.png?v=2 from public/static/x.png, so the
+    // probe must strip the query before hitting disk.
+    const q = validateContentGraph(
+      [blogFixture({ summary: "s", images: ["/static/images/logo.png?v=2#top"] })],
+      [],
+      present(["static/images/logo.png"])
+    );
+    expect(q).toEqual([]);
+    // A malformed % sequence must not throw out of the probe — it falls back to
+    // the raw path and reports missing like any other absent file.
+    const bad = validateContentGraph(
+      [blogFixture({ summary: "s", images: ["/static/%.png"] })],
+      [],
+      present([])
+    );
+    expect(bad.join("\n")).toMatch(/missing file public\/static\/%\.png/);
+  });
+
+  it("may reference a missing author while a draft, but not once published", () => {
+    // Pins the deliberate decision that drafts skip the published-only author
+    // resolution, so a later refactor cannot quietly reverse it.
+    const draft = [blogFixture({ slug: "wip", draft: true, authors: ["ghost"] })];
+    expect(validateContentGraph(draft, [], present([]))).toEqual([]);
+    // The same reference on a published post is a build failure.
+    const published = [blogFixture({ slug: "live", summary: "s", authors: ["ghost"] })];
+    expect(validateContentGraph(published, [], present([])).join("\n")).toMatch(
+      /unknown author "ghost"/
+    );
+  });
+
+  it("the real, published corpus is internally consistent", () => {
+    // The same gate the postbuild step runs against disk, asserted here so a
+    // future bad reference fails `bun run test` before it can reach a build.
+    expect(runContentGraphCheck()).toEqual([]);
   });
 });
