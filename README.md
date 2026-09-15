@@ -121,6 +121,18 @@ any JSON endpoint), or `DISCORD_BOT_TOKEN` plus `DISCORD_CHANNEL_ID` /
 your own application and sends a test message, so the setup can be checked
 without submitting a question.
 
+## Error reporting
+
+There is no APM account. `captureError` always writes a structured line to the
+server log (which Vercel drains) and, when configured, forwards the same payload:
+server-side to `ERROR_REPORT_URL`, and — reusing the Discord bot above — as an
+embed to the same channel/DM (wired through `src/instrumentation.ts`). So setting
+up the AMA bot also turns it into your error-alert channel, with each distinct
+failure de-duplicated per process and browser failures routed through the
+same-origin `POST /api/report`. Point an uptime monitor at `GET /api/health` to
+catch a degraded live config (it reports `mode` and store reachability without
+ever echoing a secret).
+
 `timelineData.ts` must stay in sync with <https://resume.nacnano.dev>, which is
 the source of truth for roles and dates.
 
