@@ -22,6 +22,21 @@ const REPORT_PATH = "/api/report";
 // serverless function alive waiting on an unresponsive peer.
 const TIMEOUT_MS = 2_000;
 
+/**
+ * A server-side delivery hook, registered once at boot by `instrumentation.ts`.
+ *
+ * Kept as an injected function pointer rather than an import so this module —
+ * which the client error boundaries also pull in — never statically depends on a
+ * `server-only` transport (`discord.ts`). The sink is a no-op until the server
+ * registers one, so the browser bundle and static deploys are unaffected.
+ */
+export type ReportSink = (payload: Record<string, unknown>) => void;
+let reportSink: ReportSink | null = null;
+
+export function setReportSink(sink: ReportSink | null): void {
+  reportSink = sink;
+}
+
 function serialize(error: unknown): Record<string, unknown> {
   if (error instanceof Error) {
     return {
@@ -79,6 +94,10 @@ export function captureError(error: unknown, context: Context = {}): void {
       // taken anyway.)
       const endpoint = process.env.ERROR_REPORT_URL;
       if (endpoint) dispatch(endpoint, payload);
+      // Also hand the payload to any server-registered sink (e.g. Discord, wired
+      // in `instrumentation.ts`). It self-checks configuration and de-dupes, so
+      // this is a no-op on a static deploy with nothing configured.
+      reportSink?.(payload);
     } else {
       // Ship only bounded, non-secret fields to our own origin. `stack` is
       // deliberately withheld — it is attacker-influenced text (a thrown

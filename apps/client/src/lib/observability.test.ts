@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from "bun:test";
-import { captureError } from "./observability";
+import { captureError, setReportSink } from "./observability";
 
 type Call = { url: string; init: RequestInit };
 let calls: Call[] = [];
@@ -139,5 +139,58 @@ describe("captureError", () => {
       globalThis.fetch = original;
     }
     expect(maxDepth).toBeLessThanOrEqual(1);
+  });
+
+  describe("server report sink", () => {
+    function silenceConsole() {
+      const original = console.error;
+      console.error = () => {};
+      return () => (console.error = original);
+    }
+
+    it("invokes a registered sink with the serialized payload on the server", () => {
+      const received: Record<string, unknown>[] = [];
+      setReportSink((payload) => received.push(payload));
+      const restore = silenceConsole();
+      try {
+        // Server branch (window is undefined under bun test); no ERROR_REPORT_URL,
+        // so the sink is the only delivery and must still receive the payload.
+        captureError(new Error("sink me"), { scope: "activity-feed" });
+      } finally {
+        restore();
+        setReportSink(null);
+      }
+      expect(received).toHaveLength(1);
+      expect(received[0]).toMatchObject({
+        message: "sink me",
+        scope: "activity-feed",
+        name: "Error",
+      });
+    });
+
+    it("does not invoke the sink from the browser branch", () => {
+      (globalThis as { window?: unknown }).window = {};
+      (globalThis as { location?: { href: string } }).location = {
+        href: "https://x.test",
+      };
+      let called = 0;
+      setReportSink(() => {
+        called += 1;
+      });
+      const restore = silenceConsole();
+      const originalFetch = globalThis.fetch;
+      globalThis.fetch = (async () =>
+        new Response(null, { status: 204 })) as unknown as typeof fetch;
+      try {
+        captureError(new Error("browser"), { scope: "route-error" });
+      } finally {
+        restore();
+        globalThis.fetch = originalFetch;
+        setReportSink(null);
+        delete (globalThis as { window?: unknown }).window;
+        delete (globalThis as { location?: { href: string } }).location;
+      }
+      expect(called).toBe(0);
+    });
   });
 });
