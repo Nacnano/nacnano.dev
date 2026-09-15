@@ -142,6 +142,7 @@ jobs:
             apps/client/test-results/
             apps/client/playwright-report/
           retention-days: 7
+          if-no-files-found: ignore
 
   perf:
     name: lighthouse · budgets
@@ -190,5 +191,4 @@ jobs:
           name: lighthouse-reports
           path: apps/client/.lighthouseci/
           retention-days: 7
-          if-no-files-found: ignore
           if-no-files-found: ignore
