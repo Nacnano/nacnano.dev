@@ -14,8 +14,14 @@
 
 import { Redis } from "@upstash/redis";
 import { isInternalPath, sortVisitsDesc } from "./activity";
+import { parseVisitEvent } from "./activityTypes";
+import { captureError } from "./observability";
+import { getRuntimeConfig, namespacedKey } from "./runtimeConfig";
 import type { VisitEvent, VisitFeedPayload } from "./activityTypes";
 
+// Logical keys; the configured namespace (see `runtimeConfig.namespacedKey`) is
+// applied at each use so an opted-in prefix isolates test workspaces without
+// changing production keys when no prefix is set.
 const STREAM_KEY = "activity:stream";
 const COUNT_KEY = "activity:count";
 // How far back detailed visits reach, by count. Exported so the UI can state it
@@ -40,41 +46,25 @@ export type VisitInput = {
 let cachedClient: Redis | undefined;
 
 /**
- * The configured Upstash client, or null in static mode. Only a constructed
- * client is cached — the static "no env" case is re-checked each call so a
- * store configured later (a different runtime, or a test) is picked up rather
- * than latched off forever.
+ * The configured Upstash client, or null in a genuinely static deployment.
+ *
+ * Construction goes through the validated runtime configuration: neither
+ * credential present is the supported static mode (returns null), but a partial
+ * or weak live configuration *throws* rather than silently degrading — the
+ * caller's try/catch turns it into a 5xx the operator can actually see, which is
+ * the point. Only a constructed client is cached, so a store configured later (a
+ * different runtime, or a test) is picked up rather than latched off forever.
  */
 export function getActivityClient(): Redis | null {
   if (cachedClient) return cachedClient;
-  const url = process.env.UPSTASH_REDIS_REST_URL;
-  const token = process.env.UPSTASH_REDIS_REST_TOKEN;
-  if (!url || !token) return null;
-  cachedClient ??= new Redis({ url, token });
+  const config = getRuntimeConfig();
+  if (config.mode === "disabled") return null;
+  cachedClient ??= new Redis({ url: config.url, token: config.token });
   return cachedClient;
 }
 
-function isVisitEvent(value: unknown): value is VisitEvent {
-  if (!value || typeof value !== "object") return false;
-  const record = value as Record<string, unknown>;
-  return (
-    typeof record.id === "string" &&
-    typeof record.ts === "string" &&
-    typeof record.page === "string"
-  );
-}
-
 export function coerceVisit(raw: unknown): VisitEvent | null {
-  const candidate = typeof raw === "string" ? safeParse(raw) : raw;
-  return isVisitEvent(candidate) ? candidate : null;
-}
-
-function safeParse(value: string): unknown {
-  try {
-    return JSON.parse(value);
-  } catch {
-    return null;
-  }
+  return parseVisitEvent(raw);
 }
 
 type StreamEntry = { id: string; fields: Record<string, unknown> };
@@ -152,14 +142,16 @@ export async function readActivityFeed(
   const client = getActivityClient();
   if (!client) return { visits: [], count: 0, hasMore: false, nextCursor: null };
 
+  const streamKey = namespacedKey(STREAM_KEY);
+  const countKey = namespacedKey(COUNT_KEY);
   const cursor = normaliseCursor(before);
   // `(<id>` is an exclusive upper bound, so the page starts strictly older than
   // the cursor the client already has.
   const upper = cursor ? `(${cursor}` : "+";
 
   const [entries, count] = await Promise.all([
-    client.xrevrange(STREAM_KEY, upper, "-", limit),
-    client.get<number>(COUNT_KEY),
+    client.xrevrange(streamKey, upper, "-", limit),
+    client.get<number>(countKey),
   ]);
 
   const parsed = parseStreamEntries(entries);
@@ -167,11 +159,21 @@ export async function readActivityFeed(
   const visits: VisitEvent[] = [];
   for (const entry of parsed) {
     const visit = coerceVisit(entry.fields.data);
-    // The write endpoint enforces this now, but the feed renders `page` as a
+    if (!visit) {
+      // A row we can't parse must never truncate or loop pagination (the paging
+      // decision below uses the RAW page), but it is worth surfacing so a store
+      // corruption or a schema drift is visible rather than silently missing.
+      captureError(new Error("corrupt activity row skipped"), {
+        scope: "activity-feed",
+        entryId: entry.id,
+      });
+      continue;
+    }
+    // The write endpoint enforces the path, but the feed renders `page` as a
     // link — so re-check on read too, or any row written before the guard (or
     // through a path that bypasses it) keeps rendering as an outbound link.
     // Dropping the row here means the guarantee holds for data we didn't write.
-    if (visit && isInternalPath(visit.page)) visits.push({ ...visit, cursor: entry.id });
+    if (isInternalPath(visit.page)) visits.push({ ...visit, cursor: entry.id });
   }
 
   const ordered = sortVisitsDesc(visits);
@@ -203,16 +205,43 @@ export function coarsenCoordinate(value: number | undefined): number | undefined
   return Math.round(value * 10) / 10;
 }
 
+function normalizedCountry(value: string | undefined): string | undefined {
+  if (typeof value !== "string") return undefined;
+  const code = value.trim().toUpperCase();
+  return /^[A-Z]{2}$/.test(code) ? code : undefined;
+}
+
+/** Coords are stored as a pair, in range, or not at all — never a lone axis. */
+function coordinatePair(
+  lat: number | undefined,
+  lng: number | undefined
+): { lat?: number; lng?: number } {
+  if (
+    typeof lat === "number" &&
+    typeof lng === "number" &&
+    Number.isFinite(lat) &&
+    Number.isFinite(lng) &&
+    lat >= -90 &&
+    lat <= 90 &&
+    lng >= -180 &&
+    lng <= 180
+  ) {
+    return { lat: coarsenCoordinate(lat), lng: coarsenCoordinate(lng) };
+  }
+  return {};
+}
+
 export function visitEvent(input: VisitInput): VisitEvent {
+  const coords = coordinatePair(input.lat, input.lng);
   return {
     id: crypto.randomUUID(),
     ts: new Date().toISOString(),
     page: input.path,
     title: input.title?.trim() || undefined,
-    countryCode: input.countryCode,
+    countryCode: normalizedCountry(input.countryCode),
     city: input.city?.trim() || undefined,
-    lat: coarsenCoordinate(input.lat),
-    lng: coarsenCoordinate(input.lng),
+    lat: coords.lat,
+    lng: coords.lng,
   };
 }
 
@@ -228,26 +257,28 @@ export async function recordVisit(input: VisitInput): Promise<boolean> {
 
   const event = visitEvent(input);
   const oldestAllowed = `${Date.now() - RETENTION_MS}-0`;
+  const streamKey = namespacedKey(STREAM_KEY);
+  const countKey = namespacedKey(COUNT_KEY);
 
   const pipeline = client.pipeline();
   pipeline.xadd(
-    STREAM_KEY,
+    streamKey,
     "*",
     { data: JSON.stringify(event) },
     {
       trim: { type: "MAXLEN", comparison: "~", threshold: STREAM_MAXLEN },
     }
   );
-  pipeline.incr(COUNT_KEY);
+  pipeline.incr(countKey);
   // Drop entries older than the retention window (stream ids are ms-ordered).
-  pipeline.xtrim(STREAM_KEY, {
+  pipeline.xtrim(streamKey, {
     strategy: "MINID",
     exactness: "~",
     threshold: oldestAllowed,
   });
   // Idle clear: if tracking stops entirely, the keys vanish after the window.
-  pipeline.expire(STREAM_KEY, RETENTION_SECONDS);
-  pipeline.expire(COUNT_KEY, RETENTION_SECONDS);
+  pipeline.expire(streamKey, RETENTION_SECONDS);
+  pipeline.expire(countKey, RETENTION_SECONDS);
   await pipeline.exec();
 
   return true;

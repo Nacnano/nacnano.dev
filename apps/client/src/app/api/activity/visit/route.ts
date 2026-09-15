@@ -23,14 +23,31 @@ function parseCoordinate(value: string | null): number | undefined {
   return Number.isFinite(n) ? n : undefined;
 }
 
+/**
+ * Decode Vercel's percent-encoded city header without letting a malformed escape
+ * take down the whole visit. A bad `%`-sequence is a data-quality problem with
+ * one field, not a reason to drop a legitimate page view, so it degrades to
+ * "no city" rather than throwing. (Vercel overwrites these headers on the edge,
+ * so they are trusted here only because the platform controls them; a non-Vercel
+ * deployment must define a trusted-proxy boundary before accepting them.)
+ */
+function decodeCity(value: string | null): string | undefined {
+  if (!value || value.trim() === "") return undefined;
+  try {
+    return decodeURIComponent(value);
+  } catch {
+    return undefined;
+  }
+}
+
 function readGeo(headers: Headers) {
   // Vercel annotates every request with these. Absent elsewhere (local dev),
-  // the visit is still recorded, just without a point on the globe.
-  const country = headers.get("x-vercel-ip-country") ?? undefined;
-  const cityHeader = headers.get("x-vercel-ip-city");
+  // the visit is still recorded, just without a point on the globe. Country and
+  // coordinates are bounded by the store's canonical schema on the way in.
+  const country = headers.get("x-vercel-ip-country")?.trim() ?? undefined;
   return {
     countryCode: country,
-    city: cityHeader ? decodeURIComponent(cityHeader) : undefined,
+    city: decodeCity(headers.get("x-vercel-ip-city")),
     lat: parseCoordinate(headers.get("x-vercel-ip-latitude")),
     lng: parseCoordinate(headers.get("x-vercel-ip-longitude")),
   };

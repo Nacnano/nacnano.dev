@@ -214,18 +214,17 @@ export function buildFeedPayload(
 }
 
 /**
- * Live mode is on only when the site has been pointed at a Redis instance.
- * The page computes this on the server and hands the answer to the client as a
- * plain boolean, so no server-only env ever reaches the browser bundle. When
- * this is false nothing is polled or recorded and the page stays a genuinely
- * static site.
+ * Live mode is *intended* as soon as either Redis credential is present. It
+ * deliberately reads the raw environment (not `runtimeConfig`) and never throws,
+ * because this boolean is handed to the client as a prop: the client must learn
+ * only "poll or don't", never a credential or the salt. The authoritative,
+ * throwing validation lives in `getActivityClient`/`getRuntimeConfig` — so an
+ * operator who sets exactly one credential (or a weak salt) does NOT silently
+ * fall back to static here; the intent is "live," and the first store call
+ * surfaces the misconfiguration loudly instead.
  */
 export function isActivityLive(): boolean {
-  // Truthiness, not `!== undefined`: an env var set to the empty string is the
-  // classic CI/Vercel misconfiguration, and `getActivityClient` treats `""` as
-  // absent. Both must agree, or a blank credential reads as "live" here while
-  // the client returns null.
-  return !!process.env.UPSTASH_REDIS_REST_URL && !!process.env.UPSTASH_REDIS_REST_TOKEN;
+  return !!process.env.UPSTASH_REDIS_REST_URL || !!process.env.UPSTASH_REDIS_REST_TOKEN;
 }
 
 /**
