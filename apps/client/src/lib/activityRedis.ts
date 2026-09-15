@@ -12,6 +12,8 @@
  * id doubles as the pagination cursor for the client's infinite scroll.
  */
 
+import "server-only";
+
 import { Redis } from "@upstash/redis";
 import { isInternalPath, sortVisitsDesc } from "./activity";
 import { parseVisitEvent } from "./activityTypes";

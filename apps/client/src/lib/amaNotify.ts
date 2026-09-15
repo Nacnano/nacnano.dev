@@ -22,6 +22,8 @@
  * feature, but it is worth knowing before pointing this at a shared channel.
  */
 
+import "server-only";
+
 import type { AskRecord } from "./amaInbox";
 import {
   clampToLimit,

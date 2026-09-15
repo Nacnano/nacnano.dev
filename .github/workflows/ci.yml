@@ -180,6 +180,14 @@ jobs:
       # Vitals and resource budgets and uploads them without gating the merge.
       # Promote an individual budget to `error` only once it has proven stable
       # across several runs (see lighthouserc.json).
+      #
+      # `bun run perf` fetches `@lhci/cli` at an exact version via bunx rather
+      # than a committed dependency, so it resolves from the network at CI time
+      # and is not covered by bun.lock's integrity hashes. Accepted knowingly,
+      # not an oversight: this is a report-only job that ships nothing, its
+      # result never gates a merge, and pinning the version keeps it from
+      # drifting. Revisit (pin by digest, or commit it as a devDependency) if
+      # this ever becomes an error-gating gate or a supply-chain input.
       - name: Lighthouse CI
         working-directory: apps/client
         run: bun run perf

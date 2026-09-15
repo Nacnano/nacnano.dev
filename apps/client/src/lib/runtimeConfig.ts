@@ -22,11 +22,14 @@
  * Error messages always name the offending variable but never echo its value.
  */
 
-// Server-only by construction: it reads process.env and holds Upstash
-// credentials and the IP salt. The codebase marks no npm `server-only` package,
-// so the guard is explicit — an accidental import from a client component fails
-// loudly here instead of shipping a secret into the browser bundle. (The
-// client-side bridge is the plain boolean `isActivityLive()` in `activity.ts`.)
+// Turn an accidental client import into a *build* error, not a runtime surprise —
+// this module holds Upstash credentials and the IP salt. The explicit guard
+// below is kept as the second line of defence it always claimed to be (the
+// package is a build-time marker; this throws if anything defeats that and
+// reaches the browser anyway). The client-side bridge remains the plain boolean
+// `isActivityLive()` in `activity.ts`.
+import "server-only";
+
 if (typeof window !== "undefined") {
   throw new Error("runtimeConfig is server-only and must not be imported by client code");
 }

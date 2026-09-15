@@ -14,6 +14,8 @@
  * resolution, limits and the mention guard.
  */
 
+import "server-only";
+
 import { captureError } from "./observability";
 
 const DEFAULT_API_BASE = "https://discord.com/api/v10";
