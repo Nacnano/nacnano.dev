@@ -38,8 +38,8 @@ describe("captureError", () => {
     const { lines, restore } = silenceConsole();
     const restoreFetch = stubFetch();
     try {
-      expect(() => captureError(new Error("boom"), { route: "test" })).not.toThrow();
-      expect(() => captureError("plain string", { route: "test" })).not.toThrow();
+      expect(() => captureError(new Error("boom"), { scope: "test" })).not.toThrow();
+      expect(() => captureError("plain string", { scope: "test" })).not.toThrow();
       // Server branch with no ERROR_REPORT_URL configured → nothing dispatched.
       expect(calls).toHaveLength(0);
     } finally {
@@ -166,6 +166,32 @@ describe("captureError", () => {
         scope: "activity-feed",
         name: "Error",
       });
+    });
+
+    it("does not swallow an error the sink itself reports", () => {
+      // The Discord transport resolves its target synchronously and reports a
+      // misconfigured bot back through `captureError`. Were the sink invoked
+      // inside the re-entrancy window, that nested call would be dropped whole —
+      // including its log line — hiding the one misconfiguration that makes the
+      // whole alert path silent. The sink closes its own loop by scope, exactly
+      // as `errorAlert` does with `discord/*`.
+      const lines: string[] = [];
+      const original = console.error;
+      console.error = (...args: unknown[]) => {
+        lines.push(args.map(String).join(" "));
+      };
+      setReportSink((payload) => {
+        if (payload.scope === "discord/config") return;
+        captureError(new Error("bot has no target"), { scope: "discord/config" });
+      });
+      try {
+        captureError(new Error("outer"), { scope: "activity-feed" });
+      } finally {
+        console.error = original;
+        setReportSink(null);
+      }
+      expect(lines.some((line) => line.includes("outer"))).toBe(true);
+      expect(lines.some((line) => line.includes("bot has no target"))).toBe(true);
     });
 
     it("does not invoke the sink from the browser branch", () => {

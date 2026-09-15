@@ -94,10 +94,6 @@ export function captureError(error: unknown, context: Context = {}): void {
       // taken anyway.)
       const endpoint = process.env.ERROR_REPORT_URL;
       if (endpoint) dispatch(endpoint, payload);
-      // Also hand the payload to any server-registered sink (e.g. Discord, wired
-      // in `instrumentation.ts`). It self-checks configuration and de-dupes, so
-      // this is a no-op on a static deploy with nothing configured.
-      reportSink?.(payload);
     } else {
       // Ship only bounded, non-secret fields to our own origin. `stack` is
       // deliberately withheld — it is attacker-influenced text (a thrown
@@ -117,5 +113,24 @@ export function captureError(error: unknown, context: Context = {}): void {
     /* never let reporting break the caller */
   } finally {
     reporting = false;
+  }
+
+  // Hand the payload to any server-registered sink (Discord, wired in
+  // `instrumentation.ts`). It self-checks configuration and de-dupes, so this is
+  // a no-op on a static deploy with nothing configured.
+  //
+  // Deliberately OUTSIDE the `reporting` window above. The sink's transport
+  // resolves its target synchronously and reports a misconfigured bot back
+  // through `captureError`; inside the window that nested call is swallowed
+  // whole — including its `console.error` — so the one misconfiguration the
+  // operator most needs to see would vanish. The loop the flag exists to stop is
+  // the `ERROR_REPORT_URL` → `/api/report` fan-out, which is already closed by
+  // the time we get here. The sink closes its own loop by dropping `discord/*`.
+  if (isServer) {
+    try {
+      reportSink?.(payload);
+    } catch {
+      /* a sink must never break the caller either */
+    }
   }
 }

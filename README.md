@@ -128,8 +128,10 @@ server log (which Vercel drains) and, when configured, forwards the same payload
 server-side to `ERROR_REPORT_URL`, and — reusing the Discord bot above — as an
 embed to the same channel/DM (wired through `src/instrumentation.ts`). So setting
 up the AMA bot also turns it into your error-alert channel, with each distinct
-failure de-duplicated per process and browser failures routed through the
-same-origin `POST /api/report`. Point an uptime monitor at `GET /api/health` to
+failure de-duplicated over a rolling window (so a persistent error neither DMs
+you per request nor goes quiet for good), a per-window cap on how much of that
+budget the public `POST /api/report` may spend, and browser failures routed
+through that same-origin endpoint. Point an uptime monitor at `GET /api/health` to
 catch a degraded live config (it reports `mode` and store reachability without
 ever echoing a secret).
 

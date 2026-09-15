@@ -25,8 +25,10 @@ const TIMEOUT_MS = 5_000;
 // Discord's documented ceilings. Exceeding one is a 400, which would turn a
 // long question into a silently missing notification.
 export const MAX_CONTENT = 2000;
+export const MAX_EMBED_TITLE = 256;
 export const MAX_EMBED_DESCRIPTION = 4096;
 export const MAX_EMBED_FIELD_VALUE = 1024;
+export const MAX_EMBED_FOOTER_TEXT = 2048;
 
 /**
  * Where a message goes. A channel id posts into a server channel; a user id
@@ -133,6 +135,11 @@ function discordFetch(url: string, token: string, body: unknown): Promise<Respon
 /**
  * Send one message as the bot. Resolves either way; never throws.
  *
+ * Resolves `true` only when Discord accepted the message. Callers that just
+ * want the notification can ignore it (most do); a caller that remembers what
+ * it has already announced needs to know the difference between "sent" and
+ * "silently dropped", or a transient 429 costs it the notification for good.
+ *
  * `allowed_mentions` is forced here rather than left to callers. Every message
  * this sends contains text a stranger typed, and a bot with the right
  * permission will happily ping a whole server on `@everyone`. Setting an empty
@@ -142,10 +149,10 @@ function discordFetch(url: string, token: string, body: unknown): Promise<Respon
 export async function sendDiscordMessage(
   message: DiscordMessage,
   options: { apiBase?: string } = {}
-): Promise<void> {
+): Promise<boolean> {
   const token = process.env.DISCORD_BOT_TOKEN;
   const target = discordTarget();
-  if (!token || !target) return;
+  if (!token || !target) return false;
 
   const apiBase = options.apiBase ?? DEFAULT_API_BASE;
 
@@ -168,9 +175,12 @@ export async function sendDiscordMessage(
         scope: "discord/send",
         status: response.status,
       });
+      return false;
     }
+    return true;
   } catch (error) {
     captureError(error, { scope: "discord/send" });
+    return false;
   }
 }
 
