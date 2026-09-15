@@ -66,7 +66,7 @@ export default function Ama() {
       <h1 className="text-[1.75rem] font-semibold leading-[1.2] tracking-[-0.022em] text-zinc-900 dark:text-zinc-100 sm:text-[2.125rem]">
         Ask me anything
       </h1>
-      <p className="max-w-measure mt-4 text-[1.0625rem] leading-[1.75] text-zinc-600 dark:text-zinc-400">
+      <p className="mt-4 max-w-measure text-[1.0625rem] leading-[1.75] text-zinc-600 dark:text-zinc-400">
         Anything you like. Most of it gets a short reply and goes no further. The answers
         below are the ones I kept thinking about afterwards.
       </p>
@@ -113,7 +113,7 @@ export default function Ama() {
                         // Naming every one of these "Link to this question" gives
                         // a screen reader an unusable list of identical entries.
                         aria-label={`Link to this question: ${entry.question}`}
-                        className="hover:text-accent-600 dark:hover:text-accent-300 ml-0.5 inline-flex h-6 w-6 translate-y-1 items-center justify-center rounded text-zinc-500 no-underline transition-colors dark:text-zinc-400"
+                        className="ml-0.5 inline-flex h-6 w-6 translate-y-1 items-center justify-center rounded text-zinc-500 no-underline transition-colors hover:text-accent-600 dark:text-zinc-400 dark:hover:text-accent-300"
                       >
                         <PermalinkIcon />
                       </a>
@@ -129,7 +129,7 @@ export default function Ama() {
                       </p>
                     )}
 
-                    <div className="prose prose-zinc max-w-measure dark:prose-invert mt-2.5">
+                    <div className="prose prose-zinc mt-2.5 max-w-measure dark:prose-invert">
                       <Mdx source={entry.answer} />
                     </div>
                   </div>
