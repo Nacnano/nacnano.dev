@@ -22,6 +22,21 @@ const REPORT_PATH = "/api/report";
 // serverless function alive waiting on an unresponsive peer.
 const TIMEOUT_MS = 2_000;
 
+/**
+ * A server-side delivery hook, registered once at boot by `instrumentation.ts`.
+ *
+ * Kept as an injected function pointer rather than an import so this module —
+ * which the client error boundaries also pull in — never statically depends on a
+ * `server-only` transport (`discord.ts`). The sink is a no-op until the server
+ * registers one, so the browser bundle and static deploys are unaffected.
+ */
+export type ReportSink = (payload: Record<string, unknown>) => void;
+let reportSink: ReportSink | null = null;
+
+export function setReportSink(sink: ReportSink | null): void {
+  reportSink = sink;
+}
+
 function serialize(error: unknown): Record<string, unknown> {
   if (error instanceof Error) {
     return {
@@ -98,5 +113,24 @@ export function captureError(error: unknown, context: Context = {}): void {
     /* never let reporting break the caller */
   } finally {
     reporting = false;
+  }
+
+  // Hand the payload to any server-registered sink (Discord, wired in
+  // `instrumentation.ts`). It self-checks configuration and de-dupes, so this is
+  // a no-op on a static deploy with nothing configured.
+  //
+  // Deliberately OUTSIDE the `reporting` window above. The sink's transport
+  // resolves its target synchronously and reports a misconfigured bot back
+  // through `captureError`; inside the window that nested call is swallowed
+  // whole — including its `console.error` — so the one misconfiguration the
+  // operator most needs to see would vanish. The loop the flag exists to stop is
+  // the `ERROR_REPORT_URL` → `/api/report` fan-out, which is already closed by
+  // the time we get here. The sink closes its own loop by dropping `discord/*`.
+  if (isServer) {
+    try {
+      reportSink?.(payload);
+    } catch {
+      /* a sink must never break the caller either */
+    }
   }
 }

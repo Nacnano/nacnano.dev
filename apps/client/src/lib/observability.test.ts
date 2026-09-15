@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from "bun:test";
-import { captureError } from "./observability";
+import { captureError, setReportSink } from "./observability";
 
 type Call = { url: string; init: RequestInit };
 let calls: Call[] = [];
@@ -38,8 +38,8 @@ describe("captureError", () => {
     const { lines, restore } = silenceConsole();
     const restoreFetch = stubFetch();
     try {
-      expect(() => captureError(new Error("boom"), { route: "test" })).not.toThrow();
-      expect(() => captureError("plain string", { route: "test" })).not.toThrow();
+      expect(() => captureError(new Error("boom"), { scope: "test" })).not.toThrow();
+      expect(() => captureError("plain string", { scope: "test" })).not.toThrow();
       // Server branch with no ERROR_REPORT_URL configured → nothing dispatched.
       expect(calls).toHaveLength(0);
     } finally {
@@ -139,5 +139,84 @@ describe("captureError", () => {
       globalThis.fetch = original;
     }
     expect(maxDepth).toBeLessThanOrEqual(1);
+  });
+
+  describe("server report sink", () => {
+    function silenceConsole() {
+      const original = console.error;
+      console.error = () => {};
+      return () => (console.error = original);
+    }
+
+    it("invokes a registered sink with the serialized payload on the server", () => {
+      const received: Record<string, unknown>[] = [];
+      setReportSink((payload) => received.push(payload));
+      const restore = silenceConsole();
+      try {
+        // Server branch (window is undefined under bun test); no ERROR_REPORT_URL,
+        // so the sink is the only delivery and must still receive the payload.
+        captureError(new Error("sink me"), { scope: "activity-feed" });
+      } finally {
+        restore();
+        setReportSink(null);
+      }
+      expect(received).toHaveLength(1);
+      expect(received[0]).toMatchObject({
+        message: "sink me",
+        scope: "activity-feed",
+        name: "Error",
+      });
+    });
+
+    it("does not swallow an error the sink itself reports", () => {
+      // The Discord transport resolves its target synchronously and reports a
+      // misconfigured bot back through `captureError`. Were the sink invoked
+      // inside the re-entrancy window, that nested call would be dropped whole —
+      // including its log line — hiding the one misconfiguration that makes the
+      // whole alert path silent. The sink closes its own loop by scope, exactly
+      // as `errorAlert` does with `discord/*`.
+      const lines: string[] = [];
+      const original = console.error;
+      console.error = (...args: unknown[]) => {
+        lines.push(args.map(String).join(" "));
+      };
+      setReportSink((payload) => {
+        if (payload.scope === "discord/config") return;
+        captureError(new Error("bot has no target"), { scope: "discord/config" });
+      });
+      try {
+        captureError(new Error("outer"), { scope: "activity-feed" });
+      } finally {
+        console.error = original;
+        setReportSink(null);
+      }
+      expect(lines.some((line) => line.includes("outer"))).toBe(true);
+      expect(lines.some((line) => line.includes("bot has no target"))).toBe(true);
+    });
+
+    it("does not invoke the sink from the browser branch", () => {
+      (globalThis as { window?: unknown }).window = {};
+      (globalThis as { location?: { href: string } }).location = {
+        href: "https://x.test",
+      };
+      let called = 0;
+      setReportSink(() => {
+        called += 1;
+      });
+      const restore = silenceConsole();
+      const originalFetch = globalThis.fetch;
+      globalThis.fetch = (async () =>
+        new Response(null, { status: 204 })) as unknown as typeof fetch;
+      try {
+        captureError(new Error("browser"), { scope: "route-error" });
+      } finally {
+        restore();
+        globalThis.fetch = originalFetch;
+        setReportSink(null);
+        delete (globalThis as { window?: unknown }).window;
+        delete (globalThis as { location?: { href: string } }).location;
+      }
+      expect(called).toBe(0);
+    });
   });
 });
