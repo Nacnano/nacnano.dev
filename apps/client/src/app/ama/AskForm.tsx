@@ -76,7 +76,7 @@ export default function AskForm({
         for it. Questions are deleted after {retentionDays} days.
       </p>
 
-      <form ref={formRef} action={formAction} className="max-w-measure mt-5">
+      <form ref={formRef} action={formAction} className="mt-5 max-w-measure">
         <label
           htmlFor={questionId}
           className="block text-xs uppercase tracking-[0.08em] text-zinc-500 dark:text-zinc-400"
@@ -145,7 +145,7 @@ export default function AskForm({
             Or email{" "}
             <a
               href={`mailto:${email}`}
-              className="hover:text-accent-600 hover:decoration-accent-600 dark:hover:text-accent-300 dark:hover:decoration-accent-300 rounded text-zinc-900 underline decoration-zinc-300 underline-offset-4 transition-colors dark:text-zinc-100 dark:decoration-zinc-700"
+              className="rounded text-zinc-900 underline decoration-zinc-300 underline-offset-4 transition-colors hover:text-accent-600 hover:decoration-accent-600 dark:text-zinc-100 dark:decoration-zinc-700 dark:hover:text-accent-300 dark:hover:decoration-accent-300"
             >
               {email}
             </a>

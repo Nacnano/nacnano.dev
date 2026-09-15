@@ -37,7 +37,7 @@ const ProjectCard = ({
       </div>
 
       <div className="min-w-0">
-        <h3 className="group-hover:text-accent-600 dark:group-hover:text-accent-300 text-[1.0625rem] font-semibold leading-7 tracking-[-0.011em] text-zinc-900 transition-colors dark:text-zinc-100">
+        <h3 className="text-[1.0625rem] font-semibold leading-7 tracking-[-0.011em] text-zinc-900 transition-colors group-hover:text-accent-600 dark:text-zinc-100 dark:group-hover:text-accent-300">
           {primary ? (
             <CustomLink href={primary} className="rounded">
               {/* Stretched link: the whole row is the target, with one
@@ -50,12 +50,12 @@ const ProjectCard = ({
           )}
         </h3>
 
-        <p className="max-w-measure mt-1.5 text-[0.9375rem] leading-7 text-zinc-600 dark:text-zinc-400">
+        <p className="mt-1.5 max-w-measure text-[0.9375rem] leading-7 text-zinc-600 dark:text-zinc-400">
           {description}
         </p>
 
         {note && (
-          <p className="max-w-measure mt-1.5 text-[0.9375rem] leading-7 text-zinc-500 dark:text-zinc-400">
+          <p className="mt-1.5 max-w-measure text-[0.9375rem] leading-7 text-zinc-500 dark:text-zinc-400">
             {note}
           </p>
         )}
@@ -78,7 +78,7 @@ const ProjectCard = ({
           // clickable rather than being swallowed by the title's hit area.
           <CustomLink
             href={repo as string}
-            className="hover:text-accent-600 hover:decoration-accent-600 dark:hover:text-accent-300 dark:hover:decoration-accent-300 relative mt-2.5 inline-block rounded text-sm text-zinc-500 underline decoration-zinc-300 underline-offset-4 transition-colors dark:text-zinc-400 dark:decoration-zinc-700"
+            className="relative mt-2.5 inline-block rounded text-sm text-zinc-500 underline decoration-zinc-300 underline-offset-4 transition-colors hover:text-accent-600 hover:decoration-accent-600 dark:text-zinc-400 dark:decoration-zinc-700 dark:hover:text-accent-300 dark:hover:decoration-accent-300"
           >
             Source
           </CustomLink>

@@ -49,14 +49,14 @@ export default function BlogWithDetail({ content, newer, older, children }: Prop
           )}
         </header>
 
-        <div className="prose prose-zinc max-w-measure dark:prose-invert mt-10">
+        <div className="prose prose-zinc mt-10 max-w-measure dark:prose-invert">
           {children}
         </div>
 
         <div className="mt-12 border-t border-zinc-200 pt-6 dark:border-zinc-800">
           <CustomLink
             href={githubUrl(filePath)}
-            className="hover:text-accent-600 hover:decoration-accent-600 dark:hover:text-accent-300 dark:hover:decoration-accent-300 rounded text-sm text-zinc-500 underline decoration-zinc-300 underline-offset-4 transition-colors dark:text-zinc-400 dark:decoration-zinc-700"
+            className="rounded text-sm text-zinc-500 underline decoration-zinc-300 underline-offset-4 transition-colors hover:text-accent-600 hover:decoration-accent-600 dark:text-zinc-400 dark:decoration-zinc-700 dark:hover:text-accent-300 dark:hover:decoration-accent-300"
           >
             Edit this page on GitHub
           </CustomLink>
@@ -84,7 +84,7 @@ export default function BlogWithDetail({ content, newer, older, children }: Prop
                   <span className="w-14 shrink-0 text-xs uppercase tracking-[0.08em] text-zinc-500 dark:text-zinc-400">
                     {label}
                   </span>
-                  <span className="group-hover:text-accent-600 dark:group-hover:text-accent-300 text-[0.9375rem] font-medium leading-6 text-zinc-900 transition-colors dark:text-zinc-100">
+                  <span className="text-[0.9375rem] font-medium leading-6 text-zinc-900 transition-colors group-hover:text-accent-600 dark:text-zinc-100 dark:group-hover:text-accent-300">
                     {post!.title}
                   </span>
                 </CustomLink>
