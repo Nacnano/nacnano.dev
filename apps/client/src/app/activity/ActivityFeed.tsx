@@ -16,6 +16,7 @@ import {
   visitMarkers,
 } from "@/lib/activity";
 import {
+  STREAM_MAXLEN,
   VISITS_TRACKED_SINCE,
   parseFeedPayload,
   type VisitEvent,
@@ -92,7 +93,11 @@ async function fetchAllVisits(): Promise<VisitEvent[] | null> {
   });
   if (!response.ok) return null;
   const payload: unknown = await response.json();
-  const parsed = parseFeedPayload(payload);
+  // The bulk page can hold the whole retained window, so it is parsed against
+  // the store's cap — not the ordinary-page ceiling, which would reject a
+  // legitimate >200-row response as hostile and silently strand the aggregates
+  // on the head page.
+  const parsed = parseFeedPayload(payload, STREAM_MAXLEN);
   return parsed ? parsed.visits : null;
 }
 
