@@ -225,7 +225,7 @@ export default function ActivityFeed({
           {live && visits.length > 0 ? (
             <span className="inline-flex items-center gap-1.5">
               <span
-                className="bg-accent-500 ml-1 inline-block h-1.5 w-1.5 rounded-full motion-safe:animate-pulse"
+                className="bg-accent-600 dark:bg-accent-300 ml-1 inline-block h-1.5 w-1.5 rounded-full motion-safe:animate-pulse"
                 aria-hidden="true"
               />
               live now
