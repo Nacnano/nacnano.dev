@@ -90,7 +90,7 @@ const projectsData: Project[] = [
     title: "JUMP Thailand",
     description:
       "An app that teaches massage technique by watching through a camera and a multimodal model. We placed 2nd runner-up out of more than 700 teams.",
-    stack: ["Next.js", "React", "Gemini", "Tailwind CSS"],
+    stack: ["Next.js", "Computer Vision", "Multimodal LLM"],
     category: "built",
     imgSrc: "/static/images/nuad-dee.png",
     href: "https://nuad-dee.vercel.app",
@@ -100,7 +100,7 @@ const projectsData: Project[] = [
     title: "MITR PHOL AI Hackathon",
     description:
       "A predictive-maintenance system that forecasts equipment sensor readings to catch failures before they happen. 2nd runner-up among 156 teams.",
-    stack: ["Python", "Time-series Forecasting"],
+    stack: ["Python", "Time-series Forecasting", "GenAI"],
     category: "built",
     mark: "signal",
     repo: "https://github.com/bookpanda/MitrPhol-GenAI-Hackathon",
@@ -109,7 +109,7 @@ const projectsData: Project[] = [
     title: "TCAS Ranking Simulation",
     description:
       "A service that ran the Thai university admission ranking ahead of time so students could see where their scores would land them. I architected it; it served more than forty thousand people.",
-    stack: ["NestJS", "GraphQL", "Prisma"],
+    stack: ["Pandas", "NumPy", "Algorithm"],
     category: "built",
     imgSrc: "/static/images/tcas-ranking.png",
     href: "https://monkeyeveryday.com/tcas/ranking",
