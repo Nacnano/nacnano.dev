@@ -16,7 +16,7 @@ export default function Projects() {
   return (
     <div className="py-12 sm:py-16">
       <h1 className="text-[1.75rem] leading-[1.2] font-semibold tracking-[-0.022em] text-zinc-900 sm:text-[2.125rem] dark:text-zinc-100">
-        Things I&rsquo;ve made
+        Projects
       </h1>
       <p className="max-w-measure mt-4 text-[1.0625rem] leading-[1.75] text-zinc-600 dark:text-zinc-400">
         Mostly built with other people, mostly for students. Some of it is still running,

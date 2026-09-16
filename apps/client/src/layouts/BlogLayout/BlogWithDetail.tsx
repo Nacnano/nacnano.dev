@@ -49,9 +49,7 @@ export default function BlogWithDetail({ content, newer, older, children }: Prop
           )}
         </header>
 
-        <div className="prose prose-zinc max-w-measure dark:prose-invert mt-10">
-          {children}
-        </div>
+        <div className="prose max-w-measure dark:prose-invert mt-10">{children}</div>
 
         <div className="mt-12 border-t border-zinc-200 pt-6 dark:border-zinc-800">
           <CustomLink
