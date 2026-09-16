@@ -87,15 +87,17 @@ const projectsData: Project[] = [
   {
     title: "JUMP Thailand",
     description:
-      "An app that teaches massage technique by watching your hands through a camera and a multimodal model. We placed 2nd runner-up out of more than 700 teams.",
+      "An app that teaches massage technique by watching through a camera and a multimodal model. We placed 2nd runner-up out of more than 700 teams.",
     stack: ["Python", "Computer Vision", "Multimodal LLM"],
     category: "built",
     mark: "pose",
+    href: "https://nuad-dee.vercel.app",
+    repo: "https://github.com/Nacnano/nuad-dee",
   },
   {
     title: "MITR PHOL AI Hackathon",
     description:
-      "A system that predicts when mining equipment needs servicing by forecasting its sensor readings. 2nd runner-up among 156 teams.",
+      "A predictive-maintenance system that forecasts equipment sensor readings to catch failures before they happen. 2nd runner-up among 156 teams.",
     stack: ["Python", "Time-series Forecasting"],
     category: "built",
     mark: "signal",
