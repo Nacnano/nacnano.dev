@@ -111,7 +111,8 @@ const projectsData: Project[] = [
       "A service that ran the Thai university admission ranking ahead of time so students could see where their scores would land them. I architected it; it served more than forty thousand people.",
     stack: ["NestJS", "GraphQL", "Prisma"],
     category: "built",
-    mark: "rank",
+    imgSrc: "/static/images/tcas-ranking.png",
+    href: "https://monkeyeveryday.com/tcas/ranking",
     repo: "https://github.com/monkey-monkey/tcas-ranking",
   },
 
