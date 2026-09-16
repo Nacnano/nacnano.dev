@@ -1,16 +1,9 @@
 import siteMetadata from "@/data/siteMetadata";
 import CustomLink from "@/components/Link";
+import StatusLine from "@/components/StatusLine";
 import BlogCard from "@/components/BlogCard";
 import Image from "next/image";
 import type { Blog } from "@/lib/content";
-
-// All the same weight on purpose — nothing here is trying to sell you anything.
-const links = [
-  { href: "/projects", title: "Things I've made" },
-  { href: "/activity", title: "Activity" },
-  { href: siteMetadata.github, title: "GitHub" },
-  { href: "/about", title: "More about me" },
-];
 
 const Main = ({ posts }: { posts: Blog[] }) => (
   <>
@@ -33,6 +26,7 @@ const Main = ({ posts }: { posts: Blog[] }) => (
           <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
             {siteMetadata.legalName}
           </p>
+          <StatusLine />
         </div>
       </div>
 
@@ -40,17 +34,22 @@ const Main = ({ posts }: { posts: Blog[] }) => (
         {siteMetadata.description}
       </p>
 
-      <nav aria-label="Elsewhere on this site" className="mt-7 flex flex-wrap gap-2">
-        {links.map((link) => (
-          <CustomLink
-            key={link.title}
-            href={link.href}
-            className="hover:text-accent-600 dark:hover:text-accent-300 rounded border border-zinc-200 px-3.5 py-2 text-sm font-medium text-zinc-700 transition-colors hover:border-zinc-300 dark:border-zinc-800 dark:text-zinc-300 dark:hover:border-zinc-700"
-          >
-            {link.title}
-          </CustomLink>
-        ))}
-      </nav>
+      {/* One solid action — the CV, the one thing the recruiter came for — and
+          one outline action beside it. The rest already live in the header nav. */}
+      <div className="mt-7 flex flex-wrap items-center gap-2">
+        <CustomLink
+          href={siteMetadata.resume}
+          className="rounded bg-zinc-900 px-3.5 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-700 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300"
+        >
+          Résumé
+        </CustomLink>
+        <CustomLink
+          href="/about"
+          className="rounded border border-zinc-200 px-3.5 py-2 text-sm font-medium text-zinc-700 transition-colors hover:border-zinc-300 hover:text-zinc-900 dark:border-zinc-800 dark:text-zinc-300 dark:hover:border-zinc-700 dark:hover:text-zinc-100"
+        >
+          More about me
+        </CustomLink>
+      </div>
     </section>
 
     <section
