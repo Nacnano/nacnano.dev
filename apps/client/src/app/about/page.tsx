@@ -8,7 +8,7 @@ import { notFound } from "next/navigation";
 export const metadata = genPageMetaData({
   title: PAGE_TITLES.about,
   description:
-    "A bit about Nac — what I've worked on, where I went to school, and how to get hold of me.",
+    "A bit about Nac — life in Bangkok, the walks and writing in between, and how to get hold of me.",
 });
 
 export default function About() {
