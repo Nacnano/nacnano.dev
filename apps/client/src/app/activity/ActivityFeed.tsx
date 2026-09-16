@@ -253,7 +253,19 @@ export default function ActivityFeed({
         <GlobeShell>
           {globeInView ? <ActivityGlobe markers={markers} /> : null}
         </GlobeShell>
-        {countries.length > 0 ? (
+        {aggLoading ? (
+          <ul aria-hidden="true" className="mt-6 flex flex-wrap justify-center gap-1.5">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <li
+                key={i}
+                className="flex items-center gap-1.5 rounded border border-zinc-200 px-2 py-1 dark:border-zinc-800"
+              >
+                <SkeletonLine className="h-3 w-5" />
+                <SkeletonLine className="h-3 w-4" />
+              </li>
+            ))}
+          </ul>
+        ) : countries.length > 0 ? (
           <ul
             aria-label="Most-visited countries"
             className="mt-6 flex flex-wrap justify-center gap-1.5"
@@ -282,24 +294,12 @@ export default function ActivityFeed({
 
         {/* The recent list is the head page; the globe, country badges, and
             leaderboards widen to the WHOLE retained window with a one-shot
-            `all=1` fetch. While that runs we keep showing the head-page
-            aggregates (never a blank) and just label them as not-yet-final, so
-            the numbers settling is explained rather than a silent jump. */}
+            `all=1` fetch. While that runs those aggregates show a pulsing
+            skeleton (sized to the real content) instead of a text label. */}
         {aggLoading ? (
-          <p
-            role="status"
-            className="mt-5 inline-flex items-center gap-2 font-mono text-xs tracking-[0.08em] text-zinc-500 uppercase dark:text-zinc-400"
-          >
-            <span
-              className="bg-accent-600 dark:bg-accent-300 inline-block h-1.5 w-1.5 rounded-full motion-safe:animate-pulse"
-              aria-hidden="true"
-            />
-            Loading full history
-          </p>
-        ) : null}
-
-        {pages.length > 0 ? (
-          <section aria-labelledby="top-pages" aria-busy={aggLoading} className="mt-10">
+          <MostVisitedSkeleton />
+        ) : pages.length > 0 ? (
+          <section aria-labelledby="top-pages" className="mt-10">
             <h2
               id="top-pages"
               className="text-base font-semibold tracking-[-0.011em] text-zinc-900 dark:text-zinc-100"
@@ -408,6 +408,46 @@ export default function ActivityFeed({
         </p>
       </div>
     </div>
+  );
+}
+
+/** A single pulsing placeholder bar, shared by the loading skeletons below. */
+function SkeletonLine({ className }: { className?: string }) {
+  return (
+    <div
+      aria-hidden="true"
+      className={`rounded bg-zinc-200 motion-safe:animate-pulse dark:bg-zinc-800 ${className ?? ""}`}
+    />
+  );
+}
+
+/** The "Most visited" leaderboard rendered as a skeleton while the one-shot
+ *  `all=1` bulk fetch is in flight — same heading and row rhythm as the real
+ *  list, so the swap to data never shifts layout. */
+function MostVisitedSkeleton() {
+  return (
+    <section aria-labelledby="top-pages" aria-busy="true" className="mt-10">
+      <h2
+        id="top-pages"
+        className="text-base font-semibold tracking-[-0.011em] text-zinc-900 dark:text-zinc-100"
+      >
+        Most visited
+      </h2>
+      <ul
+        aria-hidden="true"
+        className="mt-2 divide-y divide-zinc-200 border-t border-zinc-200 dark:divide-zinc-800 dark:border-zinc-800"
+      >
+        {Array.from({ length: MOST_VISITED_PAGE }).map((_, i) => (
+          <li key={i} className="flex items-baseline justify-between gap-4 py-2.5">
+            <div className="min-w-0 flex-1">
+              <SkeletonLine className="h-3.5 w-1/2" />
+              <SkeletonLine className="mt-1.5 h-2.5 w-1/3" />
+            </div>
+            <SkeletonLine className="h-3 w-10 shrink-0" />
+          </li>
+        ))}
+      </ul>
+    </section>
   );
 }
 
