@@ -38,19 +38,26 @@ const MOST_VISITED_PAGE = 6;
 // loads as before.
 const ActivityGlobe = dynamic(() => import("./ActivityGlobe"), {
   ssr: false,
+  loading: () => <GlobeSkeleton />,
 });
+
+/** The circle the globe draws into — shown both while its column is below the
+ *  fold and while the cobe chunk streams in, so neither wait is a blank slot. */
+function GlobeSkeleton() {
+  return (
+    <div
+      aria-hidden="true"
+      className="h-full w-full rounded-full border border-zinc-200 motion-safe:animate-pulse dark:border-zinc-800"
+    />
+  );
+}
 
 /** The reserved, sized box the globe draws into — present before and while the
  *  cobe chunk streams in, so mounting the canvas never shifts layout. */
 function GlobeShell({ children }: { children?: React.ReactNode }) {
   return (
     <div className="aspect-square w-full" aria-busy={!children}>
-      {children ?? (
-        <div
-          aria-hidden="true"
-          className="h-full w-full rounded-full border border-zinc-200 dark:border-zinc-800"
-        />
-      )}
+      {children ?? <GlobeSkeleton />}
     </div>
   );
 }
@@ -117,6 +124,11 @@ export default function ActivityFeed({
   // the poll then keeps it fresh. (The stream holds at most STREAM_MAXLEN rows,
   // so this is a bounded, single fetch — not an unbounded scroll.)
   const [aggVisits, setAggVisits] = useState<VisitEvent[]>(initialVisits);
+  // True while the one-shot `all=1` bulk fetch is in flight. It seeds from
+  // `live` so the "still expanding to full history" affordance is present on
+  // the very first client paint, before the effect fires; the fetch clears it.
+  // Static/seed mode already holds every row, so it stays false there.
+  const [aggLoading, setAggLoading] = useState<boolean>(live);
   const [mostVisitedShown, setMostVisitedShown] = useState(MOST_VISITED_PAGE);
   // Relative times are a clock race against the server pass, so they only
   // appear once hydrated; the first paint (server and first client render) is
@@ -144,12 +156,19 @@ export default function ActivityFeed({
     if (!live || loadedAllRef.current) return;
     loadedAllRef.current = true;
     let active = true;
+    setAggLoading(true);
     fetchAllVisits()
       .then((all) => {
         if (active && all) setAggVisits(all);
       })
       .catch(() => {
         // A failed bulk load leaves the aggregates on the head page.
+      })
+      .finally(() => {
+        // Cleared unconditionally (not gated on `active`): a single bulk fetch
+        // runs per mount, so there is no stale resolve to race, and this
+        // guarantees the "loading full history" affordance can never stick on.
+        setAggLoading(false);
       });
     return () => {
       active = false;
@@ -222,6 +241,7 @@ export default function ActivityFeed({
       <section
         ref={globeRef}
         aria-label="Site visits around the world"
+        aria-busy={aggLoading}
         className="mx-auto w-full max-w-[22rem] shrink-0 lg:sticky lg:top-8"
       >
         <GlobeShell>
@@ -254,8 +274,26 @@ export default function ActivityFeed({
           <Stat label="Tracked since" value={formatDate(VISITS_TRACKED_SINCE, "en-US")} />
         </dl>
 
+        {/* The recent list is the head page; the globe, country badges, and
+            leaderboards widen to the WHOLE retained window with a one-shot
+            `all=1` fetch. While that runs we keep showing the head-page
+            aggregates (never a blank) and just label them as not-yet-final, so
+            the numbers settling is explained rather than a silent jump. */}
+        {aggLoading ? (
+          <p
+            role="status"
+            className="mt-5 inline-flex items-center gap-2 font-mono text-xs tracking-[0.08em] text-zinc-500 uppercase dark:text-zinc-400"
+          >
+            <span
+              className="bg-accent-600 dark:bg-accent-300 inline-block h-1.5 w-1.5 rounded-full motion-safe:animate-pulse"
+              aria-hidden="true"
+            />
+            Loading full history
+          </p>
+        ) : null}
+
         {pages.length > 0 ? (
-          <section aria-labelledby="top-pages" className="mt-10">
+          <section aria-labelledby="top-pages" aria-busy={aggLoading} className="mt-10">
             <h2
               id="top-pages"
               className="text-base font-semibold tracking-[-0.011em] text-zinc-900 dark:text-zinc-100"
