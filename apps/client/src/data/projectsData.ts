@@ -29,7 +29,7 @@ const projectsData: Project[] = [
   {
     title: "CU Get Reg",
     description:
-      "An open-source course planner that a lot of Chula students ended up using. I only worked on the backoffice service behind the reviews and elective data.",
+      "An open-source course planner that a lot of Chula students use. I worked on the backoffice service for the reviews and elective data, not the part people actually see.",
     stack: ["NestJS", "GraphQL", "Prisma"],
     category: "built",
     imgSrc: "/static/images/cugetreg-logo.png",
@@ -39,7 +39,7 @@ const projectsData: Project[] = [
   {
     title: "CU Get Rekt",
     description:
-      "A ten-day go at making withdrawal and resignation paperwork less miserable, with a PDF generator and some score prediction. I did the backend. It won the hackathon it was built for, which had as much to do with timing as with us.",
+      "A ten-day go at making withdrawal and resignation paperwork less miserable, with a PDF generator and some score prediction. I did the backend. We won the hackathon with it, which still surprises me a little.",
     stack: ["NestJS", "Prisma"],
     category: "built",
     imgSrc: "/static/images/cugetrekt.png",
