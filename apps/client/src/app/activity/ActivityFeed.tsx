@@ -9,7 +9,6 @@ import { formatDate } from "@/lib/formatDate";
 import {
   aggregateByCountry,
   countCountries,
-  countryFlag,
   formatRelative,
   mergeById,
   topPages,
@@ -58,10 +57,7 @@ function GlobeShell({ children }: { children?: React.ReactNode }) {
 }
 
 function locationLabel(visit: VisitEvent): string {
-  const country = visit.countryCode
-    ? `${countryFlag(visit.countryCode)} ${visit.countryCode}`
-    : "";
-  return [visit.city, country].filter(Boolean).join(" · ") || "somewhere";
+  return [visit.city, visit.countryCode].filter(Boolean).join(" · ") || "somewhere";
 }
 
 /** Fetch one page of the feed; a non-ok or malformed response is `null`. */
@@ -213,7 +209,6 @@ export default function ActivityFeed({
                 key={country.countryCode}
                 className="flex items-center gap-1.5 rounded border border-zinc-200 px-2 py-1 font-mono text-xs text-zinc-600 dark:border-zinc-800 dark:text-zinc-400"
               >
-                <span aria-hidden="true">{countryFlag(country.countryCode)}</span>
                 <span>{country.countryCode}</span>
                 <span className="tabular text-zinc-500 dark:text-zinc-400">
                   ×{country.count}
@@ -226,8 +221,7 @@ export default function ActivityFeed({
 
       <div className="min-w-0 flex-1">
         <p className="text-[0.9375rem] leading-7 text-zinc-600 dark:text-zinc-400">
-          A public record of visits to this site. The globe lights up wherever people have
-          shown up, newest first below.
+          The globe marks each place a visit came from; the most recent are listed below.
           {live && visits.length > 0 ? (
             <span className="inline-flex items-center gap-1.5">
               <span
@@ -259,12 +253,19 @@ export default function ActivityFeed({
                   key={page.page}
                   className="flex items-baseline justify-between gap-4 py-2.5"
                 >
-                  <CustomLink
-                    href={page.page}
-                    className="hover:text-accent-600 dark:hover:text-accent-300 min-w-0 truncate text-[0.9375rem] text-zinc-800 transition-colors dark:text-zinc-200"
-                  >
-                    {page.title ?? page.page}
-                  </CustomLink>
+                  <div className="min-w-0 flex-1">
+                    <CustomLink
+                      href={page.page}
+                      className="hover:text-accent-600 dark:hover:text-accent-300 block min-w-0 truncate text-[0.9375rem] text-zinc-800 transition-colors dark:text-zinc-200"
+                    >
+                      {page.title ?? page.page}
+                    </CustomLink>
+                    {page.title ? (
+                      <p className="mt-0.5 truncate font-mono text-xs text-zinc-500 dark:text-zinc-400">
+                        {page.page}
+                      </p>
+                    ) : null}
+                  </div>
                   <span className="tabular shrink-0 font-mono text-xs text-zinc-500 dark:text-zinc-400">
                     {page.count} {page.count === 1 ? "view" : "views"}
                   </span>
@@ -380,7 +381,7 @@ function ChevronDown() {
       strokeWidth="2"
       strokeLinecap="round"
       strokeLinejoin="round"
-      className="h-3.5 w-3.5 motion-safe:animate-bounce"
+      className="h-3.5 w-3.5"
       aria-hidden="true"
     >
       <path d="M6 9l6 6 6-6" />
