@@ -146,6 +146,42 @@ describe("GET /api/activity/feed", () => {
     expect(res.headers.get("cache-control")).toContain("s-maxage=2");
   });
 
+  it("re-derives a stored visit's title from our content at read time", async () => {
+    // The store holds an /ama row beaconed before /ama had a registered title,
+    // so it was stored with none. The feed must show the resolved label, not the
+    // raw path — which is the whole point of resolving on read, not on write.
+    ctrl.live = true;
+    ctrl.title = (path) => (path === "/ama" ? "Ask me anything" : undefined);
+    ctrl.read = async () => ({
+      visits: [{ id: "1", ts: "2026-09-14T00:00:00.000Z", page: "/ama" }],
+      count: 1,
+      hasMore: false,
+      nextCursor: null,
+    });
+    const body = await (await getFeed(feedRequest())).json();
+    expect(body.visits[0]).toMatchObject({ page: "/ama", title: "Ask me anything" });
+  });
+
+  it("keeps a stored title the resolver has no opinion about", async () => {
+    ctrl.live = true;
+    ctrl.title = () => undefined;
+    ctrl.read = async () => ({
+      visits: [
+        {
+          id: "1",
+          ts: "2026-09-14T00:00:00.000Z",
+          page: "/somewhere",
+          title: "Authored",
+        },
+      ],
+      count: 1,
+      hasMore: false,
+      nextCursor: null,
+    });
+    const body = await (await getFeed(feedRequest())).json();
+    expect(body.visits[0].title).toBe("Authored");
+  });
+
   it("throttles an unauthenticated flood of reads with 429", async () => {
     ctrl.live = true;
     ctrl.allow = false;
@@ -352,6 +388,22 @@ describe("loadInitialFeed (SSR first paint)", () => {
     const result = await loadInitialFeed(true);
     expect(result.status).toBe("ok");
     if (result.status === "ok") expect(result.payload.count).toBe(7);
+  });
+
+  it("fills titles on the first paint, not only on poll", async () => {
+    ctrl.live = true;
+    ctrl.title = (path) => (path === "/ama" ? "Ask me anything" : undefined);
+    ctrl.read = async () => ({
+      visits: [{ id: "1", ts: "2026-09-14T00:00:00.000Z", page: "/ama" }],
+      count: 1,
+      hasMore: false,
+      nextCursor: null,
+    });
+    const result = await loadInitialFeed(true);
+    expect(result.status).toBe("ok");
+    if (result.status === "ok") {
+      expect(result.payload.visits[0]?.title).toBe("Ask me anything");
+    }
   });
 
   it("reports an error and surfaces it — never a fabricated empty feed", async () => {

@@ -9,6 +9,7 @@
 
 import { buildFeedPayload, shouldUseSeed } from "./activity";
 import { readActivityFeed } from "./activityRedis";
+import { resolveFeedTitles } from "./activityTitles";
 import { seedVisits } from "@/data/activityData";
 import { captureError } from "./observability";
 import type { VisitFeedPayload } from "./activityTypes";
@@ -22,8 +23,13 @@ export type InitialFeed =
 export async function loadInitialFeed(live: boolean): Promise<InitialFeed> {
   if (live) {
     try {
-      // Whatever the store holds — including an honest empty page.
-      return { status: "ok", payload: await readActivityFeed(HEAD_LIMIT) };
+      // Whatever the store holds — including an honest empty page. Titles are
+      // re-derived from our own content so rows stored before a page gained a
+      // registered title still read correctly.
+      return {
+        status: "ok",
+        payload: resolveFeedTitles(await readActivityFeed(HEAD_LIMIT)),
+      };
     } catch (error) {
       captureError(error, { scope: "activity-initial-feed" });
       return { status: "error" };
@@ -34,11 +40,11 @@ export async function loadInitialFeed(live: boolean): Promise<InitialFeed> {
   if (shouldUseSeed()) {
     return {
       status: "ok",
-      payload: {
+      payload: resolveFeedTitles({
         ...buildFeedPayload(seedVisits, seedVisits.length),
         hasMore: false,
         nextCursor: null,
-      },
+      }),
     };
   }
   return {

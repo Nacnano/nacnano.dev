@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { buildFeedPayload, isActivityLive, shouldUseSeed } from "@/lib/activity";
 import { readActivityFeed } from "@/lib/activityRedis";
+import { resolveFeedTitles } from "@/lib/activityTitles";
 import { allowFeed, clientIp, RETRY_AFTER_SECONDS } from "@/lib/rateLimit";
 import { captureError } from "@/lib/observability";
 import { seedVisits } from "@/data/activityData";
@@ -71,7 +72,9 @@ export async function GET(request: Request) {
       // Whatever the store actually holds for this page, including an honest
       // empty result. Never substitute the seed on a real deployment.
       const payload = await readActivityFeed(limit, before);
-      return NextResponse.json(payload, { headers: { "Cache-Control": FEED_CACHE } });
+      return NextResponse.json(resolveFeedTitles(payload), {
+        headers: { "Cache-Control": FEED_CACHE },
+      });
     } catch (error) {
       // A store failure is not an empty feed. Surface it as 5xx so the client
       // keeps its last good page rather than rendering a fabricated zero, and
@@ -93,11 +96,11 @@ export async function GET(request: Request) {
   };
   if (shouldUseSeed()) {
     return NextResponse.json(
-      {
+      resolveFeedTitles({
         ...buildFeedPayload(seedVisits, seedVisits.length),
         hasMore: false,
         nextCursor: null,
-      },
+      }),
       staticHeaders
     );
   }
