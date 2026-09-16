@@ -83,6 +83,8 @@ const projectsData: Project[] = [
     stack: ["Next.js", "Flask"],
     category: "built",
     mark: "match",
+    href: "https://yacht-for-youth.vercel.app",
+    repo: "https://github.com/mekintown/yacht-for-youth",
   },
   {
     title: "JUMP Thailand",
@@ -101,6 +103,7 @@ const projectsData: Project[] = [
     stack: ["Python", "Time-series Forecasting"],
     category: "built",
     mark: "signal",
+    repo: "https://github.com/bookpanda/MitrPhol-GenAI-Hackathon",
   },
   {
     title: "TCAS Ranking Simulation",
@@ -109,6 +112,7 @@ const projectsData: Project[] = [
     stack: ["NestJS", "GraphQL", "Prisma"],
     category: "built",
     mark: "rank",
+    repo: "https://github.com/monkey-monkey/tcas-ranking",
   },
 
   // ── Things I looked into ──────────────────────────────────────────────
