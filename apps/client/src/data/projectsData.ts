@@ -90,7 +90,7 @@ const projectsData: Project[] = [
     title: "JUMP Thailand",
     description:
       "An app that teaches massage technique by watching through a camera and a multimodal model. We placed 2nd runner-up out of more than 700 teams.",
-    stack: ["Python", "Computer Vision", "Multimodal LLM"],
+    stack: ["Next.js", "React", "Gemini", "Tailwind CSS"],
     category: "built",
     imgSrc: "/static/images/nuad-dee.png",
     href: "https://nuad-dee.vercel.app",
