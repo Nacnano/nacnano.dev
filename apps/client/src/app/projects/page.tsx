@@ -6,7 +6,7 @@ import ProjectCard from "./ProjectCard";
 export const metadata = genPageMetaData({
   title: PAGE_TITLES.projects,
   description:
-    "A few things Nac has built — student tools, an open-source course planner, and a handful of research projects.",
+    "A few things I've had a hand in, mostly alongside other people. None of it is especially impressive — it's just where the time went.",
 });
 
 const built = projectsData.filter((p) => p.category === "built");
