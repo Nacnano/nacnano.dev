@@ -9,6 +9,7 @@ import { ThemeProviders } from "./theme-provider";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import VisitTracker from "@/components/VisitTracker";
+import ScrollTop from "@/components/ScrollTop";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -105,6 +106,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <Footer />
             </div>
           </SectionContainer>
+          {/* Floats over any long page, not just essays; the control self-hides
+              until the reader has scrolled, so short pages never see it. */}
+          <ScrollTop />
         </ThemeProviders>
       </body>
     </html>
