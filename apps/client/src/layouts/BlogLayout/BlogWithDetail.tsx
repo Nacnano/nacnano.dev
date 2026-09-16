@@ -54,6 +54,8 @@ interface Props {
 
 export default function BlogWithDetail({ content, newer, older, children }: Props) {
   const { date, title, tags, readingTime } = content;
+  const showOlder = Boolean(older?.path);
+  const showNewer = Boolean(newer?.path);
 
   return (
     <>
@@ -83,50 +85,62 @@ export default function BlogWithDetail({ content, newer, older, children }: Prop
 
         {/*
           One bordered band for everything that follows the essay — prev/next
-          rows then the author note — each separated by a single hairline. The
-          old version gave the nav a top and bottom rule and then the aside its
-          own top rule, which left an empty strip pinned between two lines that
-          read as a broken, content-less row.
+          then the author note — separated by a single hairline. Prev/next is a
+          two-column split (older left, newer right): each arrow rides with its
+          own title instead of being stranded at the far edge, and the columns
+          meet at one divider instead of a stack of full-width rules.
         */}
         <div className="mt-12 divide-y divide-zinc-200 border-t border-zinc-200 dark:divide-zinc-800 dark:border-zinc-800">
-          {(newer || older) && (
-            <nav
-              aria-label="More essays"
-              className="divide-y divide-zinc-200 dark:divide-zinc-800"
-            >
-              {[
-                { post: older, label: "Older", rel: "prev", dir: "left" },
-                { post: newer, label: "Newer", rel: "next", dir: "right" },
-              ]
-                .filter((row) => row.post?.path)
-                .map(({ post, label, rel, dir }) => (
-                  <CustomLink
-                    key={rel}
-                    href={`/${post!.path}`}
-                    rel={rel}
-                    className="group flex flex-col gap-1 py-4 sm:flex-row sm:items-baseline sm:gap-6"
+          {(showOlder || showNewer) && (
+            <nav aria-label="More essays" className="grid grid-cols-1 sm:grid-cols-2">
+              {showOlder && (
+                <CustomLink
+                  href={`/${older!.path}`}
+                  rel="prev"
+                  className={`group flex items-center gap-4 py-5 sm:gap-3 sm:pr-8 ${
+                    showNewer
+                      ? "border-b border-zinc-200 sm:border-r sm:border-b-0 dark:border-zinc-800"
+                      : ""
+                  }`}
+                >
+                  <span
+                    aria-hidden="true"
+                    className="group-hover:text-accent-600 dark:group-hover:text-accent-300 shrink-0 text-zinc-500 transition group-hover:-translate-x-0.5 dark:text-zinc-400"
                   >
-                    <span className="w-14 shrink-0 text-xs tracking-[0.08em] text-zinc-500 uppercase dark:text-zinc-400">
-                      {label}
+                    <DirectionArrow dir="left" />
+                  </span>
+                  <span className="flex min-w-0 flex-col">
+                    <span className="text-xs tracking-[0.08em] text-zinc-500 uppercase dark:text-zinc-400">
+                      Older
                     </span>
-                    <span className="group-hover:text-accent-600 dark:group-hover:text-accent-300 min-w-0 flex-1 text-[0.9375rem] leading-6 font-medium text-zinc-900 transition-colors dark:text-zinc-100">
-                      {post!.title}
+                    <span className="group-hover:text-accent-600 dark:group-hover:text-accent-300 mt-1 text-[0.9375rem] leading-6 font-medium text-zinc-900 transition-colors dark:text-zinc-100">
+                      {older!.title}
                     </span>
-                    {/* A drawn arrow fills the empty right-hand column and makes
-                        the reading direction legible at a glance, instead of
-                        leaning on the muted label alone. */}
-                    <span
-                      aria-hidden="true"
-                      className={`group-hover:text-accent-600 dark:group-hover:text-accent-300 hidden shrink-0 self-center text-zinc-500 transition sm:inline-flex dark:text-zinc-400 ${
-                        dir === "right"
-                          ? "group-hover:translate-x-0.5"
-                          : "group-hover:-translate-x-0.5"
-                      }`}
-                    >
-                      <DirectionArrow dir={dir as "left" | "right"} />
+                  </span>
+                </CustomLink>
+              )}
+              {showNewer && (
+                <CustomLink
+                  href={`/${newer!.path}`}
+                  rel="next"
+                  className="group flex items-center justify-end gap-4 py-5 text-right sm:gap-3 sm:pl-8"
+                >
+                  <span className="flex min-w-0 flex-col items-end">
+                    <span className="text-xs tracking-[0.08em] text-zinc-500 uppercase dark:text-zinc-400">
+                      Newer
                     </span>
-                  </CustomLink>
-                ))}
+                    <span className="group-hover:text-accent-600 dark:group-hover:text-accent-300 mt-1 text-[0.9375rem] leading-6 font-medium text-zinc-900 transition-colors dark:text-zinc-100">
+                      {newer!.title}
+                    </span>
+                  </span>
+                  <span
+                    aria-hidden="true"
+                    className="group-hover:text-accent-600 dark:group-hover:text-accent-300 shrink-0 text-zinc-500 transition group-hover:translate-x-0.5 dark:text-zinc-400"
+                  >
+                    <DirectionArrow dir="right" />
+                  </span>
+                </CustomLink>
+              )}
             </nav>
           )}
 
