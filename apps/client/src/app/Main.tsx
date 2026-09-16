@@ -1,5 +1,4 @@
 import siteMetadata from "@/data/siteMetadata";
-import StatusLine from "@/components/StatusLine";
 import BlogCard from "@/components/BlogCard";
 import Image from "next/image";
 import type { Blog } from "@/lib/content";
@@ -25,7 +24,6 @@ const Main = ({ posts }: { posts: Blog[] }) => (
           <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
             {siteMetadata.legalName}
           </p>
-          <StatusLine />
         </div>
       </div>
 
