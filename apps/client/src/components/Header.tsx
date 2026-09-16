@@ -19,7 +19,7 @@ const Header = () => {
   const pathname = usePathname() ?? "/";
 
   return (
-    <header className="flex items-center justify-between gap-4 border-b border-zinc-200 py-5 dark:border-zinc-800">
+    <header className="sticky top-0 z-40 flex items-center justify-between gap-4 border-b border-zinc-200 bg-white py-3 backdrop-blur supports-[backdrop-filter]:bg-white/85 dark:border-zinc-800 dark:bg-zinc-950 dark:supports-[backdrop-filter]:bg-zinc-950/85">
       <CustomLink
         href="/"
         className="group flex items-center gap-2.5 rounded"
