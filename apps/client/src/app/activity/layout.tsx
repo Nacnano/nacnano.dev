@@ -1,5 +1,3 @@
-import { STREAM_MAXLEN } from "@/lib/activityRedis";
-
 /**
  * Static chrome for /activity. Living in a layout (not the page) means the
  * heading and intro render immediately and survive the streaming swap — so the
@@ -14,8 +12,7 @@ export default function ActivityLayout({ children }: { children: React.ReactNode
       </h1>
       <p className="max-w-measure mt-4 text-[1.0625rem] leading-[1.75] text-zinc-600 dark:text-zinc-400">
         A public record of visits to this site. No cookies, no IP stored — just country,
-        city, and an approximate location. We keep the most recent{" "}
-        {STREAM_MAXLEN.toLocaleString("en-US")} visits.
+        city, and an approximate location.
       </p>
       <div className="mt-12">{children}</div>
     </div>
