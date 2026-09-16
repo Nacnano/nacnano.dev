@@ -75,7 +75,10 @@ export async function GET(request: Request) {
       // Whatever the store actually holds for this page, including an honest
       // empty result. Never substitute the seed on a real deployment. With
       // `all`, pull the whole retained window at once instead of a single page.
-      const payload = await readActivityFeed(all ? STREAM_MAXLEN : limit, all ? null : before);
+      const payload = await readActivityFeed(
+        all ? STREAM_MAXLEN : limit,
+        all ? null : before
+      );
       return NextResponse.json(resolveFeedTitles(payload), {
         headers: { "Cache-Control": FEED_CACHE },
       });
