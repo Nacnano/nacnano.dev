@@ -26,10 +26,9 @@ import {
 // the tab is hidden.
 const PAGE_SIZE = 30;
 const POLL_MS = 2500;
-// Bound how many rows feed the globe/leaderboards so re-renders stay cheap as
-// the reader pages deep into history. The full list still renders; only the
-// aggregates sample the most recent slice.
-const AGGREGATE_WINDOW = 200;
+// The "Most visited" leaderboard pages client-side over the whole retained set
+// rather than truncating to a fixed top-N.
+const MOST_VISITED_PAGE = 6;
 
 // The globe is a WebGL canvas that only ever draws on the client, so its cobe
 // code is deferred; a sized placeholder keeps the sticky column from shifting.
@@ -74,6 +73,22 @@ async function fetchPage(before: string | null): Promise<VisitFeedPayload | null
   return parseFeedPayload(payload);
 }
 
+/**
+ * Fetch the entire retained window in one shot, for the globe and the aggregate
+ * leaderboards (which reflect every visit we hold, not just the page shown as
+ * recent). A non-ok or malformed response is `null`, so callers keep what they
+ * already have.
+ */
+async function fetchAllVisits(): Promise<VisitEvent[] | null> {
+  const response = await fetch(`/api/activity/feed?all=1`, {
+    headers: { accept: "application/json" },
+  });
+  if (!response.ok) return null;
+  const payload: unknown = await response.json();
+  const parsed = parseFeedPayload(payload);
+  return parsed ? parsed.visits : null;
+}
+
 type Props = {
   initialVisits: VisitEvent[];
   initialCount: number;
@@ -96,6 +111,13 @@ export default function ActivityFeed({
   const [loadingMore, setLoadingMore] = useState(false);
   const [failedMore, setFailedMore] = useState(false);
   const [now, setNow] = useState(() => Date.now());
+  // The globe, countries, and "Most visited" reflect the WHOLE retained window,
+  // not just the recent list this component paginates. It is seeded from the
+  // initial load and, live, expanded to the full stream once by a one-shot fetch;
+  // the poll then keeps it fresh. (The stream holds at most STREAM_MAXLEN rows,
+  // so this is a bounded, single fetch — not an unbounded scroll.)
+  const [aggVisits, setAggVisits] = useState<VisitEvent[]>(initialVisits);
+  const [mostVisitedShown, setMostVisitedShown] = useState(MOST_VISITED_PAGE);
   // Relative times are a clock race against the server pass, so they only
   // appear once hydrated; the first paint (server and first client render) is
   // identical because `mounted` is false in both.
@@ -108,12 +130,31 @@ export default function ActivityFeed({
 
   // Guards so a slow/duplicate response can never reorder the list.
   const loadingMoreRef = useRef(false);
+  const loadedAllRef = useRef(false);
 
   // Re-anchor "now" on a coarse tick so the labels age without a re-fetch storm.
   useEffect(() => {
     const id = window.setInterval(() => setNow(Date.now()), 30_000);
     return () => window.clearInterval(id);
   }, []);
+
+  // Pull the full retained window once for the globe/leaderboards. Static mode
+  // already has every seed row in `initialVisits`, so this only runs live.
+  useEffect(() => {
+    if (!live || loadedAllRef.current) return;
+    loadedAllRef.current = true;
+    let active = true;
+    fetchAllVisits()
+      .then((all) => {
+        if (active && all) setAggVisits(all);
+      })
+      .catch(() => {
+        // A failed bulk load leaves the aggregates on the head page.
+      });
+    return () => {
+      active = false;
+    };
+  }, [live]);
 
   // Live head: poll the newest page and merge it over whatever is loaded, so
   // new visits surface without disturbing the older pages already shown.
@@ -127,6 +168,7 @@ export default function ActivityFeed({
         const payload = await fetchPage(null);
         if (active && payload) {
           setVisits((current) => mergeById(current, payload.visits));
+          setAggVisits((current) => mergeById(current, payload.visits));
           setCount(payload.count);
         }
       } catch {
@@ -165,11 +207,13 @@ export default function ActivityFeed({
     }
   }, [hasMore, cursor]);
 
-  const markers = useMemo(() => visitMarkers(visits), [visits]);
-  const aggregateSource = useMemo(() => visits.slice(0, AGGREGATE_WINDOW), [visits]);
-  const countries = useMemo(() => aggregateByCountry(aggregateSource), [aggregateSource]);
-  const pages = useMemo(() => topPages(aggregateSource), [aggregateSource]);
-  const countryCount = useMemo(() => countCountries(aggregateSource), [aggregateSource]);
+  // Globe, countries, and "Most visited" read the full retained window; the
+  // recent-visits list below stays on its own paginated `visits`.
+  const markers = useMemo(() => visitMarkers(aggVisits), [aggVisits]);
+  const countries = useMemo(() => aggregateByCountry(aggVisits), [aggVisits]);
+  const pages = useMemo(() => topPages(aggVisits), [aggVisits]);
+  const countryCount = useMemo(() => countCountries(aggVisits), [aggVisits]);
+  const visiblePages = pages.slice(0, mostVisitedShown);
 
   const totalLabel = count.toLocaleString("en-US");
 
@@ -231,7 +275,7 @@ export default function ActivityFeed({
               Most visited
             </h2>
             <ul className="mt-2 divide-y divide-zinc-200 border-t border-zinc-200 dark:divide-zinc-800 dark:border-zinc-800">
-              {pages.slice(0, 5).map((page) => (
+              {visiblePages.map((page) => (
                 <li
                   key={page.page}
                   className="flex items-baseline justify-between gap-4 py-2.5"
@@ -255,6 +299,17 @@ export default function ActivityFeed({
                 </li>
               ))}
             </ul>
+            {pages.length > mostVisitedShown ? (
+              <div className="mt-4 flex justify-center">
+                <button
+                  type="button"
+                  onClick={() => setMostVisitedShown((n) => n + MOST_VISITED_PAGE)}
+                  className="hover:text-accent-600 dark:hover:text-accent-300 rounded border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-700 transition-colors hover:border-zinc-400 dark:border-zinc-700 dark:text-zinc-300 dark:hover:border-zinc-600"
+                >
+                  Show more pages
+                </button>
+              </div>
+            ) : null}
           </section>
         ) : null}
 
