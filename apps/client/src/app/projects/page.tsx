@@ -5,8 +5,7 @@ import ProjectCard from "./ProjectCard";
 
 export const metadata = genPageMetaData({
   title: PAGE_TITLES.projects,
-  description:
-    "Things I've helped build, mostly for students.",
+  description: "Things I've helped build, mostly for students.",
 });
 
 const built = projectsData.filter((p) => p.category === "built");
@@ -19,7 +18,8 @@ export default function Projects() {
         Projects
       </h1>
       <p className="max-w-measure mt-4 text-[1.0625rem] leading-[1.75] text-zinc-600 dark:text-zinc-400">
-        Built with other people, mostly for students. Some still run; some lasted a weekend.
+        Built with other people, mostly for students. Some still run; some lasted a
+        weekend.
       </p>
 
       <section aria-labelledby="built" className="mt-12">
