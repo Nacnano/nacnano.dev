@@ -152,27 +152,28 @@ export default function ActivityFeed({
 
   // Pull the full retained window once for the globe/leaderboards. Static mode
   // already has every seed row in `initialVisits`, so this only runs live.
+  //
+  // Deliberately NOT gated on an `active`/cleanup flag: in React StrictMode the
+  // mount→unmount→remount double-invoke would flip such a flag false on the
+  // first setup, and because `loadedAllRef` makes the second setup bail out
+  // early, the one and only fetch would then discard its own result — leaving
+  // the aggregates stuck on the head page while the "loading" pill still
+  // cleared. `loadedAllRef` already guarantees exactly one fetch per mount, so
+  // there is no stale or duplicate resolve to race; a setState landing after a
+  // real unmount is silently tolerated in React 18. Clearing the flag in
+  // `finally` guarantees the loading affordance can never stick on.
   useEffect(() => {
     if (!live || loadedAllRef.current) return;
     loadedAllRef.current = true;
-    let active = true;
     setAggLoading(true);
     fetchAllVisits()
       .then((all) => {
-        if (active && all) setAggVisits(all);
+        if (all) setAggVisits(all);
       })
       .catch(() => {
         // A failed bulk load leaves the aggregates on the head page.
       })
-      .finally(() => {
-        // Cleared unconditionally (not gated on `active`): a single bulk fetch
-        // runs per mount, so there is no stale resolve to race, and this
-        // guarantees the "loading full history" affordance can never stick on.
-        setAggLoading(false);
-      });
-    return () => {
-      active = false;
-    };
+      .finally(() => setAggLoading(false));
   }, [live]);
 
   // Live head: poll the newest page and merge it over whatever is loaded, so
