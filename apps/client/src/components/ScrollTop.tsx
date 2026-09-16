@@ -12,13 +12,21 @@ const ScrollTop = () => {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  const scrollToTop = () => {
+    // The reduced-motion block in tailwind.css only reaches CSS scroll-behavior;
+    // a JS `behavior: "smooth"` overrides it, so opt out here to keep the
+    // promise that no motion ships uncovered.
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    window.scrollTo({ top: 0, behavior: reduce ? "auto" : "smooth" });
+  };
+
   if (!show) return null;
 
   return (
     <button
       type="button"
       aria-label="Scroll to top"
-      onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+      onClick={scrollToTop}
       // Available on touch too: a long essay left mobile readers with no way
       // back to the navigation.
       className="shadow-raise fixed right-5 bottom-5 z-40 flex h-11 w-11 items-center justify-center rounded-full border border-zinc-200 bg-white/90 text-zinc-600 backdrop-blur transition-colors hover:text-zinc-900 dark:border-zinc-800 dark:bg-zinc-900/90 dark:text-zinc-300 dark:hover:text-zinc-100"
