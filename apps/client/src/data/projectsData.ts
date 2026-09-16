@@ -76,6 +76,39 @@ const projectsData: Project[] = [
     href: "https://soul-seasons.vercel.app",
     repo: "https://github.com/CBC-soul-seasons/soul-seasons",
   },
+  {
+    title: "Chula LegalTech",
+    description:
+      "A job-matching site for young people, thrown together over a competition weekend. I did the front end and the OCR that reads documents off the page. It took first place.",
+    stack: ["Next.js", "Flask"],
+    category: "built",
+    mark: "match",
+  },
+  {
+    title: "JUMP Thailand",
+    description:
+      "An app that teaches massage technique by watching your hands through a camera and a multimodal model. We placed 2nd runner-up out of more than 700 teams.",
+    stack: ["Python", "Computer Vision", "Multimodal LLM"],
+    category: "built",
+    mark: "pose",
+  },
+  {
+    title: "MITR PHOL AI Hackathon",
+    description:
+      "A system that predicts when mining equipment needs servicing by forecasting its sensor readings. 2nd runner-up among 156 teams.",
+    stack: ["Python", "Time-series Forecasting"],
+    category: "built",
+    mark: "signal",
+  },
+  {
+    title: "TCAS Ranking Simulation",
+    description:
+      "A service that ran the Thai university admission ranking ahead of time so students could see where their scores would land them. I architected it; it served more than forty thousand people.",
+    stack: ["NestJS", "GraphQL", "Prisma"],
+    category: "built",
+    mark: "rank",
+  },
+
   // ── Things I looked into ──────────────────────────────────────────────
   {
     title: "Thai context benchmark for multimodal LLMs",
