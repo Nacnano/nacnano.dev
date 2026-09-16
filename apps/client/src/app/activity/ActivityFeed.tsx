@@ -43,12 +43,15 @@ const ActivityGlobe = dynamic(() => import("./ActivityGlobe"), {
 });
 
 /** The circle the globe draws into — shown both while its column is below the
- *  fold and while the cobe chunk streams in, so neither wait is a blank slot. */
+ *  fold and while the cobe chunk streams in, so neither wait is a blank slot.
+ *  It is a filled disc (not a bare outline) sized and toned to the globe's own
+ *  sphere, so the deferred mount reads as an intentional placeholder rather than
+ *  a white void where the globe will appear. */
 function GlobeSkeleton() {
   return (
     <div
       aria-hidden="true"
-      className="h-full w-full rounded-full border border-zinc-200 motion-safe:animate-pulse dark:border-zinc-800"
+      className="h-full w-full rounded-full bg-zinc-200 motion-safe:animate-pulse dark:bg-zinc-800"
     />
   );
 }
