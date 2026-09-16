@@ -39,33 +39,39 @@ const MOST_VISITED_PAGE = 6;
 // loads as before.
 const ActivityGlobe = dynamic(() => import("./ActivityGlobe"), {
   ssr: false,
-  loading: () => <GlobeSkeleton />,
+  // No loading fallback: `GlobeShell` keeps the sphere stand-in mounted behind
+  // the canvas for the whole wait, so there is never a gap to fill.
+  loading: () => null,
 });
 
-/** The circle the globe draws into — shown both while its column is below the
- *  fold and while the cobe chunk streams in, so neither wait is a blank slot.
+/** The circle the globe draws into — the sphere stand-in.
  *
- *  A flat fill read as a stark white void while loading, so this is painted to
- *  stand in for the real sphere: an off-centre radial gradient gives the same
- *  lit-from-upper-left volume, and a faint accent halo matches the glow the
- *  globe itself is ringed by. The deferred mount therefore looks like the globe
- *  settling in, not like an empty circle waiting for something to appear. No
- *  pulse — on a sphere stand-in the breathing just reads as a broken image. */
-function GlobeSkeleton() {
+ *  A flat fill read as a stark white void, so this is painted to stand in for
+ *  the real sphere: an off-centre radial gradient gives the same lit-from-upper-
+ *  left volume, and a faint accent halo matches the glow the globe is ringed by.
+ *  It sits *behind* the canvas at all times (see `GlobeShell`), so both the wait
+ *  for the cobe chunk *and* the beat before WebGL paints its first frame show a
+ *  globe settling in — never a white hole where the globe will appear. */
+function GlobeSkeleton({ className = "" }: { className?: string }) {
   return (
     <div
       aria-hidden="true"
-      className="h-full w-full rounded-full bg-[radial-gradient(circle_at_38%_32%,#ffffff_0%,#e4e4e7_58%,#d4d4d8_100%)] shadow-[inset_0_0_0_1px_rgba(37,86,218,0.06),0_0_28px_rgba(37,86,218,0.18)] dark:bg-[radial-gradient(circle_at_38%_32%,#3f3f46_0%,#27272a_58%,#18181b_100%)] dark:shadow-[inset_0_0_0_1px_rgba(120,150,255,0.10),0_0_28px_rgba(96,140,255,0.16)]"
+      className={`rounded-full bg-[radial-gradient(circle_at_38%_32%,#ffffff_0%,#e4e4e7_58%,#d4d4d8_100%)] shadow-[inset_0_0_0_1px_rgba(37,86,218,0.06),0_0_28px_rgba(37,86,218,0.18)] dark:bg-[radial-gradient(circle_at_38%_32%,#3f3f46_0%,#27272a_58%,#18181b_100%)] dark:shadow-[inset_0_0_0_1px_rgba(120,150,255,0.10),0_0_28px_rgba(96,140,255,0.16)] ${className}`}
     />
   );
 }
 
-/** The reserved, sized box the globe draws into — present before and while the
- *  cobe chunk streams in, so mounting the canvas never shifts layout. */
+/** The reserved, sized box the globe draws into. The sphere stand-in is always
+ *  painted first, underneath whatever mounts on top, so neither the below-the-
+ *  fold wait nor the transparent-canvas moment is ever a blank white slot. It is
+ *  inset to sit just inside the globe's own disc — cobe draws the sphere at 80%
+ *  of the canvas — so once WebGL paints, the opaque sphere covers the stand-in
+ *  with no ring left around it. Mounting the canvas never shifts layout. */
 function GlobeShell({ children }: { children?: React.ReactNode }) {
   return (
-    <div className="aspect-square w-full" aria-busy={!children}>
-      {children ?? <GlobeSkeleton />}
+    <div className="relative aspect-square w-full" aria-busy={!children}>
+      <GlobeSkeleton className="absolute inset-[11%]" />
+      <div className="absolute inset-0">{children}</div>
     </div>
   );
 }
