@@ -12,16 +12,16 @@
   }
 
   :root {
-    --ring: theme('colors.accent.600');
-    --selection-bg: theme('colors.accent.100');
-    --selection-fg: theme('colors.accent.900');
+    --ring: theme("colors.accent.600");
+    --selection-bg: theme("colors.accent.100");
+    --selection-fg: theme("colors.accent.900");
     color-scheme: light;
   }
 
   .dark {
-    --ring: theme('colors.accent.300');
-    --selection-bg: theme('colors.accent.900');
-    --selection-fg: theme('colors.accent.50');
+    --ring: theme("colors.accent.300");
+    --selection-bg: theme("colors.accent.900");
+    --selection-fg: theme("colors.accent.50");
     color-scheme: dark;
   }
 
@@ -32,7 +32,7 @@
   }
 
   html {
-    scrollbar-color: theme('colors.zinc.300') transparent;
+    scrollbar-color: theme("colors.zinc.300") transparent;
   }
 
   /* `dark` lives on the root <html>, so the root selector is `html.dark`, not
@@ -40,7 +40,7 @@
      scrollbar in dark mode). `.dark body` is kept for nested scroll surfaces. */
   html.dark,
   .dark body {
-    scrollbar-color: theme('colors.zinc.700') transparent;
+    scrollbar-color: theme("colors.zinc.700") transparent;
   }
 
   ::-webkit-scrollbar {
@@ -53,14 +53,14 @@
   }
 
   ::-webkit-scrollbar-thumb {
-    background-color: theme('colors.zinc.300');
+    background-color: theme("colors.zinc.300");
     border: 3px solid transparent;
     border-radius: 9999px;
     background-clip: content-box;
   }
 
   .dark ::-webkit-scrollbar-thumb {
-    background-color: theme('colors.zinc.700');
+    background-color: theme("colors.zinc.700");
   }
 
   input,
@@ -87,7 +87,7 @@
      It is a closing statement, not a section heading: space and the weight
      step attach it to the essay's ending, with no rule and no label. */
   .prose .takeaway {
-    @apply mt-10 text-lg font-medium leading-8 text-zinc-900 dark:text-zinc-50;
+    @apply mt-10 text-lg leading-8 font-medium text-zinc-900 dark:text-zinc-50;
     letter-spacing: -0.011em;
   }
 
@@ -104,18 +104,17 @@
 
   .field:focus {
     box-shadow: none;
-    border-color: theme('colors.zinc.300');
+    border-color: theme("colors.zinc.300");
   }
 
   .dark .field:focus {
-    border-color: theme('colors.zinc.700');
+    border-color: theme("colors.zinc.700");
   }
 
   .field:focus-visible {
     outline: 2px solid var(--ring);
     outline-offset: 2px;
   }
-
 }
 
 .task-list-item::before {
@@ -137,7 +136,37 @@
 /* https://stackoverflow.com/questions/61083813/how-to-avoid-internal-autofill-selected-style-to-be-applied */
 input:-webkit-autofill,
 input:-webkit-autofill:focus {
-  transition: background-color 600000s 0s, color 600000s 0s;
+  transition:
+    background-color 600000s 0s,
+    color 600000s 0s;
+}
+
+/* Theme swap: the new theme radiates from the toggle as a circular reveal.
+   The toggle sets --vt-x/--vt-y/--vt-r on <html> (see ThemeSwitch.tsx) so the
+   circle is anchored under the icon the reader just pressed. The old snapshot
+   is held flat underneath while the new one is clipped open over it. */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+::view-transition-old(root) {
+  z-index: 0;
+}
+
+::view-transition-new(root) {
+  z-index: 1;
+  animation: theme-reveal 450ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes theme-reveal {
+  from {
+    clip-path: circle(0 at var(--vt-x, 50%) var(--vt-y, 50%));
+  }
+  to {
+    clip-path: circle(var(--vt-r, 150%) at var(--vt-x, 50%) var(--vt-y, 50%));
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -148,5 +177,10 @@ input:-webkit-autofill:focus {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation: none;
   }
 }
