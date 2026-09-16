@@ -52,7 +52,7 @@ const siteMetadata = {
   // Nac is what people actually call him; the site greets in that voice.
   greeting: "Hi, I'm Nac",
   description:
-    "I build things on the internet and write about the bits I got wrong, which is usually the interesting part.",
+    "I mostly write about the bits I got wrong. The building is just how I end up with things to write about.",
   // Casual, and easy to change. Shown on the About page, not the front door.
   now: "Currently in Bangkok, looking for my next thing, and slowly working through a list of half-written drafts.",
   status: "Graduated · Open to work",

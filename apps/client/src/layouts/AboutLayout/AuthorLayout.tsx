@@ -69,7 +69,7 @@ export default function AuthorLayout({ children, content }: Props) {
           id="work"
           className="mb-2 text-base font-semibold tracking-[-0.011em] text-zinc-900 dark:text-zinc-100"
         >
-          Things I&rsquo;ve done
+          A bit of work history
         </h2>
         <Timeline items={workItems} initialCount={4} moreLabel="older ones" />
       </section>
