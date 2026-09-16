@@ -82,7 +82,7 @@ const projectsData: Project[] = [
       "A job-matching site for young people, thrown together over a competition weekend. I did the front end and the OCR that reads documents off the page. It took first place.",
     stack: ["Next.js", "Flask"],
     category: "built",
-    mark: "match",
+    imgSrc: "/static/images/chula-legaltech.png",
     href: "https://yacht-for-youth.vercel.app",
     repo: "https://github.com/mekintown/yacht-for-youth",
   },
