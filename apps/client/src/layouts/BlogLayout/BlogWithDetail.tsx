@@ -48,70 +48,77 @@ export default function BlogWithDetail({ content, newer, older, children }: Prop
 
         <div className="prose max-w-measure dark:prose-invert mt-10">{children}</div>
 
-        {/* Hairline rows in the same grammar as the essay list — this world
-            uses rules, not cards. */}
-        {(newer || older) && (
-          <nav
-            aria-label="More essays"
-            className="mt-10 divide-y divide-zinc-200 border-y border-zinc-200 dark:divide-zinc-800 dark:border-zinc-800"
-          >
-            {[
-              { post: older, label: "Older", rel: "prev" },
-              { post: newer, label: "Newer", rel: "next" },
-            ]
-              .filter((row) => row.post?.path)
-              .map(({ post, label, rel }) => (
-                <CustomLink
-                  key={rel}
-                  href={`/${post!.path}`}
-                  rel={rel}
-                  className="group flex flex-col gap-1 py-4 sm:flex-row sm:items-baseline sm:gap-6"
-                >
-                  <span className="w-14 shrink-0 text-xs tracking-[0.08em] text-zinc-500 uppercase dark:text-zinc-400">
-                    {label}
-                  </span>
-                  <span className="group-hover:text-accent-600 dark:group-hover:text-accent-300 text-[0.9375rem] leading-6 font-medium text-zinc-900 transition-colors dark:text-zinc-100">
-                    {post!.title}
-                  </span>
-                </CustomLink>
-              ))}
-          </nav>
-        )}
+        {/*
+          One bordered band for everything that follows the essay — prev/next
+          rows then the author note — each separated by a single hairline. The
+          old version gave the nav a top and bottom rule and then the aside its
+          own top rule, which left an empty strip pinned between two lines that
+          read as a broken, content-less row.
+        */}
+        <div className="mt-12 divide-y divide-zinc-200 border-t border-zinc-200 dark:divide-zinc-800 dark:border-zinc-800">
+          {(newer || older) && (
+            <nav
+              aria-label="More essays"
+              className="divide-y divide-zinc-200 dark:divide-zinc-800"
+            >
+              {[
+                { post: older, label: "Older", rel: "prev" },
+                { post: newer, label: "Newer", rel: "next" },
+              ]
+                .filter((row) => row.post?.path)
+                .map(({ post, label, rel }) => (
+                  <CustomLink
+                    key={rel}
+                    href={`/${post!.path}`}
+                    rel={rel}
+                    className="group flex flex-col gap-1 py-4 sm:flex-row sm:items-baseline sm:gap-6"
+                  >
+                    <span className="w-14 shrink-0 text-xs tracking-[0.08em] text-zinc-500 uppercase dark:text-zinc-400">
+                      {label}
+                    </span>
+                    <span className="group-hover:text-accent-600 dark:group-hover:text-accent-300 text-[0.9375rem] leading-6 font-medium text-zinc-900 transition-colors dark:text-zinc-100">
+                      {post!.title}
+                    </span>
+                  </CustomLink>
+                ))}
+            </nav>
+          )}
 
-        {/* A stranger arriving from social meets the author after the essay,
-            not between the headline and the first sentence. */}
-        <aside className="mt-10 border-t border-zinc-200 pt-6 dark:border-zinc-800">
-          <p className="max-w-measure text-[0.9375rem] leading-7 text-zinc-600 dark:text-zinc-400">
-            Written by{" "}
-            <span className="font-medium text-zinc-900 dark:text-zinc-100">
-              {siteMetadata.author}
-            </span>
-            . {siteMetadata.description}
-          </p>
-          <div className="mt-4 flex flex-wrap gap-2">
-            <CustomLink
-              href="/"
-              className="rounded border border-zinc-200 px-3 py-1.5 text-sm font-medium text-zinc-700 transition-colors hover:border-zinc-300 hover:text-zinc-900 dark:border-zinc-800 dark:text-zinc-300 dark:hover:border-zinc-700 dark:hover:text-zinc-100"
-            >
-              More writing
-            </CustomLink>
-            <CustomLink
-              href="/about"
-              className="rounded border border-zinc-200 px-3 py-1.5 text-sm font-medium text-zinc-700 transition-colors hover:border-zinc-300 hover:text-zinc-900 dark:border-zinc-800 dark:text-zinc-300 dark:hover:border-zinc-700 dark:hover:text-zinc-100"
-            >
-              About me
-            </CustomLink>
-            {/* A reader who just finished an essay is the likeliest person to
-                have a question about it, so the AMA sits beside the other
-                next-step links rather than hidden in the nav. */}
-            <CustomLink
-              href="/ama"
-              className="rounded border border-zinc-200 px-3 py-1.5 text-sm font-medium text-zinc-700 transition-colors hover:border-zinc-300 hover:text-zinc-900 dark:border-zinc-800 dark:text-zinc-300 dark:hover:border-zinc-700 dark:hover:text-zinc-100"
-            >
-              Ask me about this
-            </CustomLink>
-          </div>
-        </aside>
+          {/* A stranger arriving from social meets the author after the essay,
+              not between the headline and the first sentence. */}
+          <aside className="py-6">
+            <p className="max-w-measure text-[0.9375rem] leading-7 text-zinc-600 dark:text-zinc-400">
+              Written by{" "}
+              <span className="font-medium text-zinc-900 dark:text-zinc-100">
+                {siteMetadata.author}
+              </span>
+              . {siteMetadata.description}
+            </p>
+            <div className="mt-4 flex flex-wrap gap-2">
+              <CustomLink
+                href="/"
+                className="rounded border border-zinc-200 px-3 py-1.5 text-sm font-medium text-zinc-700 transition-colors hover:border-zinc-300 hover:text-zinc-900 dark:border-zinc-800 dark:text-zinc-300 dark:hover:border-zinc-700 dark:hover:text-zinc-100"
+              >
+                More writing
+              </CustomLink>
+              <CustomLink
+                href="/about"
+                className="rounded border border-zinc-200 px-3 py-1.5 text-sm font-medium text-zinc-700 transition-colors hover:border-zinc-300 hover:text-zinc-900 dark:border-zinc-800 dark:text-zinc-300 dark:hover:border-zinc-700 dark:hover:text-zinc-100"
+              >
+                About me
+              </CustomLink>
+              {/* A reader who just finished an essay is the likeliest person to
+                  have a question about it, so the AMA sits beside the other
+                  next-step links rather than hidden in the nav. */}
+              <CustomLink
+                href="/ama"
+                className="rounded border border-zinc-200 px-3 py-1.5 text-sm font-medium text-zinc-700 transition-colors hover:border-zinc-300 hover:text-zinc-900 dark:border-zinc-800 dark:text-zinc-300 dark:hover:border-zinc-700 dark:hover:text-zinc-100"
+              >
+                Ask me about this
+              </CustomLink>
+            </div>
+          </aside>
+        </div>
       </article>
     </>
   );
