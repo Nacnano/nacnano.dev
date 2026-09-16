@@ -117,8 +117,10 @@ export default function BlogWithDetail({ content, newer, older, children }: Prop
                         leaning on the muted label alone. */}
                     <span
                       aria-hidden="true"
-                      className={`hidden shrink-0 self-center text-zinc-500 transition group-hover:text-accent-600 sm:inline-flex dark:text-zinc-400 dark:group-hover:text-accent-300 ${
-                        dir === "right" ? "group-hover:translate-x-0.5" : "group-hover:-translate-x-0.5"
+                      className={`group-hover:text-accent-600 dark:group-hover:text-accent-300 hidden shrink-0 self-center text-zinc-500 transition sm:inline-flex dark:text-zinc-400 ${
+                        dir === "right"
+                          ? "group-hover:translate-x-0.5"
+                          : "group-hover:-translate-x-0.5"
                       }`}
                     >
                       <DirectionArrow dir={dir as "left" | "right"} />
