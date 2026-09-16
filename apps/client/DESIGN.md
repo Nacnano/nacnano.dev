@@ -155,7 +155,11 @@ components:
 
 This is the category standard executed straight: a personal site where the person and the writing are both legible immediately. Four derived visual worlds were dealt and all four were declined in favour of the convention done properly — no ironic framing, no smuggled quirk.
 
-The brief the system serves has since changed (see `PRODUCT.md`, 2026-09-16): the site is a reflection of its author for people who want to know them, not a front door for a recruiter. **The visual preference is unchanged** — restraint survives the new brief. What it now means is that the delight belongs to the content, not to the chrome: the page may say something surprising, but it says it in this type at this measure on this ground. Anything that wants to break the system needs an explicit product decision first, not a design one. The craft bar is brianlovin.com and rauchg.com: app-like structural clarity, tight restrained typography, a neutral scale with a single accent, and everything exactly where a visitor expects it. The system's ambition is in its precision, not in its invention.
+The brief the system serves has since changed (see `PRODUCT.md`, 2026-09-16): the site is a reflection of its author for people who want to know them, not a front door for a recruiter. **Decided 2026-09-16: the dial moves toward fun, and restraint stays the ground it happens on.**
+
+These are not in tension, because they own different layers. Restraint is a property of the _system_ — the ground, the measure, the one accent, the hairline grammar. Fun is a property of what that system carries, and of a small number of moments where the system deliberately gives way. A page with nothing competing for attention is the best possible delivery mechanism for a personal sentence; that is why the restraint earns its place under the new brief rather than merely surviving it.
+
+What changes is the burden of proof. The old reading treated any departure from the grammar as a defect to be argued out of. The new one treats a flat, inert page as its own kind of failure — correct and forgettable. Delight is something a surface is now expected to attempt, and the Licensed Moment Rule below says where. The craft bar is brianlovin.com and rauchg.com: app-like structural clarity, tight restrained typography, a neutral scale with a single accent, and everything exactly where a visitor expects it. The system's ambition is in its precision, not in its invention.
 
 The material is thin. A neutral zinc ground — pure white or near-black, never tinted — carries a single blue accent used sparingly enough that a reader notices it. Structure comes from 1px hairline rules, not from cards: list rows are separated by a divider and nothing else, with no border, no fill, no shadow and no corner around them. There is exactly one elevation step in the whole system and only one floating control uses it. Depth is conveyed by rule, rhythm and ink weight.
 
@@ -169,6 +173,7 @@ Type does the hierarchy. Inter carries everything readable; the platform mono st
 - Inter for everything read; platform mono with tabular numerals for every date, duration and count
 - A 48rem single column with a 68ch measure for running prose
 - One 4px radius everywhere; full-round reserved for genuinely circular objects
+- A short, named list of licensed moments where the grammar deliberately gives way
 - 44px minimum target on every icon control; one keyboard-only focus ring for the whole site
 
 ## Colors
@@ -235,11 +240,15 @@ Horizontal structure inside that column is always the same shape: a fixed-width 
 
 The vertical rhythm is coarse and consistent: 20px for the header band and a timeline entry, 28px for a list row, 40px between blocks inside a page, 48px → 64px for the top of an interior page, 56px → 80px for the home hero, 56px between major about-page sections, 80px above the footer. Responsive change is a step, not a fluid interpolation — sizes and paddings jump once at 640px and hold.
 
-Motion is minimal and honest: `transition-colors` on interactive text and borders, smooth scroll on the root element, and a global `prefers-reduced-motion` block that reduces every animation, transition and scroll behaviour to effectively instant.
+Motion is quiet by default and occasionally not: `transition-colors` on interactive text and borders, smooth scroll on the root element, an `animate-rise` entrance on the home hero, and the licensed moments named below. A global `prefers-reduced-motion` block reduces every animation, transition and scroll behaviour to effectively instant — that block is what makes the playful moments affordable, and no new motion ships without being covered by it.
 
 ### Named Rules
 
 **The One Column Rule.** Every route is one 48rem column. Do not introduce a multi-column grid, a sidebar, or a masonry of cards. Lateral structure is a metadata rail against content, and it collapses to stacked blocks on mobile.
+
+**The Licensed Moment Rule.** A surface may break the resting grammar — a transform, a tilt, a drawn flourish, an unexpected response to a hover or a click — when the break _is_ the content rather than decoration applied to it. The test: would removing it remove something the visitor learns about the author? Two exist today and both pass. The avatar on the home and about pages scales and tilts toward the reader on hover — the one photograph on the site, behaving like a person rather than an asset. The live dot on `/activity` pulses, because what follows is happening now.
+
+A licensed moment must be listed in this rule, must be covered by the reduced-motion block, must not introduce a second accent hue or a tinted ground, and must stay rare enough that the next one still surprises. Adding one is an ordinary design decision and does not need a product debate. Adding five is a new system and does.
 
 **The Step-Not-Slide Rule.** Responsive change happens at the 640px breakpoint as a discrete step. No `clamp()` type, no fluid padding. A layout should be one of two known states, not an infinite family of them.
 
@@ -255,7 +264,7 @@ This system is flat. Depth comes from hairline rules, vertical rhythm and ink we
 
 **The One Step Rule.** There is a single elevation token and it belongs to floating overlay controls. If a new surface wants a shadow, the correct answer is almost always a hairline rule and more space. A second shadow value is a new system, not a variation on this one.
 
-**The Flat Document Rule.** Anything in normal flow — list rows, sections, headers, footers, images, buttons — is flat at rest and flat on hover. Hover feedback is a color change, never a lift, never a shadow, never a transform.
+**The Flat Document Rule.** Anything in normal flow — list rows, sections, headers, footers, buttons — is flat at rest and flat on hover, and its feedback is a color change rather than a lift. This rule is about _elevation_: nothing in the document grows a shadow or floats above its neighbours. A Licensed Moment may transform in place; it does not get a shadow either.
 
 ## Shapes
 
@@ -346,5 +355,5 @@ The second signature. Every list row leads with a fixed-width rail of mono, uppe
 - **Don't** use a Unicode glyph, emoji or icon font in place of a drawn SVG icon.
 - **Don't** set a date, duration, count or period in the sans face, or without tabular numerals.
 - **Don't** add a per-component focus style or suppress the global focus ring.
-- **Don't** express hover as a lift, scale or transform. Hover is a color transition.
+- **Don't** express hover as a lift, scale or transform on a _structural_ element — rows, cards, buttons, nav. For those, hover is a color transition. The exception is a Licensed Moment, which must be named in the Layout rules.
 - **Don't** invent a third letter-spacing step between -0.022em and -0.011em.
