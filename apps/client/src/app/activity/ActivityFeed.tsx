@@ -44,14 +44,18 @@ const ActivityGlobe = dynamic(() => import("./ActivityGlobe"), {
 
 /** The circle the globe draws into — shown both while its column is below the
  *  fold and while the cobe chunk streams in, so neither wait is a blank slot.
- *  It is a filled disc (not a bare outline) sized and toned to the globe's own
- *  sphere, so the deferred mount reads as an intentional placeholder rather than
- *  a white void where the globe will appear. */
+ *
+ *  A flat fill read as a stark white void while loading, so this is painted to
+ *  stand in for the real sphere: an off-centre radial gradient gives the same
+ *  lit-from-upper-left volume, and a faint accent halo matches the glow the
+ *  globe itself is ringed by. The deferred mount therefore looks like the globe
+ *  settling in, not like an empty circle waiting for something to appear. No
+ *  pulse — on a sphere stand-in the breathing just reads as a broken image. */
 function GlobeSkeleton() {
   return (
     <div
       aria-hidden="true"
-      className="h-full w-full rounded-full bg-zinc-200 motion-safe:animate-pulse dark:bg-zinc-800"
+      className="h-full w-full rounded-full bg-[radial-gradient(circle_at_38%_32%,#ffffff_0%,#e4e4e7_58%,#d4d4d8_100%)] shadow-[inset_0_0_0_1px_rgba(37,86,218,0.06),0_0_28px_rgba(37,86,218,0.18)] dark:bg-[radial-gradient(circle_at_38%_32%,#3f3f46_0%,#27272a_58%,#18181b_100%)] dark:shadow-[inset_0_0_0_1px_rgba(120,150,255,0.10),0_0_28px_rgba(96,140,255,0.16)]"
     />
   );
 }
