@@ -58,7 +58,7 @@ const siteMetadata = {
   greeting: "Hi, I'm Nac",
   description: "I live in Bangkok, walk a lot, and write when something's worth saying.",
   // Casual, and easy to change. Shown on the About page, not the front door.
-  now: "Bangkok. Football, badminton, wandering, too many half-written drafts.",
+  now: "Bangkok. Football, badminton, wandering, piano when the neighbours allow it, too many half-written drafts.",
   status: "Graduated · Open to work",
   language: "en-us",
   theme: "system",
