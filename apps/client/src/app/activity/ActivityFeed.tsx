@@ -204,18 +204,17 @@ export default function ActivityFeed({
       </section>
 
       <div className="min-w-0 flex-1">
-        <p className="text-[0.9375rem] leading-7 text-zinc-600 dark:text-zinc-400">
-          The globe marks each place a visit came from; the most recent are listed below.
-          {live && visits.length > 0 ? (
+        {live && visits.length > 0 ? (
+          <p className="text-[0.9375rem] leading-7 text-zinc-600 dark:text-zinc-400">
             <span className="inline-flex items-center gap-1.5">
               <span
-                className="bg-accent-600 dark:bg-accent-300 ml-1 inline-block h-1.5 w-1.5 rounded-full motion-safe:animate-pulse"
+                className="bg-accent-600 dark:bg-accent-300 inline-block h-1.5 w-1.5 rounded-full motion-safe:animate-pulse"
                 aria-hidden="true"
               />
               live now
             </span>
-          ) : null}
-        </p>
+          </p>
+        ) : null}
 
         <dl className="mt-6 flex flex-wrap gap-x-10 gap-y-4">
           <Stat label="Visits" value={totalLabel} />
