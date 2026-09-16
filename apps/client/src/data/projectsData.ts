@@ -92,7 +92,7 @@ const projectsData: Project[] = [
       "An app that teaches massage technique by watching through a camera and a multimodal model. We placed 2nd runner-up out of more than 700 teams.",
     stack: ["Python", "Computer Vision", "Multimodal LLM"],
     category: "built",
-    mark: "pose",
+    imgSrc: "/static/images/nuad-dee.png",
     href: "https://nuad-dee.vercel.app",
     repo: "https://github.com/Nacnano/nuad-dee",
   },
