@@ -23,6 +23,7 @@ const STATIC_TITLES: Record<string, string> = {
   "/projects": PAGE_TITLES.projects,
   "/link": PAGE_TITLES.link,
   "/activity": PAGE_TITLES.activity,
+  "/ama": PAGE_TITLES.ama,
 };
 
 const BLOG_PREFIX = "/blogs/";
