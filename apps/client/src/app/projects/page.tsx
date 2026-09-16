@@ -6,7 +6,7 @@ import ProjectCard from "./ProjectCard";
 export const metadata = genPageMetaData({
   title: PAGE_TITLES.projects,
   description:
-    "A few things I've had a hand in, mostly alongside other people. None of it is especially impressive — it's just where the time went.",
+    "A few things I've helped build, mostly with other people, mostly for students.",
 });
 
 const built = projectsData.filter((p) => p.category === "built");
