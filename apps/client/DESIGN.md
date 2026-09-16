@@ -140,7 +140,7 @@ components:
     backgroundColor: "transparent"
     textColor: "{colors.ink-meta}"
     typography: "{typography.label}"
-  status-dot:
+  live-dot:
     backgroundColor: "{colors.accent}"
     rounded: "{rounded.full}"
     height: "6px"
@@ -153,7 +153,9 @@ components:
 
 **Creative North Star: "The Standing Exit"**
 
-This is the category standard executed straight: a working engineer's personal site where the name, the current status and the writing are all legible in one viewport. Four derived visual worlds were dealt and all four were declined in favour of the convention done properly — no ironic framing, no smuggled quirk. The craft bar is brianlovin.com and rauchg.com: app-like structural clarity, tight restrained typography, a neutral scale with a single accent, and everything exactly where a visitor expects it. The system's ambition is in its precision, not in its invention.
+This is the category standard executed straight: a personal site where the person and the writing are both legible immediately. Four derived visual worlds were dealt and all four were declined in favour of the convention done properly — no ironic framing, no smuggled quirk.
+
+The brief the system serves has since changed (see `PRODUCT.md`, 2026-09-16): the site is a reflection of its author for people who want to know them, not a front door for a recruiter. **The visual preference is unchanged** — restraint survives the new brief. What it now means is that the delight belongs to the content, not to the chrome: the page may say something surprising, but it says it in this type at this measure on this ground. Anything that wants to break the system needs an explicit product decision first, not a design one. The craft bar is brianlovin.com and rauchg.com: app-like structural clarity, tight restrained typography, a neutral scale with a single accent, and everything exactly where a visitor expects it. The system's ambition is in its precision, not in its invention.
 
 The material is thin. A neutral zinc ground — pure white or near-black, never tinted — carries a single blue accent used sparingly enough that a reader notices it. Structure comes from 1px hairline rules, not from cards: list rows are separated by a divider and nothing else, with no border, no fill, no shadow and no corner around them. There is exactly one elevation step in the whole system and only one floating control uses it. Depth is conveyed by rule, rhythm and ink weight.
 
@@ -175,7 +177,7 @@ A neutral zinc scale carrying one blue accent, paired light-and-dark at every ro
 
 ### Primary
 
-- **Signal Blue** (`{colors.accent}` light / `{colors.accent-dark}` dark): The only chromatic voice in the system. It appears on the active navigation item, on an item title while its row is hovered, on link hover in prose and in the footer, and as the 6px status dot beside the availability line on the home and about pages. It never fills a surface larger than that dot and it never appears as a background behind text.
+- **Signal Blue** (`{colors.accent}` light / `{colors.accent-dark}` dark): The only chromatic voice in the system. It appears on the active navigation item, on an item title while its row is hovered, on link hover in prose and in the footer, and as the small live dot beside the activity feed's heading. It never fills a surface larger than that dot and it never appears as a background behind text.
 - **Signal Blue Pressed** (`{colors.accent-press}` light / `{colors.accent-press-dark}` dark): The hover value for links inside long-form prose, one step further from the ground than the resting link color so hover reads as commitment rather than as a second color.
 
 ### Neutral
@@ -191,7 +193,7 @@ A neutral zinc scale carrying one blue accent, paired light-and-dark at every ro
 
 ### Named Rules
 
-**The One Accent Rule.** There is one accent hue and two values of it: `{colors.accent}` on light surfaces, `{colors.accent-dark}` on dark. It is allowed on active nav, hovered item titles, link hover, and the status dot — nothing else. A second hue is a defect, not a variation. Test: if you can point at two distinct chromatic colors on a screen (syntax-highlighted code excepted), the rule is broken.
+**The One Accent Rule.** There is one accent hue and two values of it: `{colors.accent}` on light surfaces, `{colors.accent-dark}` on dark. It is allowed on active nav, hovered item titles, link hover, and the live dot — nothing else. A second hue is a defect, not a variation. Test: if you can point at two distinct chromatic colors on a screen (syntax-highlighted code excepted), the rule is broken.
 
 **The Paired-Theme Rule.** No color is declared without its counterpart. Light and dark are both first-class; the theme is class-based and defaults to the system preference, so either one is the visitor's real first impression. Every surface must pass 4.5:1 for body text and 3:1 for large text in both themes — the shipped build measures 0 failures across all five routes in both themes, and that is the floor, not the achievement.
 
@@ -257,7 +259,7 @@ This system is flat. Depth comes from hairline rules, vertical rhythm and ink we
 
 ## Shapes
 
-One radius: 4px, applied to buttons, nav items, focusable link targets, image frames and code-title bars. Full-round (`{rounded.full}`) is reserved for objects that are genuinely circular — the status dot, timeline markers, the avatar, the scroll-to-top button and the scrollbar thumb. There is no soft-UI middle ground; a rectangle gets 4px and a circle gets a circle.
+One radius: 4px, applied to buttons, nav items, focusable link targets, image frames and code-title bars. Full-round (`{rounded.full}`) is reserved for objects that are genuinely circular — the live dot, timeline markers, the avatar, the scroll-to-top button and the scrollbar thumb. There is no soft-UI middle ground; a rectangle gets 4px and a circle gets a circle.
 
 Borders are always 1px and always Hairline. They appear as: the rule under the header and above the footer, the divider between sibling list rows, the rule that opens a section, the outline of the secondary button, and the frame around a project thumbnail. The vertical rail behind the timeline is the same idea rotated — a 1px line spanning only the entries, never the disclosure button below them.
 
@@ -274,7 +276,7 @@ Icons are drawn SVG on a 24px viewBox at `stroke-width: 1.5` with round caps and
 ### Buttons
 
 - **Shape:** A soft rectangle (4px radius) at every size. Never pill-shaped.
-- **Solid (primary):** Full Ink fill with Paper text, 8px/14px padding, 0.875rem at weight 500. Inverted in dark — near-white fill, near-black text. One per view, on the single most likely next action: Résumé in the home hero, Full résumé on About, All essays on the 404.
+- **Solid (primary):** Full Ink fill with Paper text, 8px/14px padding, 0.875rem at weight 500. Inverted in dark — near-white fill, near-black text. At most one per view, on the single most likely next action. Currently it survives only on the two dead ends — All essays on the 404, Try again on the error page. The home hero has no button and does not want one; the résumé is a quiet underlined link in the About contact row, which is the weight the new brief gives it.
 - **Outline (secondary):** Transparent with a Hairline border and Reading Ink text, same 8px/14px padding. Used for every other action in the same cluster.
 - **Compact outline:** Same treatment at 6px/12px, for actions that sit under content rather than beside a headline — the post-footer links and the timeline disclosure.
 - **Hover:** Solid darkens/lightens one ink step; outline brightens its text to Full Ink and its border to Marker. Both animate `colors` only.
@@ -299,13 +301,15 @@ Every field carries a visible `<label>` above it — a placeholder is never the 
 
 ### Navigation
 
-- **Header:** A 20px band closed by a hairline rule. Left is the 36px logo plus the short name at 0.9375rem/600; right is the nav, theme switch and mobile trigger. Nav items are 0.875rem in Metadata Ink, brightening to Full Ink on hover; the active route goes weight 500 and Signal Blue and carries `aria-current="page"`.
+- **Header:** A thin band closed by a hairline rule, stuck to the top of the viewport at `z-40` over a `backdrop-blur` translucent ground (falling back to the opaque ground where `backdrop-filter` is unsupported). It is the one persistent chrome on the site, so it stays as close to a rule with a wordmark on it as it can. The mobile menu overlay is portalled to `body` so it escapes the sticky stacking context rather than scrolling inside it. Left is the 36px logo plus the short name at 0.9375rem/600; right is the nav, theme switch and mobile trigger. Nav items are 0.875rem in Metadata Ink, brightening to Full Ink on hover; the active route goes weight 500 and Signal Blue and carries `aria-current="page"`.
 - **Mobile:** Below 640px the nav is replaced by a 44px menu button opening a full-screen dialog on the opaque ground, with items at 1.125rem/500 separated by dividers. The closed panel is removed from the DOM entirely rather than hidden, so its links never sit in the tab order behind the page; focus is trapped and Escape returns focus to the trigger.
 - **Footer:** Mirror of the header — a hairline rule above, an 80px gap before it, a copyright line with underlined links, and the social icon row.
 
-### The Status Line
+### The Live Dot
 
-The signature component. A 6px Signal Blue dot followed by one line of mono uppercase micro-type stating current availability, sitting directly under the name on both the home and about pages. It is the system's only use of the accent as a fill, and the reason is that it is the one fact the site exists to make unmissable.
+A 6px Signal Blue dot, `motion-safe:animate-pulse`, beside the activity feed's heading. It is the system's only use of the accent as a fill, and the only element on the site that moves at rest — both licensed by the one thing it says, which is that what follows is happening now rather than being recounted.
+
+It is the survivor of a component called the Status Line — the same dot followed by a line of mono uppercase micro-type stating current availability, under the name on the home and about pages. That line was removed in 2026-09 when the site stopped being a hiring document. The dot is the correct amount of what it was: `siteMetadata.status` is still declared and documented but no longer read by anything, and should be deleted rather than left as a hook for a component that is not coming back.
 
 ### The Metadata Rail
 
@@ -325,7 +329,7 @@ The second signature. Every list row leads with a fixed-width rail of mono, uppe
 
 - **Do** separate sibling items with a 1px Hairline divider and 28px of padding — the Hairline-Not-Card Rule. A new list joins the existing grammar.
 - **Do** lead every list row with a fixed-width mono metadata rail, uppercase at +0.08em with tabular numerals, collapsing to a stacked block below 640px.
-- **Do** spend the accent on exactly four things: active nav, hovered item title, link hover, status dot.
+- **Do** spend the accent on exactly four things: active nav, hovered item title, link hover, live dot.
 - **Do** ship every color as a light/dark pair and verify 4.5:1 body / 3:1 large in both themes before calling a surface done.
 - **Do** cap running prose at the 68ch measure even though the column is 48rem wide.
 - **Do** give every icon-only control a 44×44px hit area and draw its glyph as inline SVG at stroke-width 1.5 in `currentColor`.

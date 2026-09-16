@@ -15,9 +15,11 @@ type SiteMetadata = {
   description: string;
   now: string;
   /**
-   * The canonical availability line, shown as the Status Line under the name on
-   * the home and about pages. Reflects confirmed product truth (graduated,
-   * currently seeking) and must never imply a start date or term we haven't set.
+   * Dead config. This fed the Status Line under the name on the home and about
+   * pages; that component was removed in 2026-09 when the site stopped being a
+   * hiring document (see PRODUCT.md). Nothing reads this field any more — it is
+   * kept only until the `SiteMetadata` type and its one literal are changed
+   * together, and should be deleted rather than re-wired into a new surface.
    */
   status: string;
   language: string;
