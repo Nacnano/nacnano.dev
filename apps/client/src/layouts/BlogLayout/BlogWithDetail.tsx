@@ -5,9 +5,6 @@ import siteMetadata from "@/data/siteMetadata";
 import type { Author, Blog } from "@/lib/content";
 import type { ReactNode } from "react";
 
-const githubUrl = (filePath: string) =>
-  `${siteMetadata.siteRepo}/blob/main/apps/client/src/data/${filePath}`;
-
 const postDateTemplate: Intl.DateTimeFormatOptions = {
   year: "numeric",
   month: "long",
@@ -23,7 +20,7 @@ interface Props {
 }
 
 export default function BlogWithDetail({ content, newer, older, children }: Props) {
-  const { filePath, date, title, tags, readingTime } = content;
+  const { date, title, tags, readingTime } = content;
 
   return (
     <>
@@ -50,15 +47,6 @@ export default function BlogWithDetail({ content, newer, older, children }: Prop
         </header>
 
         <div className="prose max-w-measure dark:prose-invert mt-10">{children}</div>
-
-        <div className="mt-12 border-t border-zinc-200 pt-6 dark:border-zinc-800">
-          <CustomLink
-            href={githubUrl(filePath)}
-            className="hover:text-accent-600 hover:decoration-accent-600 dark:hover:text-accent-300 dark:hover:decoration-accent-300 rounded text-sm text-zinc-500 underline decoration-zinc-300 underline-offset-4 transition-colors dark:text-zinc-400 dark:decoration-zinc-700"
-          >
-            Edit this page on GitHub
-          </CustomLink>
-        </div>
 
         {/* Hairline rows in the same grammar as the essay list — this world
             uses rules, not cards. */}
