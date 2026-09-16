@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import CustomLink from "@/components/Link";
 import { useMounted } from "@/lib/useMounted";
@@ -113,6 +113,12 @@ export default function ActivityFeed({ initialVisits, initialCount, live }: Prop
   const [now, setNow] = useState(() => Date.now());
   const [recentShown, setRecentShown] = useState(PAGE_SIZE);
   const [mostVisitedShown, setMostVisitedShown] = useState(MOST_VISITED_PAGE);
+  // How many rows were already revealed on the previous "Show more" — rows past
+  // this mark are the freshly-added batch and get a one-time staggered entrance.
+  // Held in refs (not state) so updating them never re-renders or re-triggers
+  // the animation on the clock tick / live poll.
+  const prevRecentShown = useRef(PAGE_SIZE);
+  const prevMostVisitedShown = useRef(MOST_VISITED_PAGE);
   // Relative times are a clock race against the server pass, so they only
   // appear once hydrated; the first paint (server and first client render) is
   // identical because `mounted` is false in both.
@@ -155,6 +161,16 @@ export default function ActivityFeed({ initialVisits, initialCount, live }: Prop
       window.clearInterval(id);
     };
   }, [live]);
+
+  // Remember the revealed counts only after paint, so the render that first
+  // shows the new batch still sees them as "beyond" the previous mark (and so
+  // animates), while every later re-render treats them as already-shown.
+  useEffect(() => {
+    prevRecentShown.current = recentShown;
+  }, [recentShown]);
+  useEffect(() => {
+    prevMostVisitedShown.current = mostVisitedShown;
+  }, [mostVisitedShown]);
 
   // Every summary reads the same full window the list does.
   const markers = useMemo(() => visitMarkers(visits), [visits]);
@@ -214,10 +230,17 @@ export default function ActivityFeed({ initialVisits, initialCount, live }: Prop
               Most visited
             </h2>
             <ul className="mt-2 divide-y divide-zinc-200 border-t border-zinc-200 dark:divide-zinc-800 dark:border-zinc-800">
-              {visiblePages.map((page) => (
+              {visiblePages.map((page, i) => (
                 <li
                   key={page.page}
-                  className="flex items-baseline justify-between gap-4 py-2.5"
+                  style={
+                    i >= prevMostVisitedShown.current
+                      ? { animationDelay: `${(i - prevMostVisitedShown.current) * 40}ms` }
+                      : undefined
+                  }
+                  className={`flex items-baseline justify-between gap-4 py-2.5 ${
+                    i >= prevMostVisitedShown.current ? "animate-rise" : ""
+                  }`}
                 >
                   <div className="min-w-0 flex-1">
                     <CustomLink
@@ -243,7 +266,7 @@ export default function ActivityFeed({ initialVisits, initialCount, live }: Prop
                 <button
                   type="button"
                   onClick={() => setMostVisitedShown((n) => n + MOST_VISITED_PAGE)}
-                  className="hover:text-accent-600 dark:hover:text-accent-300 rounded border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-700 transition-colors hover:border-zinc-400 dark:border-zinc-700 dark:text-zinc-300 dark:hover:border-zinc-600"
+                  className="pressable hover:text-accent-600 dark:hover:text-accent-300 rounded border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-700 hover:border-zinc-400 dark:border-zinc-700 dark:text-zinc-300 dark:hover:border-zinc-600"
                 >
                   Show more pages
                 </button>
@@ -266,8 +289,15 @@ export default function ActivityFeed({ initialVisits, initialCount, live }: Prop
           ) : (
             <>
               <ul className="mt-2 divide-y divide-zinc-200 border-t border-zinc-200 dark:divide-zinc-800 dark:border-zinc-800">
-                {visibleVisits.map((visit) => (
-                  <VisitRow key={visit.id} visit={visit} now={now} mounted={mounted} />
+                {visibleVisits.map((visit, i) => (
+                  <VisitRow
+                    key={visit.id}
+                    visit={visit}
+                    now={now}
+                    mounted={mounted}
+                    animateIn={i >= prevRecentShown.current}
+                    delayMs={(i - prevRecentShown.current) * 40}
+                  />
                 ))}
               </ul>
 
@@ -279,7 +309,7 @@ export default function ActivityFeed({ initialVisits, initialCount, live }: Prop
                   <button
                     type="button"
                     onClick={() => setRecentShown((n) => n + PAGE_SIZE)}
-                    className="hover:text-accent-600 dark:hover:text-accent-300 inline-flex items-center gap-2 rounded border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-700 transition-colors hover:border-zinc-400 dark:border-zinc-700 dark:text-zinc-300 dark:hover:border-zinc-600"
+                    className="pressable hover:text-accent-600 dark:hover:text-accent-300 inline-flex items-center gap-2 rounded border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-700 hover:border-zinc-400 dark:border-zinc-700 dark:text-zinc-300 dark:hover:border-zinc-600"
                   >
                     Show more visits
                   </button>
@@ -327,13 +357,20 @@ function VisitRow({
   visit,
   now,
   mounted,
+  animateIn = false,
+  delayMs = 0,
 }: {
   visit: VisitEvent;
   now: number;
   mounted: boolean;
+  animateIn?: boolean;
+  delayMs?: number;
 }) {
   return (
-    <li className="flex items-baseline justify-between gap-4 py-2.5">
+    <li
+      style={animateIn ? { animationDelay: `${delayMs}ms` } : undefined}
+      className={`flex items-baseline justify-between gap-4 py-2.5 ${animateIn ? "animate-rise" : ""}`}
+    >
       <div className="min-w-0 flex-1">
         <CustomLink
           href={visit.page}

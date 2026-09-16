@@ -13,16 +13,22 @@ const ScrollTop = () => {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  if (!show) return null;
-
+  // Always mounted, so the entrance/exit can transition instead of snapping at
+  // the 400px threshold. When hidden it drops out of the tab order and the
+  // pointer, and is announced as hidden, so an invisible button is never a
+  // stray focus stop or a click blocker over the content beneath it.
   return (
     <button
       type="button"
       aria-label="Scroll to top"
+      aria-hidden={!show}
+      tabIndex={show ? 0 : -1}
       onClick={scrollToTop}
       // Available on touch too: a long essay left mobile readers with no way
       // back to the navigation.
-      className="shadow-raise fixed right-5 bottom-5 z-40 flex h-11 w-11 items-center justify-center rounded-full border border-zinc-200 bg-white/90 text-zinc-600 backdrop-blur transition-colors hover:text-zinc-900 dark:border-zinc-800 dark:bg-zinc-900/90 dark:text-zinc-300 dark:hover:text-zinc-100"
+      className={`shadow-raise fixed right-5 bottom-5 z-40 flex h-11 w-11 items-center justify-center rounded-full border border-zinc-200 bg-white/90 text-zinc-600 backdrop-blur transition-[opacity,transform,color] duration-300 ease-out hover:text-zinc-900 dark:border-zinc-800 dark:bg-zinc-900/90 dark:text-zinc-300 dark:hover:text-zinc-100 ${
+        show ? "translate-y-0 opacity-100" : "pointer-events-none translate-y-2 opacity-0"
+      }`}
     >
       <svg
         viewBox="0 0 24 24"

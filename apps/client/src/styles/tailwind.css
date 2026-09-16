@@ -133,6 +133,23 @@
   @apply no-underline;
 }
 
+/* Tactile press feedback for the site's solid/outline action buttons: a barely
+   there 0.98 scale on press. Kept unlayered so its transition shorthand wins
+   over the buttons' utility `transition-colors` (which would otherwise ignore
+   the transform), and gated to `no-preference` so reduced-motion readers get a
+   plain press with no scale. */
+.pressable {
+  transition-property: background-color, border-color, color, transform;
+  transition-duration: 150ms;
+  transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .pressable:active {
+    transform: scale(0.98);
+  }
+}
+
 /* https://stackoverflow.com/questions/61083813/how-to-avoid-internal-autofill-selected-style-to-be-applied */
 input:-webkit-autofill,
 input:-webkit-autofill:focus {
