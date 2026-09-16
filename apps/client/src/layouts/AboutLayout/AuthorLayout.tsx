@@ -57,7 +57,7 @@ export default function AuthorLayout({ children, content }: Props) {
           href={siteMetadata.resume}
           className="hover:text-accent-600 hover:decoration-accent-600 dark:hover:text-accent-300 dark:hover:decoration-accent-300 rounded text-sm text-zinc-500 underline decoration-zinc-300 underline-offset-4 transition-colors dark:text-zinc-400 dark:decoration-zinc-700"
         >
-          The formal version, if you need it
+          Résumé
         </CustomLink>
       </div>
 
@@ -69,7 +69,7 @@ export default function AuthorLayout({ children, content }: Props) {
           id="work"
           className="mb-2 text-base font-semibold tracking-[-0.011em] text-zinc-900 dark:text-zinc-100"
         >
-          A bit of work history
+          Work
         </h2>
         <Timeline items={workItems} initialCount={4} moreLabel="older ones" />
       </section>
