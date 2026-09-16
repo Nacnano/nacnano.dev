@@ -105,21 +105,16 @@ describe("parseFeedPayload", () => {
     ).toBeNull(); // implausible page size
   });
 
-  it("admits the all=1 bulk page up to the store cap, and still rejects beyond it", () => {
+  it("rejects a page far larger than the network ceiling, whatever the store holds", () => {
     const rows = (n: number) => Array.from({ length: n }, () => base());
-    // The `all=1` fetch passes STREAM_MAXLEN as its ceiling, so a full retained
-    // window parses rather than reading as a hostile envelope (which previously
-    // stranded the globe/leaderboards on the head page).
-    const bulk = parseFeedPayload(
-      { visits: rows(STREAM_MAXLEN), count: STREAM_MAXLEN },
-      STREAM_MAXLEN
-    );
-    expect(bulk).not.toBeNull();
-    expect(bulk!.visits).toHaveLength(STREAM_MAXLEN);
-    // Without the override, the ordinary-page ceiling still rejects the same set.
+    // Only the server render ever materialises the whole retained window; every
+    // response that crosses the network is a `limit<=100` page, so a
+    // STREAM_MAXLEN-sized envelope here is corrupt or hostile, not a real page.
     expect(
       parseFeedPayload({ visits: rows(STREAM_MAXLEN), count: STREAM_MAXLEN })
     ).toBeNull();
+    // A genuine page, well inside the ceiling, still parses.
+    expect(parseFeedPayload({ visits: rows(100), count: 100 })).not.toBeNull();
   });
 
   it("rejects inconsistent pagination fields", () => {

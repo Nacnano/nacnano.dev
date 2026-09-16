@@ -30,12 +30,12 @@ export default async function Activity() {
     );
   }
 
+  // One store read feeds the whole page: the recent list pages client-side out
+  // of this same array, and the globe/leaderboards summarise all of it.
   return (
     <ActivityFeed
       initialVisits={initial.payload.visits}
       initialCount={initial.payload.count}
-      initialHasMore={initial.payload.hasMore ?? false}
-      initialCursor={initial.payload.nextCursor ?? null}
       live={live}
     />
   );

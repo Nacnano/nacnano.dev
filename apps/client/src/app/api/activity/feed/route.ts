@@ -1,14 +1,15 @@
 import { NextResponse } from "next/server";
 import { buildFeedPayload, isActivityLive, shouldUseSeed } from "@/lib/activity";
-import { readActivityFeed, STREAM_MAXLEN } from "@/lib/activityRedis";
+import { readActivityFeed } from "@/lib/activityRedis";
 import { resolveFeedTitles } from "@/lib/activityTitles";
 import { allowFeed, clientIp, RETRY_AFTER_SECONDS } from "@/lib/rateLimit";
 import { captureError } from "@/lib/observability";
 import { seedVisits } from "@/data/activityData";
 
-// The feed reflects recent visits, so it is never baked into the static build;
-// the client polls this route while a tab is open, and pages older ones with a
-// cursor as the reader scrolls.
+// The feed reflects recent visits, so it is never baked into the static build.
+// The /activity page is served its whole retained window by the server render
+// (see `loadInitialFeed`); this route exists for the live poll that surfaces
+// visits arriving after that render, so every page it serves is small.
 export const dynamic = "force-dynamic";
 
 const DEFAULT_LIMIT = 30;
@@ -41,14 +42,11 @@ function readPageParams(request: Request) {
   const limit = parseLimit(params.get("limit"));
   // A missing `before` is the head page (no cursor), not the string "null".
   const before = params.get("before") ?? null;
-  // `all=1` asks for the entire retained history in one page (the stream holds
-  // at most STREAM_MAXLEN rows), for the globe and the aggregate leaderboards.
-  const all = params.get("all") === "1";
-  return { limit, before, all };
+  return { limit, before };
 }
 
 export async function GET(request: Request) {
-  const { limit, before, all } = readPageParams(request);
+  const { limit, before } = readPageParams(request);
 
   if (isActivityLive()) {
     try {
@@ -73,12 +71,8 @@ export async function GET(request: Request) {
         );
       }
       // Whatever the store actually holds for this page, including an honest
-      // empty result. Never substitute the seed on a real deployment. With
-      // `all`, pull the whole retained window at once instead of a single page.
-      const payload = await readActivityFeed(
-        all ? STREAM_MAXLEN : limit,
-        all ? null : before
-      );
+      // empty result. Never substitute the seed on a real deployment.
+      const payload = await readActivityFeed(limit, before);
       return NextResponse.json(resolveFeedTitles(payload), {
         headers: { "Cache-Control": FEED_CACHE },
       });
