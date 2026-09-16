@@ -33,11 +33,18 @@ export type AmaEntry = {
 
 const amaData: AmaEntry[] = [
   {
-    slug: "over-engineered",
-    question: "Isn't this site a bit over-engineered for a personal blog?",
-    date: "2026-09-14",
+    slug: "wandering",
+    question: "What do you mean by wandering?",
+    date: "2026-09-16",
     answer:
-      "Yes. There's a design doc, a product doc, a content security policy and a full test suite, all sitting in front of a handful of essays and a photo of me.\n\nI tell myself it's practice. It's also a very comfortable way to avoid writing the next essay.",
+      "It usually means picking an area and walking around without planning everything in advance. Sometimes it becomes a few days with a backpack and a hostel; sometimes it is just getting off somewhere and seeing what I find.\n\nI like the ordinary parts most: canals, small alleys, old buildings, local cafés and watching how people live. Occasionally I talk to someone and discover a whole story—like meeting a retired software engineer running a coffee truck under a bridge.\n\nBasically, I wander because I am curious. I also get lost, run out of battery and occasionally lock myself outside my hostel room at 2 a.m. Those are apparently part of the process.",
+  },
+  {
+    slug: "after-graduation",
+    question: "What's next after graduation?",
+    date: "2026-09-16",
+    answer:
+      "I'm still deciding. The same two sides keep fighting in my head: becoming better at technical work and saving money, or travelling and collecting more experiences.\n\nRealistically, I want to work in tech, keep learning and pay for my own trips. Ideally, I'll find work flexible enough that I can do both—maybe even work remotely while travelling.\n\nSo the plan after graduation is currently: get a job, keep wandering and hope adulthood does not force me to choose only one.",
   },
 ];
 
