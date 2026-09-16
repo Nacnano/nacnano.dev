@@ -14,6 +14,12 @@ type SiteMetadata = {
   greeting: string;
   description: string;
   now: string;
+  /**
+   * The canonical availability line, shown as the Status Line under the name on
+   * the home and about pages. Reflects confirmed product truth (graduated,
+   * currently seeking) and must never imply a start date or term we haven't set.
+   */
+  status: string;
   language: string;
   locale: string;
   theme: "light" | "dark" | "system";
@@ -49,6 +55,7 @@ const siteMetadata = {
     "I build things on the internet and write about the bits I got wrong, which is usually the interesting part.",
   // Casual, and easy to change. Shown on the About page, not the front door.
   now: "Currently in Bangkok, looking for my next thing, and slowly working through a list of half-written drafts.",
+  status: "Graduated · Open to work",
   language: "en-us",
   theme: "system",
   siteUrl: "https://www.nacnano.dev",

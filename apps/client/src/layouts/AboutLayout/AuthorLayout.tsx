@@ -3,6 +3,7 @@ import type { Author } from "@/lib/content";
 import Image from "next/image";
 import SocialIcon from "@/components/social-icons";
 import CustomLink from "@/components/Link";
+import StatusLine from "@/components/StatusLine";
 import siteMetadata from "@/data/siteMetadata";
 import Timeline from "./Timeline";
 import { workItems, educationItems } from "@/data/timelineData";
@@ -35,6 +36,7 @@ export default function AuthorLayout({ children, content }: Props) {
           <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
             {siteMetadata.legalName} · goes by Nac
           </p>
+          <StatusLine />
         </div>
       </header>
 
@@ -55,9 +57,9 @@ export default function AuthorLayout({ children, content }: Props) {
         </div>
         <CustomLink
           href={siteMetadata.resume}
-          className="hover:text-accent-600 hover:decoration-accent-600 dark:hover:text-accent-300 dark:hover:decoration-accent-300 rounded text-sm text-zinc-500 underline decoration-zinc-300 underline-offset-4 transition-colors dark:text-zinc-400 dark:decoration-zinc-700"
+          className="rounded bg-zinc-900 px-3.5 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-700 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300"
         >
-          The formal version, if you need it
+          Full résumé
         </CustomLink>
       </div>
 
