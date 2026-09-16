@@ -6,7 +6,7 @@ import ProjectCard from "./ProjectCard";
 export const metadata = genPageMetaData({
   title: PAGE_TITLES.projects,
   description:
-    "A few things I've helped build, mostly with other people, mostly for students.",
+    "Things I've helped build, mostly for students.",
 });
 
 const built = projectsData.filter((p) => p.category === "built");
@@ -19,8 +19,7 @@ export default function Projects() {
         Projects
       </h1>
       <p className="max-w-measure mt-4 text-[1.0625rem] leading-[1.75] text-zinc-600 dark:text-zinc-400">
-        Mostly built with other people, mostly for students. Some of it is still running,
-        some of it was only ever meant to last a weekend.
+        Built with other people, mostly for students. Some still run; some lasted a weekend.
       </p>
 
       <section aria-labelledby="built" className="mt-12">
@@ -45,8 +44,7 @@ export default function Projects() {
           Things I looked into
         </h2>
         <p className="max-w-measure mt-2 text-[0.9375rem] leading-7 text-zinc-600 dark:text-zinc-400">
-          Coursework and research. Most of this lives in a notebook somewhere rather than
-          on the internet.
+          Coursework and research. Mostly notebooks, not websites.
         </p>
         <div className="mt-4 divide-y divide-zinc-200 border-t border-zinc-200 dark:divide-zinc-800 dark:border-zinc-800">
           {research.map((project) => (

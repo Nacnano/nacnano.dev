@@ -46,8 +46,7 @@ const Main = ({ posts }: { posts: Blog[] }) => (
       </h2>
 
       <p className="max-w-measure mt-2 text-[0.9375rem] leading-7 text-zinc-600 dark:text-zinc-400">
-        Mostly things that went sideways and what I made of them afterwards. I write when
-        something is bothering me, so: not often.
+        Things that went sideways, and what I made of them. I write rarely.
       </p>
 
       <div className="mt-4 divide-y divide-zinc-200 dark:divide-zinc-800">

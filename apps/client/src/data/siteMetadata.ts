@@ -51,10 +51,9 @@ const siteMetadata = {
   shortName: "Nacnano",
   // Nac is what people actually call him; the site greets in that voice.
   greeting: "Hi, I'm Nac",
-  description:
-    "I write about the things I make, and honestly, mostly about the parts that go wrong.",
+  description: "I build things and write about what went wrong.",
   // Casual, and easy to change. Shown on the About page, not the front door.
-  now: "Currently in Bangkok, looking for my next thing, and slowly working through a list of half-written drafts.",
+  now: "Bangkok. After the next thing. Too many half-written drafts.",
   status: "Graduated · Open to work",
   language: "en-us",
   theme: "system",
