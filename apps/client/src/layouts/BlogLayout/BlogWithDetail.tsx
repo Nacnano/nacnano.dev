@@ -113,6 +113,15 @@ export default function BlogWithDetail({ content, newer, older, children }: Prop
             >
               About me
             </CustomLink>
+            {/* A reader who just finished an essay is the likeliest person to
+                have a question about it, so the AMA sits beside the other
+                next-step links rather than hidden in the nav. */}
+            <CustomLink
+              href="/ama"
+              className="rounded border border-zinc-200 px-3 py-1.5 text-sm font-medium text-zinc-700 transition-colors hover:border-zinc-300 hover:text-zinc-900 dark:border-zinc-800 dark:text-zinc-300 dark:hover:border-zinc-700 dark:hover:text-zinc-100"
+            >
+              Ask me about this
+            </CustomLink>
           </div>
         </aside>
       </article>
