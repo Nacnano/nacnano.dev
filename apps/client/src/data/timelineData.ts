@@ -107,7 +107,7 @@ export const educationItems: TimelineItem[] = [
     organisation: "Chulalongkorn University",
     location: "Bangkok",
     description:
-      "Somehow survived four years of it, then TA'd the backend course — which, as it turns out, taught me considerably more than sitting in it ever did.",
+      "Somehow survived four years of it — repping the faculty at a maths Integration Bee and trading Bangkok for a while at Guangxi University in China somewhere in between.",
   },
   {
     period: "2019 – 2022",
