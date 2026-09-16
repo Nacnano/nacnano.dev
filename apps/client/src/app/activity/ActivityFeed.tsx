@@ -22,7 +22,7 @@ import {
   type VisitFeedPayload,
 } from "@/lib/activityTypes";
 
-// One page size for both the live head and infinite-scroll pages. Paused while
+// One page size for both the live head and "show more" pages. Paused while
 // the tab is hidden.
 const PAGE_SIZE = 30;
 const POLL_MS = 2500;
@@ -108,7 +108,6 @@ export default function ActivityFeed({
 
   // Guards so a slow/duplicate response can never reorder the list.
   const loadingMoreRef = useRef(false);
-  const sentinelRef = useRef<HTMLDivElement>(null);
 
   // Re-anchor "now" on a coarse tick so the labels age without a re-fetch storm.
   useEffect(() => {
@@ -165,21 +164,6 @@ export default function ActivityFeed({
       loadingMoreRef.current = false;
     }
   }, [hasMore, cursor]);
-
-  // Infinite scroll: load the next page as the sentinel nears the viewport.
-  useEffect(() => {
-    const sentinel = sentinelRef.current;
-    if (!sentinel || !hasMore) return;
-
-    const observer = new IntersectionObserver(
-      (records) => {
-        if (records.some((record) => record.isIntersecting)) void loadMore();
-      },
-      { rootMargin: "600px 0px" }
-    );
-    observer.observe(sentinel);
-    return () => observer.disconnect();
-  }, [hasMore, loadMore]);
 
   const markers = useMemo(() => visitMarkers(visits), [visits]);
   const aggregateSource = useMemo(() => visits.slice(0, AGGREGATE_WINDOW), [visits]);
@@ -294,35 +278,26 @@ export default function ActivityFeed({
                 ))}
               </ul>
 
-              {/* Infinite-scroll affordance: a sentinel the observer watches, a
-                  button that doubles as the accessible fallback, and a clear
-                  end state so the feed never just silently stops. */}
-              <div
-                ref={sentinelRef}
-                className="flex flex-col items-center justify-center gap-2 py-8 text-center"
-              >
+              {/* Manual pagination: the reader clicks to pull in the next older
+                  page, so nothing loads on its own, with a clear end state so the
+                  feed never just silently stops. */}
+              <div className="flex flex-col items-center justify-center gap-2 py-8 text-center">
                 {hasMore ? (
                   <>
-                    <span className="flex items-center gap-2 font-mono text-xs tracking-[0.08em] text-zinc-500 uppercase dark:text-zinc-400">
-                      {loadingMore ? (
-                        <>
-                          <Spinner />
-                          loading more…
-                        </>
-                      ) : (
-                        <>
-                          keep scrolling
-                          <ChevronDown />
-                        </>
-                      )}
-                    </span>
                     <button
                       type="button"
                       onClick={() => void loadMore()}
                       disabled={loadingMore}
-                      className="hover:text-accent-600 dark:hover:text-accent-300 rounded border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-700 transition-colors hover:border-zinc-400 disabled:cursor-default disabled:opacity-60 dark:border-zinc-700 dark:text-zinc-300 dark:hover:border-zinc-600"
+                      className="hover:text-accent-600 dark:hover:text-accent-300 inline-flex items-center gap-2 rounded border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-700 transition-colors hover:border-zinc-400 disabled:cursor-default disabled:opacity-60 dark:border-zinc-700 dark:text-zinc-300 dark:hover:border-zinc-600"
                     >
-                      {loadingMore ? "Loading…" : "Load more visits"}
+                      {loadingMore ? (
+                        <>
+                          <Spinner />
+                          Loading…
+                        </>
+                      ) : (
+                        "Show more visits"
+                      )}
                     </button>
                     {failedMore ? (
                       <span className="text-xs text-zinc-500 dark:text-zinc-400">
@@ -369,23 +344,6 @@ function Spinner() {
       className="inline-block h-3 w-3 animate-spin rounded-full border border-zinc-400 border-t-transparent motion-reduce:animate-none motion-reduce:border-t-zinc-400"
       aria-hidden="true"
     />
-  );
-}
-
-function ChevronDown() {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className="h-3.5 w-3.5"
-      aria-hidden="true"
-    >
-      <path d="M6 9l6 6 6-6" />
-    </svg>
   );
 }
 
