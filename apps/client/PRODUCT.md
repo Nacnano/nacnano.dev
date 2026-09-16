@@ -22,7 +22,7 @@ A personal website that publishes Chotpisit Adunsehawat's ("Nacnano") reflective
 
 Confirmed direction (2026-09-16): **personal and unguarded, for people who want to know the author.** The earlier brief — "the credible front door for a new graduate looking for work" — is retired. The name and the writing stay; the pressure to prove employability does not. Where an earlier decision optimised for a stranger's snap judgement, it should be re-examined rather than inherited.
 
-Success = someone who already wanted to know Nac finds something here they didn't expect and stays past the first page; a first-time essay reader finishes the piece, knows whose it was, and wants to read another.
+Success = someone who already wanted to know Nac finds something here they didn't expect, enjoys it enough to go looking for more of it, and stays past the first page; a first-time essay reader finishes the piece, knows whose it was, and wants to read another.
 
 ## Positioning
 
@@ -57,8 +57,10 @@ The author writes infrequently and the site says so plainly rather than implying
 - Name: **Nacnano** (handle) / **Chotpisit Adunsehawat** (full name). Both are load-bearing; the site carries the real name, not only the handle.
 - Voice: first-person, reflective, unguarded, frequently self-critical. Each essay closes on a single earned takeaway line — an authored convention the author invented and the design honours with its own type step. It is the best writing on the site and deserves to do more work than it currently does.
 - Thai/English code-switching inside essays is authentic and must be preserved, not normalised away.
-- **Standing visual preference (chosen 2026-09-13, unchanged):** the category standard, executed straight — no ironic framing and no smuggled quirk. The named craft bar is **brianlovin.com and rauchg.com**: app-like structural clarity, tight restrained typography, a neutral scale with a single accent. This was deliberately chosen over four derived visual worlds and is not re-opened as a concept exercise.
-  - **Open tension, needs the author's call:** the new brief asks the site to be fun, and the standing preference forbids visual quirk. The working resolution is that _the content_ may be playful and the _system_ stays restrained — the delight comes from what's on the page, not from decoration. Anything that wants to break the visual system needs an explicit decision first.
+- **The site should be fun. Decided 2026-09-16.** It is a reflection of a person, and a correct, inert page fails that brief as surely as an ugly one would. Delight is expected of a surface, not tolerated on it. A page that a visitor scrolls past without feeling anything is a defect worth writing down.
+- **Restraint is the ground it happens on (chosen 2026-09-13, still in force).** The category standard executed straight — no ironic framing, no decoration standing in for having something to say. The named craft bar is **brianlovin.com and rauchg.com**: app-like structural clarity, tight restrained typography, a neutral scale with a single accent. Chosen deliberately over four derived visual worlds and not re-opened as a concept exercise.
+  - These two are not in tension: they own different layers. The system stays quiet so that what it carries can be loud. Content — copy, essays, the takeaway line, what the site chooses to admit about its author — has no ceiling on playfulness at all.
+  - Where the _system_ itself gives way, `DESIGN.md` governs it under **The Licensed Moment Rule**: a break in the visual grammar is allowed when the break _is_ the content rather than decoration applied to it, must be named in that rule, and must stay rare enough that the next one still surprises. Two exist today (the avatar that tilts toward the reader, the pulsing live dot). Adding one is an ordinary design call. Adding five is a new system and comes back here first.
 - Theming stays **system-default**, with light and dark built to the same standard rather than one being an afterthought.
 - Existing logo at `public/static/images/logo.png` (currently 3.5 MB at 1928×1928 — the asset is committed, its encoding is not).
 
@@ -79,7 +81,7 @@ The author writes infrequently and the site says so plainly rather than implying
 
 ## Product Principles
 
-1. **Show the person, not the profile.** Every surface is judged on whether a stranger comes away with a sense of someone rather than a list of attributes.
+1. **Show the person, not the profile.** Every surface is judged on whether a stranger comes away with a sense of someone rather than a list of attributes. "Accurate but forgettable" is a failing grade, not a passing one.
 2. **The essays are the product.** Everything else on the site exists to lead into them or out of them.
 3. **Subtract before adding.** The site's historical problems are duplication and residue. Removal is still the primary tool; a new page must earn its place against deleting an old one.
 4. **Be honest about cadence, and about the unfinished.** Infrequent writing is stated plainly. Half-written things are more revealing than polished ones and do not need an apology.
