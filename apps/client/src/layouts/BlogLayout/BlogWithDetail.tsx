@@ -11,6 +11,39 @@ const postDateTemplate: Intl.DateTimeFormatOptions = {
   day: "numeric",
 };
 
+/**
+ * A stroked-SVG arrow, drawn from the same material as every other icon here
+ * (the Drawn Icon Rule forbids a Unicode glyph standing in for one). Decorative:
+ * the link's accessible name already comes from the label and title.
+ */
+function DirectionArrow({ dir }: { dir: "left" | "right" }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      width="18"
+      height="18"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      {dir === "right" ? (
+        <>
+          <path d="M4 12h15" />
+          <path d="m13 6 6 6-6 6" />
+        </>
+      ) : (
+        <>
+          <path d="M20 12H5" />
+          <path d="m11 6-6 6 6 6" />
+        </>
+      )}
+    </svg>
+  );
+}
+
 interface Props {
   content: Blog;
   authors: Author[];
@@ -62,11 +95,11 @@ export default function BlogWithDetail({ content, newer, older, children }: Prop
               className="divide-y divide-zinc-200 dark:divide-zinc-800"
             >
               {[
-                { post: older, label: "Older", rel: "prev" },
-                { post: newer, label: "Newer", rel: "next" },
+                { post: older, label: "Older", rel: "prev", dir: "left" },
+                { post: newer, label: "Newer", rel: "next", dir: "right" },
               ]
                 .filter((row) => row.post?.path)
-                .map(({ post, label, rel }) => (
+                .map(({ post, label, rel, dir }) => (
                   <CustomLink
                     key={rel}
                     href={`/${post!.path}`}
@@ -76,8 +109,19 @@ export default function BlogWithDetail({ content, newer, older, children }: Prop
                     <span className="w-14 shrink-0 text-xs tracking-[0.08em] text-zinc-500 uppercase dark:text-zinc-400">
                       {label}
                     </span>
-                    <span className="group-hover:text-accent-600 dark:group-hover:text-accent-300 text-[0.9375rem] leading-6 font-medium text-zinc-900 transition-colors dark:text-zinc-100">
+                    <span className="group-hover:text-accent-600 dark:group-hover:text-accent-300 min-w-0 flex-1 text-[0.9375rem] leading-6 font-medium text-zinc-900 transition-colors dark:text-zinc-100">
                       {post!.title}
+                    </span>
+                    {/* A drawn arrow fills the empty right-hand column and makes
+                        the reading direction legible at a glance, instead of
+                        leaning on the muted label alone. */}
+                    <span
+                      aria-hidden="true"
+                      className={`hidden shrink-0 self-center text-zinc-500 transition group-hover:text-accent-600 sm:inline-flex dark:text-zinc-400 dark:group-hover:text-accent-300 ${
+                        dir === "right" ? "group-hover:translate-x-0.5" : "group-hover:-translate-x-0.5"
+                      }`}
+                    >
+                      <DirectionArrow dir={dir as "left" | "right"} />
                     </span>
                   </CustomLink>
                 ))}
