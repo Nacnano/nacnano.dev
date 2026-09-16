@@ -1,6 +1,7 @@
 import projectsData from "@/data/projectsData";
 import { genPageMetaData } from "@/app/seo";
 import { PAGE_TITLES } from "@/data/pageTitles";
+import CustomLink from "@/components/Link";
 import ProjectCard from "./ProjectCard";
 
 export const metadata = genPageMetaData({
@@ -21,6 +22,33 @@ export default function Projects() {
         Built with other people, mostly for students. Some still run; some lasted a
         weekend.
       </p>
+
+      <p className="max-w-measure mt-4 text-[1.0625rem] leading-[1.75] text-zinc-600 dark:text-zinc-400">
+        Most of these are things other people used. A few are things I just went looking
+        into — a diffusion model that summarises Thai, chess moves read straight off
+        video, a maths model for arguing about the greatest tennis player of all time.
+      </p>
+
+      <nav
+        aria-label="Project sections"
+        className="mt-6 flex flex-wrap items-center gap-x-2.5 gap-y-1 text-sm"
+      >
+        <CustomLink
+          href="#built"
+          className="hover:text-accent-600 dark:hover:text-accent-300 rounded font-medium text-zinc-500 transition-colors dark:text-zinc-400"
+        >
+          Things people used
+        </CustomLink>
+        <span aria-hidden="true" className="text-zinc-300 dark:text-zinc-700">
+          ·
+        </span>
+        <CustomLink
+          href="#research"
+          className="hover:text-accent-600 dark:hover:text-accent-300 rounded font-medium text-zinc-500 transition-colors dark:text-zinc-400"
+        >
+          Things I looked into
+        </CustomLink>
+      </nav>
 
       <section aria-labelledby="built" className="mt-12">
         <h2
