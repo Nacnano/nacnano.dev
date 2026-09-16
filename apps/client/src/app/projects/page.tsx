@@ -1,4 +1,3 @@
-import { Fragment } from "react";
 import projectsData from "@/data/projectsData";
 import { genPageMetaData } from "@/app/seo";
 import { PAGE_TITLES } from "@/data/pageTitles";
@@ -41,24 +40,15 @@ export default function Projects() {
         into.
       </p>
 
-      <nav
-        aria-label="Project sections"
-        className="mt-6 flex flex-wrap items-center gap-x-2.5 gap-y-1 text-sm"
-      >
-        {sections.map((section, i) => (
-          <Fragment key={section.id}>
-            {i > 0 && (
-              <span aria-hidden="true" className="text-zinc-300 dark:text-zinc-700">
-                ·
-              </span>
-            )}
-            <CustomLink
-              href={`#${section.id}`}
-              className="hover:text-accent-600 dark:hover:text-accent-300 rounded font-medium text-zinc-500 transition-colors dark:text-zinc-400"
-            >
-              {section.heading}
-            </CustomLink>
-          </Fragment>
+      <nav aria-label="Project sections" className="mt-6 flex flex-wrap gap-2.5">
+        {sections.map((section) => (
+          <CustomLink
+            key={section.id}
+            href={`#${section.id}`}
+            className="rounded border border-zinc-200 px-3 py-1.5 text-sm font-medium text-zinc-700 transition-colors hover:border-zinc-300 hover:text-zinc-900 dark:border-zinc-800 dark:text-zinc-300 dark:hover:border-zinc-700 dark:hover:text-zinc-100"
+          >
+            {section.heading}
+          </CustomLink>
         ))}
       </nav>
 
