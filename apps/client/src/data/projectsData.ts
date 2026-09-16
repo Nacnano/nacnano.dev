@@ -76,25 +76,6 @@ const projectsData: Project[] = [
     href: "https://soul-seasons.vercel.app",
     repo: "https://github.com/CBC-soul-seasons/soul-seasons",
   },
-  {
-    title: "E-learning platform",
-    description:
-      "The backend for an e-learning site — lessons, progress, the usual. My first proper go at deploying on Cloud Run.",
-    stack: ["NestJS", "Prisma", "Google Cloud Run"],
-    category: "built",
-    mark: "lessons",
-  },
-  {
-    title: "MWIT29 Archive",
-    description:
-      "Somewhere for my high-school cohort to keep their own records. Still unfinished, as these things tend to be.",
-    stack: ["Next.js", "MongoDB", "Google Cloud Storage"],
-    category: "built",
-    imgSrc: "/static/images/mwit29-archive.png",
-    href: "https://mwit29-archive.vercel.app/",
-    repo: "https://github.com/Nacnano/mwit29-archive",
-  },
-
   // ── Things I looked into ──────────────────────────────────────────────
   {
     title: "Thai context benchmark for multimodal LLMs",
