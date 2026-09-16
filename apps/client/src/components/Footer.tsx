@@ -14,10 +14,15 @@ const Footer = () => (
           Source
         </CustomLink>
       </p>
-      <div className="flex items-center gap-4">
+      <div className="flex flex-wrap items-center justify-center gap-4 sm:justify-end">
         <SocialIcon kind="github" href={siteMetadata.github} />
         <SocialIcon kind="linkedin" href={siteMetadata.linkedin} />
-        <SocialIcon kind="twitter" href={siteMetadata.twitter} />
+        <SocialIcon kind="instagram" href={siteMetadata.instagram} />
+        <SocialIcon kind="facebook" href={siteMetadata.facebook} />
+        <SocialIcon kind="youtube" href={siteMetadata.youtube} />
+        <SocialIcon kind="line" href={siteMetadata.line} />
+        <SocialIcon kind="discord" href={siteMetadata.discord} />
+        <SocialIcon kind="myanimelist" href={siteMetadata.myanimelist} />
         <SocialIcon kind="mail" href={`mailto:${siteMetadata.email}`} />
       </div>
     </div>

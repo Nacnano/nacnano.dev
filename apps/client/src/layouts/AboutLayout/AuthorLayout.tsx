@@ -46,9 +46,15 @@ export default function AuthorLayout({ children, content }: Props) {
       </p>
 
       <div className="mt-6 flex flex-wrap items-center gap-x-5 gap-y-3">
-        <div className="flex items-center gap-4">
+        <div className="flex flex-wrap items-center gap-4">
           <SocialIcon kind="github" href={siteMetadata.github} />
           <SocialIcon kind="linkedin" href={siteMetadata.linkedin} />
+          <SocialIcon kind="instagram" href={siteMetadata.instagram} />
+          <SocialIcon kind="facebook" href={siteMetadata.facebook} />
+          <SocialIcon kind="youtube" href={siteMetadata.youtube} />
+          <SocialIcon kind="line" href={siteMetadata.line} />
+          <SocialIcon kind="discord" href={siteMetadata.discord} />
+          <SocialIcon kind="myanimelist" href={siteMetadata.myanimelist} />
           <SocialIcon kind="mail" href={`mailto:${siteMetadata.email}`} />
         </div>
         <CustomLink

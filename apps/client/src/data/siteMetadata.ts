@@ -37,6 +37,9 @@ type SiteMetadata = {
   github: string;
   linkedin: string;
   youtube: string;
+  line: string;
+  discord: string;
+  myanimelist: string;
 };
 
 const siteMetadata = {
@@ -69,6 +72,9 @@ const siteMetadata = {
   github: "https://www.github.com/nacnano",
   linkedin: "https://www.linkedin.com/in/chotpisit-adunsehawat-b68912210/",
   youtube: "https://www.youtube.com/channel/UC35blZ3e07Srxg_bbdXLZKQ",
+  line: "https://line.me/ti/p/Op-BPbQZFX",
+  discord: "https://discordapp.com/users/248027472208199681",
+  myanimelist: "https://myanimelist.net/profile/Nacnano",
   locale: "en-US",
 } satisfies SiteMetadata;
 

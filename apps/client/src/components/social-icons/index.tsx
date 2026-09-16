@@ -1,4 +1,16 @@
-import { Facebook, Github, Linkedin, Mail, Mastodon, Twitter, Youtube } from "./icons";
+import {
+  Discord,
+  Facebook,
+  Github,
+  Instagram,
+  Linkedin,
+  Line,
+  Mail,
+  Mastodon,
+  MyAnimeList,
+  Twitter,
+  Youtube,
+} from "./icons";
 
 const components = {
   mail: Mail,
@@ -8,6 +20,10 @@ const components = {
   linkedin: Linkedin,
   twitter: Twitter,
   mastodon: Mastodon,
+  instagram: Instagram,
+  line: Line,
+  discord: Discord,
+  myanimelist: MyAnimeList,
 };
 
 // Screen readers announce the service, not the raw URL.
@@ -19,6 +35,10 @@ const labels: Record<keyof typeof components, string> = {
   linkedin: "LinkedIn",
   twitter: "X",
   mastodon: "Mastodon",
+  instagram: "Instagram",
+  line: "LINE",
+  discord: "Discord",
+  myanimelist: "MyAnimeList",
 };
 
 type SocialIconProps = {
