@@ -248,6 +248,15 @@ describe("GET /api/activity/feed", () => {
     await getFeed(feedRequest());
     expect(readCalls[0]?.[1]).toBeNull();
   });
+
+  it("reads the whole retained window when `all=1`, ignoring the cursor", async () => {
+    // The globe and leaderboards ask for every stored row (up to STREAM_MAXLEN)
+    // in one request, so the paging cursor must be bypassed entirely.
+    ctrl.live = true;
+    await getFeed(feedRequest("?all=1&before=1700000000000-0&limit=30"));
+    expect(readCalls[0]?.[0]).toBe(1500);
+    expect(readCalls[0]?.[1]).toBeNull();
+  });
 });
 
 describe("POST /api/activity/visit", () => {

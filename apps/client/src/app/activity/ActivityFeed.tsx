@@ -16,20 +16,20 @@ import {
   visitMarkers,
 } from "@/lib/activity";
 import {
+  STREAM_MAXLEN,
   VISITS_TRACKED_SINCE,
   parseFeedPayload,
   type VisitEvent,
   type VisitFeedPayload,
 } from "@/lib/activityTypes";
 
-// One page size for both the live head and infinite-scroll pages. Paused while
+// One page size for both the live head and "show more" pages. Paused while
 // the tab is hidden.
 const PAGE_SIZE = 30;
 const POLL_MS = 2500;
-// Bound how many rows feed the globe/leaderboards so re-renders stay cheap as
-// the reader pages deep into history. The full list still renders; only the
-// aggregates sample the most recent slice.
-const AGGREGATE_WINDOW = 200;
+// The "Most visited" leaderboard pages client-side over the whole retained set
+// rather than truncating to a fixed top-N.
+const MOST_VISITED_PAGE = 6;
 
 // The globe is a WebGL canvas that only ever draws on the client, so its cobe
 // code is deferred; a sized placeholder keeps the sticky column from shifting.
@@ -39,19 +39,26 @@ const AGGREGATE_WINDOW = 200;
 // loads as before.
 const ActivityGlobe = dynamic(() => import("./ActivityGlobe"), {
   ssr: false,
+  loading: () => <GlobeSkeleton />,
 });
+
+/** The circle the globe draws into — shown both while its column is below the
+ *  fold and while the cobe chunk streams in, so neither wait is a blank slot. */
+function GlobeSkeleton() {
+  return (
+    <div
+      aria-hidden="true"
+      className="h-full w-full rounded-full border border-zinc-200 motion-safe:animate-pulse dark:border-zinc-800"
+    />
+  );
+}
 
 /** The reserved, sized box the globe draws into — present before and while the
  *  cobe chunk streams in, so mounting the canvas never shifts layout. */
 function GlobeShell({ children }: { children?: React.ReactNode }) {
   return (
     <div className="aspect-square w-full" aria-busy={!children}>
-      {children ?? (
-        <div
-          aria-hidden="true"
-          className="h-full w-full rounded-full border border-zinc-200 dark:border-zinc-800"
-        />
-      )}
+      {children ?? <GlobeSkeleton />}
     </div>
   );
 }
@@ -72,6 +79,26 @@ async function fetchPage(before: string | null): Promise<VisitFeedPayload | null
   // Strict parse: an unusable envelope reads as `null` so the poll keeps the
   // last-known-good feed instead of replacing it with malformed rows.
   return parseFeedPayload(payload);
+}
+
+/**
+ * Fetch the entire retained window in one shot, for the globe and the aggregate
+ * leaderboards (which reflect every visit we hold, not just the page shown as
+ * recent). A non-ok or malformed response is `null`, so callers keep what they
+ * already have.
+ */
+async function fetchAllVisits(): Promise<VisitEvent[] | null> {
+  const response = await fetch(`/api/activity/feed?all=1`, {
+    headers: { accept: "application/json" },
+  });
+  if (!response.ok) return null;
+  const payload: unknown = await response.json();
+  // The bulk page can hold the whole retained window, so it is parsed against
+  // the store's cap — not the ordinary-page ceiling, which would reject a
+  // legitimate >200-row response as hostile and silently strand the aggregates
+  // on the head page.
+  const parsed = parseFeedPayload(payload, STREAM_MAXLEN);
+  return parsed ? parsed.visits : null;
 }
 
 type Props = {
@@ -96,6 +123,18 @@ export default function ActivityFeed({
   const [loadingMore, setLoadingMore] = useState(false);
   const [failedMore, setFailedMore] = useState(false);
   const [now, setNow] = useState(() => Date.now());
+  // The globe, countries, and "Most visited" reflect the WHOLE retained window,
+  // not just the recent list this component paginates. It is seeded from the
+  // initial load and, live, expanded to the full stream once by a one-shot fetch;
+  // the poll then keeps it fresh. (The stream holds at most STREAM_MAXLEN rows,
+  // so this is a bounded, single fetch — not an unbounded scroll.)
+  const [aggVisits, setAggVisits] = useState<VisitEvent[]>(initialVisits);
+  // True while the one-shot `all=1` bulk fetch is in flight. It seeds from
+  // `live` so the "still expanding to full history" affordance is present on
+  // the very first client paint, before the effect fires; the fetch clears it.
+  // Static/seed mode already holds every row, so it stays false there.
+  const [aggLoading, setAggLoading] = useState<boolean>(live);
+  const [mostVisitedShown, setMostVisitedShown] = useState(MOST_VISITED_PAGE);
   // Relative times are a clock race against the server pass, so they only
   // appear once hydrated; the first paint (server and first client render) is
   // identical because `mounted` is false in both.
@@ -108,13 +147,39 @@ export default function ActivityFeed({
 
   // Guards so a slow/duplicate response can never reorder the list.
   const loadingMoreRef = useRef(false);
-  const sentinelRef = useRef<HTMLDivElement>(null);
+  const loadedAllRef = useRef(false);
 
   // Re-anchor "now" on a coarse tick so the labels age without a re-fetch storm.
   useEffect(() => {
     const id = window.setInterval(() => setNow(Date.now()), 30_000);
     return () => window.clearInterval(id);
   }, []);
+
+  // Pull the full retained window once for the globe/leaderboards. Static mode
+  // already has every seed row in `initialVisits`, so this only runs live.
+  //
+  // Deliberately NOT gated on an `active`/cleanup flag: in React StrictMode the
+  // mount→unmount→remount double-invoke would flip such a flag false on the
+  // first setup, and because `loadedAllRef` makes the second setup bail out
+  // early, the one and only fetch would then discard its own result — leaving
+  // the aggregates stuck on the head page while the "loading" pill still
+  // cleared. `loadedAllRef` already guarantees exactly one fetch per mount, so
+  // there is no stale or duplicate resolve to race; a setState landing after a
+  // real unmount is silently tolerated in React 18. Clearing the flag in
+  // `finally` guarantees the loading affordance can never stick on.
+  useEffect(() => {
+    if (!live || loadedAllRef.current) return;
+    loadedAllRef.current = true;
+    setAggLoading(true);
+    fetchAllVisits()
+      .then((all) => {
+        if (all) setAggVisits(all);
+      })
+      .catch(() => {
+        // A failed bulk load leaves the aggregates on the head page.
+      })
+      .finally(() => setAggLoading(false));
+  }, [live]);
 
   // Live head: poll the newest page and merge it over whatever is loaded, so
   // new visits surface without disturbing the older pages already shown.
@@ -128,6 +193,7 @@ export default function ActivityFeed({
         const payload = await fetchPage(null);
         if (active && payload) {
           setVisits((current) => mergeById(current, payload.visits));
+          setAggVisits((current) => mergeById(current, payload.visits));
           setCount(payload.count);
         }
       } catch {
@@ -166,26 +232,13 @@ export default function ActivityFeed({
     }
   }, [hasMore, cursor]);
 
-  // Infinite scroll: load the next page as the sentinel nears the viewport.
-  useEffect(() => {
-    const sentinel = sentinelRef.current;
-    if (!sentinel || !hasMore) return;
-
-    const observer = new IntersectionObserver(
-      (records) => {
-        if (records.some((record) => record.isIntersecting)) void loadMore();
-      },
-      { rootMargin: "600px 0px" }
-    );
-    observer.observe(sentinel);
-    return () => observer.disconnect();
-  }, [hasMore, loadMore]);
-
-  const markers = useMemo(() => visitMarkers(visits), [visits]);
-  const aggregateSource = useMemo(() => visits.slice(0, AGGREGATE_WINDOW), [visits]);
-  const countries = useMemo(() => aggregateByCountry(aggregateSource), [aggregateSource]);
-  const pages = useMemo(() => topPages(aggregateSource), [aggregateSource]);
-  const countryCount = useMemo(() => countCountries(aggregateSource), [aggregateSource]);
+  // Globe, countries, and "Most visited" read the full retained window; the
+  // recent-visits list below stays on its own paginated `visits`.
+  const markers = useMemo(() => visitMarkers(aggVisits), [aggVisits]);
+  const countries = useMemo(() => aggregateByCountry(aggVisits), [aggVisits]);
+  const pages = useMemo(() => topPages(aggVisits), [aggVisits]);
+  const countryCount = useMemo(() => countCountries(aggVisits), [aggVisits]);
+  const visiblePages = pages.slice(0, mostVisitedShown);
 
   const totalLabel = count.toLocaleString("en-US");
 
@@ -194,12 +247,25 @@ export default function ActivityFeed({
       <section
         ref={globeRef}
         aria-label="Site visits around the world"
+        aria-busy={aggLoading}
         className="mx-auto w-full max-w-[22rem] shrink-0 lg:sticky lg:top-8"
       >
         <GlobeShell>
           {globeInView ? <ActivityGlobe markers={markers} /> : null}
         </GlobeShell>
-        {countries.length > 0 ? (
+        {aggLoading ? (
+          <ul aria-hidden="true" className="mt-6 flex flex-wrap justify-center gap-1.5">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <li
+                key={i}
+                className="flex items-center gap-1.5 rounded border border-zinc-200 px-2 py-1 dark:border-zinc-800"
+              >
+                <SkeletonLine className="h-4 w-5" />
+                <SkeletonLine className="h-4 w-4" />
+              </li>
+            ))}
+          </ul>
+        ) : countries.length > 0 ? (
           <ul
             aria-label="Most-visited countries"
             className="mt-6 flex flex-wrap justify-center gap-1.5"
@@ -220,26 +286,19 @@ export default function ActivityFeed({
       </section>
 
       <div className="min-w-0 flex-1">
-        <p className="text-[0.9375rem] leading-7 text-zinc-600 dark:text-zinc-400">
-          The globe marks each place a visit came from; the most recent are listed below.
-          {live && visits.length > 0 ? (
-            <span className="inline-flex items-center gap-1.5">
-              <span
-                className="bg-accent-600 dark:bg-accent-300 ml-1 inline-block h-1.5 w-1.5 rounded-full motion-safe:animate-pulse"
-                aria-hidden="true"
-              />
-              live now
-            </span>
-          ) : null}
-        </p>
-
         <dl className="mt-6 flex flex-wrap gap-x-10 gap-y-4">
           <Stat label="Visits" value={totalLabel} />
           <Stat label="Countries" value={String(countryCount)} />
           <Stat label="Tracked since" value={formatDate(VISITS_TRACKED_SINCE, "en-US")} />
         </dl>
 
-        {pages.length > 0 ? (
+        {/* The recent list is the head page; the globe, country badges, and
+            leaderboards widen to the WHOLE retained window with a one-shot
+            `all=1` fetch. While that runs those aggregates show a pulsing
+            skeleton (sized to the real content) instead of a text label. */}
+        {aggLoading ? (
+          <MostVisitedSkeleton />
+        ) : pages.length > 0 ? (
           <section aria-labelledby="top-pages" className="mt-10">
             <h2
               id="top-pages"
@@ -248,7 +307,7 @@ export default function ActivityFeed({
               Most visited
             </h2>
             <ul className="mt-2 divide-y divide-zinc-200 border-t border-zinc-200 dark:divide-zinc-800 dark:border-zinc-800">
-              {pages.slice(0, 5).map((page) => (
+              {visiblePages.map((page) => (
                 <li
                   key={page.page}
                   className="flex items-baseline justify-between gap-4 py-2.5"
@@ -272,6 +331,17 @@ export default function ActivityFeed({
                 </li>
               ))}
             </ul>
+            {pages.length > mostVisitedShown ? (
+              <div className="mt-4 flex justify-center">
+                <button
+                  type="button"
+                  onClick={() => setMostVisitedShown((n) => n + MOST_VISITED_PAGE)}
+                  className="hover:text-accent-600 dark:hover:text-accent-300 rounded border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-700 transition-colors hover:border-zinc-400 dark:border-zinc-700 dark:text-zinc-300 dark:hover:border-zinc-600"
+                >
+                  Show more pages
+                </button>
+              </div>
+            ) : null}
           </section>
         ) : null}
 
@@ -294,35 +364,26 @@ export default function ActivityFeed({
                 ))}
               </ul>
 
-              {/* Infinite-scroll affordance: a sentinel the observer watches, a
-                  button that doubles as the accessible fallback, and a clear
-                  end state so the feed never just silently stops. */}
-              <div
-                ref={sentinelRef}
-                className="flex flex-col items-center justify-center gap-2 py-8 text-center"
-              >
+              {/* Manual pagination: the reader clicks to pull in the next older
+                  page, so nothing loads on its own, with a clear end state so the
+                  feed never just silently stops. */}
+              <div className="flex flex-col items-center justify-center gap-2 py-8 text-center">
                 {hasMore ? (
                   <>
-                    <span className="flex items-center gap-2 font-mono text-xs tracking-[0.08em] text-zinc-500 uppercase dark:text-zinc-400">
-                      {loadingMore ? (
-                        <>
-                          <Spinner />
-                          loading more…
-                        </>
-                      ) : (
-                        <>
-                          keep scrolling
-                          <ChevronDown />
-                        </>
-                      )}
-                    </span>
                     <button
                       type="button"
                       onClick={() => void loadMore()}
                       disabled={loadingMore}
-                      className="hover:text-accent-600 dark:hover:text-accent-300 rounded border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-700 transition-colors hover:border-zinc-400 disabled:cursor-default disabled:opacity-60 dark:border-zinc-700 dark:text-zinc-300 dark:hover:border-zinc-600"
+                      className="hover:text-accent-600 dark:hover:text-accent-300 inline-flex items-center gap-2 rounded border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-700 transition-colors hover:border-zinc-400 disabled:cursor-default disabled:opacity-60 dark:border-zinc-700 dark:text-zinc-300 dark:hover:border-zinc-600"
                     >
-                      {loadingMore ? "Loading…" : "Load more visits"}
+                      {loadingMore ? (
+                        <>
+                          <Spinner />
+                          Loading…
+                        </>
+                      ) : (
+                        "Show more visits"
+                      )}
                     </button>
                     {failedMore ? (
                       <span className="text-xs text-zinc-500 dark:text-zinc-400">
@@ -340,13 +401,67 @@ export default function ActivityFeed({
           )}
         </section>
 
+        {/* Reserve a line even before hydration: the label is clock-dependent so
+            it only fills once `mounted`, and an empty <p> collapsing to zero then
+            growing to a line would shift the page down. The invisible placeholder
+            keeps the line box present (server and first client paint match, so it
+            is also hydration-safe). */}
         <p className="mt-8 font-mono text-xs tracking-[0.08em] text-zinc-500 uppercase dark:text-zinc-400">
-          {mounted
-            ? `over ${trackedDays(VISITS_TRACKED_SINCE, new Date(now).toISOString())} days`
-            : ""}
+          {mounted ? (
+            `over ${trackedDays(VISITS_TRACKED_SINCE, new Date(now).toISOString())} days`
+          ) : (
+            <span className="invisible">over&nbsp;0&nbsp;days</span>
+          )}
         </p>
       </div>
     </div>
+  );
+}
+
+/** A single pulsing placeholder bar, shared by the loading skeletons below. */
+function SkeletonLine({ className }: { className?: string }) {
+  return (
+    <div
+      aria-hidden="true"
+      className={`rounded bg-zinc-200 motion-safe:animate-pulse dark:bg-zinc-800 ${className ?? ""}`}
+    />
+  );
+}
+
+/** The "Most visited" leaderboard rendered as a skeleton while the one-shot
+ *  `all=1` bulk fetch is in flight — same heading and row rhythm as the real
+ *  list, so the swap to data never shifts layout. */
+function MostVisitedSkeleton() {
+  return (
+    <section aria-labelledby="top-pages" aria-busy="true" className="mt-10">
+      <h2
+        id="top-pages"
+        className="text-base font-semibold tracking-[-0.011em] text-zinc-900 dark:text-zinc-100"
+      >
+        Most visited
+      </h2>
+      <ul
+        aria-hidden="true"
+        className="mt-2 divide-y divide-zinc-200 border-t border-zinc-200 dark:divide-zinc-800 dark:border-zinc-800"
+      >
+        {Array.from({ length: MOST_VISITED_PAGE }).map((_, i) => (
+          <li key={i} className="flex items-baseline justify-between gap-4 py-2.5">
+            <div className="min-w-0 flex-1">
+              {/* Two bars sized to the real row's line boxes (0.9375rem title +
+                  text-xs path) so the list is exactly as tall as the loaded one. */}
+              <SkeletonLine className="h-5 w-1/2" />
+              <SkeletonLine className="mt-1 h-4 w-1/3" />
+            </div>
+            <SkeletonLine className="h-4 w-10 shrink-0" />
+          </li>
+        ))}
+      </ul>
+      {/* Stand-in for the "Show more pages" control, which the loaded list shows
+          once the retained history has more pages than the first slice. */}
+      <div className="mt-4 flex justify-center">
+        <SkeletonLine className="h-9 w-32" />
+      </div>
+    </section>
   );
 }
 
@@ -369,23 +484,6 @@ function Spinner() {
       className="inline-block h-3 w-3 animate-spin rounded-full border border-zinc-400 border-t-transparent motion-reduce:animate-none motion-reduce:border-t-zinc-400"
       aria-hidden="true"
     />
-  );
-}
-
-function ChevronDown() {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className="h-3.5 w-3.5"
-      aria-hidden="true"
-    >
-      <path d="M6 9l6 6 6-6" />
-    </svg>
   );
 }
 

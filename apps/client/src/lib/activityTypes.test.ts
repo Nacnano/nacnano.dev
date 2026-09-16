@@ -1,5 +1,10 @@
 import { describe, expect, it } from "bun:test";
-import { isValidCursor, parseFeedPayload, parseVisitEvent } from "./activityTypes";
+import {
+  isValidCursor,
+  parseFeedPayload,
+  parseVisitEvent,
+  STREAM_MAXLEN,
+} from "./activityTypes";
 
 function base() {
   return { id: "v1", ts: "2026-09-14T03:00:00.000Z", page: "/projects" };
@@ -98,6 +103,23 @@ describe("parseFeedPayload", () => {
     expect(
       parseFeedPayload({ visits: Array.from({ length: 300 }, () => base()), count: 300 })
     ).toBeNull(); // implausible page size
+  });
+
+  it("admits the all=1 bulk page up to the store cap, and still rejects beyond it", () => {
+    const rows = (n: number) => Array.from({ length: n }, () => base());
+    // The `all=1` fetch passes STREAM_MAXLEN as its ceiling, so a full retained
+    // window parses rather than reading as a hostile envelope (which previously
+    // stranded the globe/leaderboards on the head page).
+    const bulk = parseFeedPayload(
+      { visits: rows(STREAM_MAXLEN), count: STREAM_MAXLEN },
+      STREAM_MAXLEN
+    );
+    expect(bulk).not.toBeNull();
+    expect(bulk!.visits).toHaveLength(STREAM_MAXLEN);
+    // Without the override, the ordinary-page ceiling still rejects the same set.
+    expect(
+      parseFeedPayload({ visits: rows(STREAM_MAXLEN), count: STREAM_MAXLEN })
+    ).toBeNull();
   });
 
   it("rejects inconsistent pagination fields", () => {

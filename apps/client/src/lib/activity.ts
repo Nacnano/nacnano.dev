@@ -131,7 +131,7 @@ export function visitMarkers(visits: readonly VisitEvent[]): VisitMarker[] {
   }
   return Array.from(buckets.values()).map((bucket) => ({
     location: [bucket.lat, bucket.lng] as [number, number],
-    size: Math.min(0.35, 0.08 + bucket.n * 0.03),
+    size: Math.min(0.18, 0.045 + bucket.n * 0.018),
   }));
 }
 

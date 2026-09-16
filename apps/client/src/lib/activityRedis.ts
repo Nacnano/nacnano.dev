@@ -16,7 +16,7 @@ import "server-only";
 
 import { Redis } from "@upstash/redis";
 import { isInternalPath, sortVisitsDesc } from "./activity";
-import { parseVisitEvent } from "./activityTypes";
+import { parseVisitEvent, STREAM_MAXLEN } from "./activityTypes";
 import { captureError } from "./observability";
 import { getRuntimeConfig, namespacedKey } from "./runtimeConfig";
 import type { VisitEvent, VisitFeedPayload } from "./activityTypes";
@@ -26,9 +26,10 @@ import type { VisitEvent, VisitFeedPayload } from "./activityTypes";
 // changing production keys when no prefix is set.
 const STREAM_KEY = "activity:stream";
 const COUNT_KEY = "activity:count";
-// How far back detailed visits reach, by count. Exported so the UI can state it
-// without hardcoding a number that could drift from the store.
-export const STREAM_MAXLEN = 1500;
+// The retained-window count cap now lives in the client-safe `activityTypes`
+// (single source of truth for both this store trim and the client's bulk parse);
+// re-exported here so existing server importers keep their familiar path.
+export { STREAM_MAXLEN };
 // A true age ceiling, in addition to the count cap: entries older than this are
 // pruned on every write (XTRIM MINID), and if tracking goes fully dormant the
 // idle EXPIRE clears the keys entirely. Both bound retention; neither depends on
