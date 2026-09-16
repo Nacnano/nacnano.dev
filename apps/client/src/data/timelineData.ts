@@ -22,6 +22,7 @@ export const workItems: TimelineItem[] = [
     start: "2026-01-01",
     title: "Data Scientist, Intern",
     organisation: "SCB",
+    location: "Bangkok",
     description:
       "Poked at FOMC statements with NLP to see whether the market's mood was hiding in the wording.",
   },
@@ -30,6 +31,7 @@ export const workItems: TimelineItem[] = [
     start: "2026-01-01",
     title: "AI Engineer, Part Time",
     organisation: "QuanXAI",
+    location: "Bangkok",
     description:
       "A LangChain chatbot, and a fraud-detection proof of concept that mostly taught me how messy real data is.",
   },
