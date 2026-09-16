@@ -56,7 +56,7 @@ export default function Projects() {
         <section key={section.id} aria-labelledby={section.id} className="mt-14">
           <h2
             id={section.id}
-            className="text-base font-semibold tracking-[-0.011em] text-zinc-900 dark:text-zinc-100"
+            className="scroll-mt-20 text-base font-semibold tracking-[-0.011em] text-zinc-900 dark:text-zinc-100"
           >
             {section.heading}
           </h2>
