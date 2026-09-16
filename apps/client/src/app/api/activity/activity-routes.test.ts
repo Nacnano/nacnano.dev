@@ -16,7 +16,7 @@ import * as visitTitles from "@/lib/visitTitles";
 import { loadInitialFeed } from "@/lib/activityServer";
 import { seedVisits } from "@/data/activityData";
 import type { VisitInput } from "@/lib/activityRedis";
-import type { VisitFeedPayload } from "@/lib/activityTypes";
+import { STREAM_MAXLEN, type VisitFeedPayload } from "@/lib/activityTypes";
 import { RedisConfigError } from "@/lib/runtimeConfig";
 import { GET as getFeed } from "./feed/route";
 import { POST as postVisit } from "./visit/route";
@@ -249,13 +249,13 @@ describe("GET /api/activity/feed", () => {
     expect(readCalls[0]?.[1]).toBeNull();
   });
 
-  it("reads the whole retained window when `all=1`, ignoring the cursor", async () => {
-    // The globe and leaderboards ask for every stored row (up to STREAM_MAXLEN)
-    // in one request, so the paging cursor must be bypassed entirely.
+  it("never serves more than the page ceiling, whatever the query asks for", async () => {
+    // The whole retained window reaches /activity through the server render, so
+    // this public route stays a small-page endpoint — there is no bulk escape
+    // hatch an anonymous caller can use to pull the entire store per request.
     ctrl.live = true;
-    await getFeed(feedRequest("?all=1&before=1700000000000-0&limit=30"));
-    expect(readCalls[0]?.[0]).toBe(1500);
-    expect(readCalls[0]?.[1]).toBeNull();
+    await getFeed(feedRequest("?all=1&limit=9999"));
+    expect(readCalls[0]?.[0]).toBe(100);
   });
 });
 
@@ -397,6 +397,37 @@ describe("loadInitialFeed (SSR first paint)", () => {
     const result = await loadInitialFeed(true);
     expect(result.status).toBe("ok");
     if (result.status === "ok") expect(result.payload.count).toBe(7);
+  });
+
+  it("reads the WHOLE retained window in one call, with no cursor", async () => {
+    // The page's globe, country badges and "Countries" stat summarise every row
+    // we hold. Reading a head page here and widening later put a confidently
+    // wrong number on screen (one country, then six) for a whole round trip, so
+    // the first paint reads all of it — one request feeds the entire page.
+    ctrl.live = true;
+    await loadInitialFeed(true);
+    expect(readCalls).toHaveLength(1);
+    expect(readCalls[0]?.[0]).toBe(STREAM_MAXLEN);
+    expect(readCalls[0]?.[1]).toBeUndefined();
+  });
+
+  it("reports the live payload as complete, even at the stream cap", async () => {
+    // A full page from the store means the stream is AT its trim length, not
+    // that older rows are waiting — they were trimmed. Passing `hasMore` through
+    // would offer the reader a "show more" that can never load anything.
+    ctrl.live = true;
+    ctrl.read = async () => ({
+      visits: [{ id: "1", ts: "2026-09-14T00:00:00.000Z", page: "/" }],
+      count: STREAM_MAXLEN,
+      hasMore: true,
+      nextCursor: "1-0",
+    });
+    const result = await loadInitialFeed(true);
+    expect(result.status).toBe("ok");
+    if (result.status === "ok") {
+      expect(result.payload.hasMore).toBe(false);
+      expect(result.payload.nextCursor).toBeNull();
+    }
   });
 
   it("fills titles on the first paint, not only on poll", async () => {

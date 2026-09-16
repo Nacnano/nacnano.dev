@@ -66,14 +66,14 @@ const MAX_TITLE = 200;
 const MAX_CITY = 100;
 const MAX_ID = 64;
 // How far back detailed visits reach, by count. Defined here (a client-safe,
-// dependency-free module) as the single source of truth: it is BOTH the store's
-// stream trim length — re-exported by `activityRedis` — and the ceiling the
-// client passes to `parseFeedPayload` for the `all=1` bulk fetch, so the two can
-// never drift and silently blank the globe/leaderboards.
+// dependency-free module) as the single source of truth for the store's stream
+// trim length, which `activityRedis` re-exports and the server render uses as
+// the size of its one whole-window read.
 export const STREAM_MAXLEN = 1500;
-// A public feed page is bounded by `limit` (<=100); anything larger than this
-// slack is a corrupt/hostile envelope, not a real page. The bulk `all=1` fetch
-// overrides this with `STREAM_MAXLEN` (see `parseFeedPayload`).
+// Every page that crosses the network is bounded by `limit` (<=100) — the whole
+// retained window reaches the client through the server render, never through
+// this envelope — so anything larger than this slack is a corrupt or hostile
+// response, not a real page.
 const MAX_PAGE_ROWS = 200;
 const CURSOR_PATTERN = /^\d+-\d+$/;
 const COUNTRY_PATTERN = /^[A-Z]{2}$/;
@@ -179,19 +179,12 @@ export function parseVisitEvent(value: unknown): VisitEvent | null {
  * envelope (bad count, inconsistent pagination, implausible row count) is a
  * wholesale failure so the caller keeps its last-known-good feed rather than
  * rendering a confident zero.
- *
- * `maxRows` bounds the row-count sanity check. It defaults to the ordinary-page
- * ceiling (`<=100` plus slack); the `all=1` bulk fetch passes `STREAM_MAXLEN`
- * so the full retained window is admitted rather than rejected as implausible.
  */
-export function parseFeedPayload(
-  value: unknown,
-  maxRows: number = MAX_PAGE_ROWS
-): VisitFeedPayload | null {
+export function parseFeedPayload(value: unknown): VisitFeedPayload | null {
   if (!value || typeof value !== "object") return null;
   const record = value as Record<string, unknown>;
 
-  if (!Array.isArray(record.visits) || record.visits.length > maxRows) {
+  if (!Array.isArray(record.visits) || record.visits.length > MAX_PAGE_ROWS) {
     return null;
   }
   if (
