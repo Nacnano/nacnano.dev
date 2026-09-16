@@ -25,9 +25,15 @@ const ScrollTop = () => {
       tabIndex={show ? 0 : -1}
       onClick={scrollToTop}
       // Available on touch too: a long essay left mobile readers with no way
-      // back to the navigation.
-      className={`shadow-raise fixed right-5 bottom-5 z-40 flex h-11 w-11 items-center justify-center rounded-full border border-zinc-200 bg-white/90 text-zinc-600 backdrop-blur transition-[opacity,transform,color] duration-300 ease-out hover:text-zinc-900 dark:border-zinc-800 dark:bg-zinc-900/90 dark:text-zinc-300 dark:hover:text-zinc-100 ${
-        show ? "translate-y-0 opacity-100" : "pointer-events-none translate-y-2 opacity-0"
+      // back to the navigation. Rendered on every page from the root layout;
+      // the self-hiding opacity means short pages never see it. Glides in on
+      // the design system's easing curve with a little travel and a soft scale
+      // so the entrance feels settled rather than popping — the global
+      // reduced-motion block collapses the whole thing to an instant swap.
+      className={`shadow-raise fixed right-5 bottom-5 z-40 flex h-11 w-11 items-center justify-center rounded-full border border-zinc-200 bg-white/90 text-zinc-600 backdrop-blur transition-[opacity,transform,color] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:text-zinc-900 dark:border-zinc-800 dark:bg-zinc-900/90 dark:text-zinc-300 dark:hover:text-zinc-100 ${
+        show
+          ? "translate-y-0 scale-100 opacity-100"
+          : "pointer-events-none translate-y-3 scale-90 opacity-0"
       }`}
     >
       <svg
