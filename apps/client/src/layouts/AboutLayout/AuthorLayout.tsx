@@ -40,9 +40,7 @@ export default function AuthorLayout({ children, content }: Props) {
         </div>
       </header>
 
-      <div className="prose prose-zinc max-w-measure dark:prose-invert mt-9">
-        {children}
-      </div>
+      <div className="prose max-w-measure dark:prose-invert mt-9">{children}</div>
 
       {/* A hairline aside, not a card — the system uses rules for this. */}
       <p className="max-w-measure mt-8 border-l border-zinc-300 pl-4 text-[0.9375rem] leading-7 text-zinc-600 dark:border-zinc-700 dark:text-zinc-400">

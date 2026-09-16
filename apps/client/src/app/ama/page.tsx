@@ -130,7 +130,7 @@ export default function Ama() {
                       </p>
                     )}
 
-                    <div className="prose prose-zinc max-w-measure dark:prose-invert mt-2.5">
+                    <div className="prose max-w-measure dark:prose-invert mt-2.5">
                       <Mdx source={entry.answer} />
                     </div>
                   </div>

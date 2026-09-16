@@ -8,7 +8,7 @@
  */
 export const PAGE_TITLES = {
   about: "About",
-  projects: "Things I've made",
+  projects: "Projects",
   link: "Links",
   activity: "Activity",
   ama: "Ask me anything",
