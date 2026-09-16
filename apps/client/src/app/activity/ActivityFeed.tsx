@@ -248,18 +248,6 @@ export default function ActivityFeed({
       </section>
 
       <div className="min-w-0 flex-1">
-        {live && visits.length > 0 ? (
-          <p className="text-[0.9375rem] leading-7 text-zinc-600 dark:text-zinc-400">
-            <span className="inline-flex items-center gap-1.5">
-              <span
-                className="bg-accent-600 dark:bg-accent-300 inline-block h-1.5 w-1.5 rounded-full motion-safe:animate-pulse"
-                aria-hidden="true"
-              />
-              live now
-            </span>
-          </p>
-        ) : null}
-
         <dl className="mt-6 flex flex-wrap gap-x-10 gap-y-4">
           <Stat label="Visits" value={totalLabel} />
           <Stat label="Countries" value={String(countryCount)} />
