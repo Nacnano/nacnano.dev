@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { scrollToTop } from "@/lib/scrollToTop";
 
 const ScrollTop = () => {
   const [show, setShow] = useState(false);
@@ -11,14 +12,6 @@ const ScrollTop = () => {
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
-
-  const scrollToTop = () => {
-    // The reduced-motion block in tailwind.css only reaches CSS scroll-behavior;
-    // a JS `behavior: "smooth"` overrides it, so opt out here to keep the
-    // promise that no motion ships uncovered.
-    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    window.scrollTo({ top: 0, behavior: reduce ? "auto" : "smooth" });
-  };
 
   if (!show) return null;
 
