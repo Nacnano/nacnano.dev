@@ -1,5 +1,6 @@
 import Mdx from "@/components/Mdx";
 import { genPageMetaData } from "@/app/seo";
+import { PAGE_TITLES } from "@/data/pageTitles";
 import siteMetadata from "@/data/siteMetadata";
 import { formatDate } from "@/lib/formatDate";
 import { jsonLdScriptProps } from "@/lib/content";
@@ -9,7 +10,7 @@ import { ASK_RETRY_AFTER_SECONDS } from "@/lib/rateLimit";
 import AskForm from "./AskForm";
 
 export const metadata = genPageMetaData({
-  title: "Ask me anything",
+  title: PAGE_TITLES.ama,
   description:
     "Questions people have asked Nac, and the answers worth keeping. If yours isn't here, send it over.",
   // Answers land here rarely and without warning, which is exactly what a feed

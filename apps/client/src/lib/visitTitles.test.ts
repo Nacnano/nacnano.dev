@@ -22,6 +22,7 @@ describe("resolveVisitTitle", () => {
     expect(resolveVisitTitle("/projects")).toBe(PAGE_TITLES.projects);
     expect(resolveVisitTitle("/link")).toBe(PAGE_TITLES.link);
     expect(resolveVisitTitle("/activity")).toBe(PAGE_TITLES.activity);
+    expect(resolveVisitTitle("/ama")).toBe(PAGE_TITLES.ama);
   });
 
   it("resolves a real blog path to its authored title", () => {
