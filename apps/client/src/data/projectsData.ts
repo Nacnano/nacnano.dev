@@ -77,22 +77,43 @@ const projectsData: Project[] = [
     repo: "https://github.com/CBC-soul-seasons/soul-seasons",
   },
   {
-    title: "E-learning platform",
+    title: "Chula LegalTech",
     description:
-      "The backend for an e-learning site — lessons, progress, the usual. My first proper go at deploying on Cloud Run.",
-    stack: ["NestJS", "Prisma", "Google Cloud Run"],
+      "A job-matching site for young people, thrown together over a competition weekend. I did the front end and the OCR that reads documents off the page. It took first place.",
+    stack: ["Next.js", "Flask"],
     category: "built",
-    mark: "lessons",
+    imgSrc: "/static/images/chula-legaltech.png",
+    href: "https://yacht-for-youth.vercel.app",
+    repo: "https://github.com/mekintown/yacht-for-youth",
   },
   {
-    title: "MWIT29 Archive",
+    title: "JUMP Thailand",
     description:
-      "Somewhere for my high-school cohort to keep their own records. Still unfinished, as these things tend to be.",
-    stack: ["Next.js", "MongoDB", "Google Cloud Storage"],
+      "An app that teaches massage technique by watching through a camera and a multimodal model. We placed 2nd runner-up out of more than 700 teams.",
+    stack: ["Next.js", "Computer Vision", "Multimodal LLM"],
     category: "built",
-    imgSrc: "/static/images/mwit29-archive.png",
-    href: "https://mwit29-archive.vercel.app/",
-    repo: "https://github.com/Nacnano/mwit29-archive",
+    imgSrc: "/static/images/nuad-dee.png",
+    href: "https://nuad-dee.vercel.app",
+    repo: "https://github.com/Nacnano/nuad-dee",
+  },
+  {
+    title: "MITR PHOL AI Hackathon",
+    description:
+      "A predictive-maintenance system that forecasts equipment sensor readings to catch failures before they happen. 2nd runner-up among 156 teams.",
+    stack: ["Python", "Time-series Forecasting", "GenAI"],
+    category: "built",
+    mark: "signal",
+    repo: "https://github.com/bookpanda/MitrPhol-GenAI-Hackathon",
+  },
+  {
+    title: "TCAS Ranking Simulation",
+    description:
+      "A service that ran the Thai university admission ranking ahead of time so students could see where their scores would land them. I architected it; it served more than forty thousand people.",
+    stack: ["Pandas", "NumPy", "Algorithm"],
+    category: "built",
+    imgSrc: "/static/images/tcas-ranking.png",
+    href: "https://monkeyeveryday.com/tcas/ranking",
+    repo: "https://github.com/monkey-monkey/tcas-ranking",
   },
 
   // ── Things I looked into ──────────────────────────────────────────────

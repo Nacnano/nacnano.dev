@@ -7,7 +7,11 @@ export type MarkKind =
   | "ticket"
   | "seasons"
   | "lessons"
-  | "segment";
+  | "segment"
+  | "match"
+  | "pose"
+  | "signal"
+  | "rank";
 
 /**
  * Some projects are coursework or research with nothing deployed to screenshot.
@@ -259,6 +263,139 @@ function Shape({ kind }: { kind: MarkKind }) {
           {[0, 2].map((i) => (
             <circle key={i} cx={49.5} cy={31 + i * 16} r={2} className={fillLine} />
           ))}
+        </>
+      );
+    // Two columns of options with one pair joined — matching people to roles.
+    case "match":
+      return (
+        <>
+          <circle cx={52} cy={34} r={5} fill="none" strokeWidth={1} className={line} />
+          <circle cx={52} cy={64} r={5} fill="none" strokeWidth={1} className={line} />
+          <circle cx={124} cy={34} r={5} fill="none" strokeWidth={1} className={line} />
+          <circle cx={124} cy={64} r={5} fill="none" strokeWidth={1} className={line} />
+          <line x1={57} y1={34} x2={119} y2={34} strokeWidth={1.5} className={accent} />
+          <line
+            x1={57}
+            y1={64}
+            x2={119}
+            y2={64}
+            strokeWidth={1}
+            strokeDasharray="3 3"
+            className={line}
+          />
+        </>
+      );
+    // A figure read by the camera, one limb picked out — pose detection.
+    case "pose":
+      return (
+        <>
+          <circle cx={88} cy={26} r={6} fill="none" strokeWidth={1} className={line} />
+          <line
+            x1={88}
+            y1={32}
+            x2={88}
+            y2={58}
+            strokeWidth={1.5}
+            strokeLinecap="round"
+            className={line}
+          />
+          <line
+            x1={88}
+            y1={40}
+            x2={66}
+            y2={50}
+            strokeWidth={1.5}
+            strokeLinecap="round"
+            className={line}
+          />
+          <line
+            x1={88}
+            y1={40}
+            x2={110}
+            y2={52}
+            strokeWidth={1.5}
+            strokeLinecap="round"
+            className={accent}
+          />
+          <line
+            x1={88}
+            y1={58}
+            x2={72}
+            y2={78}
+            strokeWidth={1.5}
+            strokeLinecap="round"
+            className={line}
+          />
+          <line
+            x1={88}
+            y1={58}
+            x2={104}
+            y2={78}
+            strokeWidth={1.5}
+            strokeLinecap="round"
+            className={line}
+          />
+          <circle cx={110} cy={52} r={2.5} className={fillAccent} />
+        </>
+      );
+    // A sensor reading trending toward the dashed threshold it is about to cross.
+    case "signal":
+      return (
+        <>
+          <line
+            x1={22}
+            y1={30}
+            x2={154}
+            y2={30}
+            strokeWidth={1}
+            strokeDasharray="3 4"
+            className={line}
+          />
+          <polyline
+            points="22,70 36,66 48,72 62,58 74,64 86,50"
+            fill="none"
+            strokeWidth={1.5}
+            strokeLinejoin="round"
+            strokeLinecap="round"
+            className={line}
+          />
+          <polyline
+            points="86,50 100,44 114,36 128,28"
+            fill="none"
+            strokeWidth={1.5}
+            strokeDasharray="3 4"
+            strokeLinejoin="round"
+            strokeLinecap="round"
+            className={accent}
+          />
+          <circle cx={128} cy={28} r={2.5} className={fillAccent} />
+        </>
+      );
+    // A descending ranking, the top entry filled — where you land.
+    case "rank":
+      return (
+        <>
+          <rect x={40} y={30} width={96} height={10} rx={2} className={fillAccent} />
+          <rect
+            x={40}
+            y={46}
+            width={68}
+            height={10}
+            rx={2}
+            fill="none"
+            strokeWidth={1}
+            className={line}
+          />
+          <rect
+            x={40}
+            y={62}
+            width={42}
+            height={10}
+            rx={2}
+            fill="none"
+            strokeWidth={1}
+            className={line}
+          />
         </>
       );
   }
