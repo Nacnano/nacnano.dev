@@ -137,7 +137,7 @@ export default function AskForm({
           <button
             type="submit"
             disabled={pending}
-            className="rounded border border-zinc-200 px-3.5 py-2 text-sm font-medium text-zinc-700 transition-colors hover:border-zinc-300 hover:text-zinc-900 disabled:cursor-default disabled:opacity-60 dark:border-zinc-800 dark:text-zinc-300 dark:hover:border-zinc-700 dark:hover:text-zinc-100"
+            className="pressable rounded border border-zinc-200 px-3.5 py-2 text-sm font-medium text-zinc-700 hover:border-zinc-300 hover:text-zinc-900 disabled:cursor-default disabled:opacity-60 dark:border-zinc-800 dark:text-zinc-300 dark:hover:border-zinc-700 dark:hover:text-zinc-100"
           >
             {pending ? "Sending…" : "Send question"}
           </button>

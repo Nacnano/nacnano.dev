@@ -31,7 +31,7 @@ const sections = [
 
 export default function Projects() {
   return (
-    <div className="py-12 sm:py-16">
+    <div className="animate-rise py-12 sm:py-16">
       <h1 className="text-[1.75rem] leading-[1.2] font-semibold tracking-[-0.022em] text-zinc-900 sm:text-[2.125rem] dark:text-zinc-100">
         Projects
       </h1>
