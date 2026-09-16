@@ -3,7 +3,6 @@ import type { Author } from "@/lib/content";
 import Image from "next/image";
 import SocialIcon from "@/components/social-icons";
 import CustomLink from "@/components/Link";
-import StatusLine from "@/components/StatusLine";
 import siteMetadata from "@/data/siteMetadata";
 import Timeline from "./Timeline";
 import { workItems, educationItems } from "@/data/timelineData";
@@ -36,7 +35,6 @@ export default function AuthorLayout({ children, content }: Props) {
           <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
             {siteMetadata.legalName} · goes by Nac
           </p>
-          <StatusLine />
         </div>
       </header>
 
