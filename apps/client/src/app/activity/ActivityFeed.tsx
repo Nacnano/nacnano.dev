@@ -260,8 +260,8 @@ export default function ActivityFeed({
                 key={i}
                 className="flex items-center gap-1.5 rounded border border-zinc-200 px-2 py-1 dark:border-zinc-800"
               >
-                <SkeletonLine className="h-3 w-5" />
-                <SkeletonLine className="h-3 w-4" />
+                <SkeletonLine className="h-4 w-5" />
+                <SkeletonLine className="h-4 w-4" />
               </li>
             ))}
           </ul>
@@ -401,10 +401,17 @@ export default function ActivityFeed({
           )}
         </section>
 
+        {/* Reserve a line even before hydration: the label is clock-dependent so
+            it only fills once `mounted`, and an empty <p> collapsing to zero then
+            growing to a line would shift the page down. The invisible placeholder
+            keeps the line box present (server and first client paint match, so it
+            is also hydration-safe). */}
         <p className="mt-8 font-mono text-xs tracking-[0.08em] text-zinc-500 uppercase dark:text-zinc-400">
-          {mounted
-            ? `over ${trackedDays(VISITS_TRACKED_SINCE, new Date(now).toISOString())} days`
-            : ""}
+          {mounted ? (
+            `over ${trackedDays(VISITS_TRACKED_SINCE, new Date(now).toISOString())} days`
+          ) : (
+            <span className="invisible">over&nbsp;0&nbsp;days</span>
+          )}
         </p>
       </div>
     </div>
@@ -440,13 +447,20 @@ function MostVisitedSkeleton() {
         {Array.from({ length: MOST_VISITED_PAGE }).map((_, i) => (
           <li key={i} className="flex items-baseline justify-between gap-4 py-2.5">
             <div className="min-w-0 flex-1">
-              <SkeletonLine className="h-3.5 w-1/2" />
-              <SkeletonLine className="mt-1.5 h-2.5 w-1/3" />
+              {/* Two bars sized to the real row's line boxes (0.9375rem title +
+                  text-xs path) so the list is exactly as tall as the loaded one. */}
+              <SkeletonLine className="h-5 w-1/2" />
+              <SkeletonLine className="mt-1 h-4 w-1/3" />
             </div>
-            <SkeletonLine className="h-3 w-10 shrink-0" />
+            <SkeletonLine className="h-4 w-10 shrink-0" />
           </li>
         ))}
       </ul>
+      {/* Stand-in for the "Show more pages" control, which the loaded list shows
+          once the retained history has more pages than the first slice. */}
+      <div className="mt-4 flex justify-center">
+        <SkeletonLine className="h-9 w-32" />
+      </div>
     </section>
   );
 }
