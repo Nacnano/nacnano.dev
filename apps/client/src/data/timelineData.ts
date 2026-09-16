@@ -1,7 +1,8 @@
 /**
  * Reconciled against https://resume.nacnano.dev (the canonical CV) on
- * 2026-09-13. Every date, title and employer here matches it — the wording is
- * deliberately casual, but the facts are not negotiable. Keep them in sync.
+ * 2026-09-16. Every date, title, employer and grade here matches it — the
+ * wording is deliberately casual, but the facts are not negotiable. Keep them
+ * in sync.
  *
  * Locations are only recorded where they are actually known — do not invent.
  */
@@ -107,7 +108,7 @@ export const educationItems: TimelineItem[] = [
     organisation: "Chulalongkorn University",
     location: "Bangkok",
     description:
-      "Also TA'd the backend course, which taught me considerably more than sitting in it did.",
+      "Finished with a GPA of 3.93 over seven semesters, and TA'd the backend course, which taught me considerably more than sitting in it did.",
   },
   {
     period: "2019 – 2022",
