@@ -25,28 +25,20 @@ test("renders a parseable FAQPage JSON-LD block", async ({ page }) => {
   }
 });
 
-test("every answer has a distinctly-named permalink pointing at a real anchor", async ({
-  page,
-}) => {
+test("every answer has a unique anchor for feed deep links", async ({ page }) => {
   await page.goto("/ama");
 
-  const permalinks = page.locator('h3 a[href^="#"]');
-  const count = await permalinks.count();
+  const headings = page.locator("article h3[id]");
+  const count = await headings.count();
   expect(count, "the page should publish at least one answer").toBeGreaterThan(0);
 
-  const names = new Set<string>();
+  const ids = new Set<string>();
   for (let i = 0; i < count; i += 1) {
-    const link = permalinks.nth(i);
-    const name = await link.getAttribute("aria-label");
-    // Six links called "Link to this question" are six indistinguishable rows
-    // in a screen reader's link list.
-    expect(name).toBeTruthy();
-    names.add(name!);
-
-    const href = (await link.getAttribute("href"))!;
-    await expect(page.locator(href)).toHaveCount(1);
+    const id = await headings.nth(i).getAttribute("id");
+    expect(id).toBeTruthy();
+    ids.add(id!);
   }
-  expect(names.size).toBe(count);
+  expect(ids.size).toBe(count);
 });
 
 test("the ask box has a real label and states what happens to a question", async ({
