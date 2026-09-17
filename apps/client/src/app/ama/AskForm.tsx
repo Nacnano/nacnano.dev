@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useId, useRef } from "react";
+import { useActionState, useEffect, useId, useRef, useState } from "react";
 import { askQuestion } from "./actions";
 import type { AskFailure, AskState } from "@/lib/amaInbox";
 
@@ -52,6 +52,8 @@ export default function AskForm({
   const hintId = useId();
   const countId = useId();
   const honeypotId = useId();
+  const panelId = useId();
+  const [expanded, setExpanded] = useState(false);
 
   // Clear the box once a question is actually stored, so asking a second one
   // starts from empty. Keyed on the state OBJECT, not on `status`: the action
@@ -68,112 +70,124 @@ export default function AskForm({
   // navigating by landmark.
   return (
     <section aria-label="Ask a question" className="mt-8">
-      <p
-        id={hintId}
-        className="max-w-measure text-[0.9375rem] leading-7 text-zinc-600 dark:text-zinc-400"
+      <button
+        type="button"
+        aria-expanded={expanded}
+        aria-controls={panelId}
+        onClick={() => setExpanded((current) => !current)}
+        className="hover:text-accent-600 hover:decoration-accent-600 dark:hover:text-accent-300 dark:hover:decoration-accent-300 rounded text-sm font-medium text-zinc-700 underline decoration-zinc-300 underline-offset-4 transition-colors dark:text-zinc-300 dark:decoration-zinc-700"
       >
-        Goes to a private inbox. Nothing you write shows up here unless I write an answer
-        for it. Questions are deleted after {retentionDays} days.
-      </p>
+        {expanded ? "Hide question form" : "Ask a question"}
+      </button>
 
-      <form ref={formRef} action={formAction} className="max-w-measure mt-5">
-        <label
-          htmlFor={questionId}
-          className="block text-xs tracking-[0.08em] text-zinc-500 uppercase dark:text-zinc-400"
-        >
-          Your question
-        </label>
-        <textarea
-          id={questionId}
-          name="question"
-          required
-          rows={3}
-          maxLength={maxQuestion}
-          aria-describedby={`${hintId} ${countId}`}
-          className="field mt-1.5 resize-y"
-        />
+      <div id={panelId} hidden={!expanded} className="mt-4">
         <p
-          id={countId}
-          className="tabular mt-1 font-mono text-xs tracking-[0.08em] text-zinc-500 uppercase dark:text-zinc-400"
+          id={hintId}
+          className="max-w-measure text-[0.9375rem] leading-7 text-zinc-600 dark:text-zinc-400"
         >
-          Up to {maxQuestion} characters
+          Goes to a private inbox. Nothing you write shows up here unless I write an
+          answer for it. Questions are deleted after {retentionDays} days.
         </p>
 
-        <label
-          htmlFor={contactId}
-          className="mt-4 block text-xs tracking-[0.08em] text-zinc-500 uppercase dark:text-zinc-400"
-        >
-          Name or email <span className="tracking-normal normal-case">(optional)</span>
-        </label>
-        <input
-          id={contactId}
-          name="contact"
-          type="text"
-          maxLength={maxContact}
-          className="field mt-1.5"
-        />
+        <form ref={formRef} action={formAction} className="max-w-measure mt-5">
+          <label
+            htmlFor={questionId}
+            className="block text-xs tracking-[0.08em] text-zinc-500 uppercase dark:text-zinc-400"
+          >
+            Your question
+          </label>
+          <textarea
+            id={questionId}
+            name="question"
+            required
+            rows={3}
+            maxLength={maxQuestion}
+            aria-describedby={`${hintId} ${countId}`}
+            className="field mt-1.5 resize-y"
+          />
+          <p
+            id={countId}
+            className="tabular mt-1 font-mono text-xs tracking-[0.08em] text-zinc-500 uppercase dark:text-zinc-400"
+          >
+            Up to {maxQuestion} characters
+          </p>
 
-        {/*
+          <label
+            htmlFor={contactId}
+            className="mt-4 block text-xs tracking-[0.08em] text-zinc-500 uppercase dark:text-zinc-400"
+          >
+            Name or email <span className="tracking-normal normal-case">(optional)</span>
+          </label>
+          <input
+            id={contactId}
+            name="contact"
+            type="text"
+            maxLength={maxContact}
+            className="field mt-1.5"
+          />
+
+          {/*
           The honeypot's field. Off-screen, out of the accessibility tree and out
           of the tab order, so no real asker can reach it — `tabIndex={-1}` is
           what keeps `aria-hidden` over a focusable control from being a defect.
           `submitAsk` decides what a filled one means.
         */}
-        <div
-          aria-hidden="true"
-          className="absolute left-[-9999px] h-0 w-0 overflow-hidden"
-        >
-          <label htmlFor={honeypotId}>Website</label>
-          <input
-            id={honeypotId}
-            name="website"
-            type="text"
-            tabIndex={-1}
-            autoComplete="off"
-          />
-        </div>
-
-        <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-3">
-          <button
-            type="submit"
-            disabled={pending}
-            className="pressable rounded border border-zinc-200 px-3.5 py-2 text-sm font-medium text-zinc-700 hover:border-zinc-300 hover:text-zinc-900 disabled:cursor-default disabled:opacity-60 dark:border-zinc-800 dark:text-zinc-300 dark:hover:border-zinc-700 dark:hover:text-zinc-100"
+          <div
+            aria-hidden="true"
+            className="absolute left-[-9999px] h-0 w-0 overflow-hidden"
           >
-            {pending ? "Sending…" : "Send question"}
-          </button>
-          <p className="text-[0.9375rem] leading-7 text-zinc-600 dark:text-zinc-400">
-            Or email{" "}
-            <a
-              href={`mailto:${email}`}
-              className="hover:text-accent-600 hover:decoration-accent-600 dark:hover:text-accent-300 dark:hover:decoration-accent-300 rounded text-zinc-900 underline decoration-zinc-300 underline-offset-4 transition-colors dark:text-zinc-100 dark:decoration-zinc-700"
-            >
-              {email}
-            </a>
-            .
-          </p>
-        </div>
+            <label htmlFor={honeypotId}>Website</label>
+            <input
+              id={honeypotId}
+              name="website"
+              type="text"
+              tabIndex={-1}
+              autoComplete="off"
+            />
+          </div>
 
-        {/*
+          <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-3">
+            <button
+              type="submit"
+              disabled={pending}
+              className="pressable rounded border border-zinc-200 px-3.5 py-2 text-sm font-medium text-zinc-700 hover:border-zinc-300 hover:text-zinc-900 disabled:cursor-default disabled:opacity-60 dark:border-zinc-800 dark:text-zinc-300 dark:hover:border-zinc-700 dark:hover:text-zinc-100"
+            >
+              {pending ? "Sending…" : "Send question"}
+            </button>
+            <p className="text-[0.9375rem] leading-7 text-zinc-600 dark:text-zinc-400">
+              Or email{" "}
+              <a
+                href={`mailto:${email}`}
+                className="hover:text-accent-600 hover:decoration-accent-600 dark:hover:text-accent-300 dark:hover:decoration-accent-300 rounded text-zinc-900 underline decoration-zinc-300 underline-offset-4 transition-colors dark:text-zinc-100 dark:decoration-zinc-700"
+              >
+                {email}
+              </a>
+              .
+            </p>
+          </div>
+
+          {/*
           One live region, always present in the DOM so a screen reader is
           already watching it when the result arrives. The pending message is
           visually hidden because the button already shows the same state, but
           it remains announced for anyone who cannot see that change.
         */}
-        <p
-          aria-live="polite"
-          className="mt-3 min-h-[1.75rem] text-[0.9375rem] leading-7 text-zinc-600 dark:text-zinc-400"
-        >
-          {pending ? (
-            <span className="sr-only">Sending…</span>
-          ) : state.status === "sent" ? (
-            "Sent, thanks. If I write an answer it turns up on this page."
-          ) : state.status === "error" ? (
-            failureCopy(state.reason, retryAfterMinutes)
-          ) : (
-            ""
-          )}
-        </p>
-      </form>
+          <p
+            aria-live="polite"
+            className="mt-3 min-h-[1.75rem] text-[0.9375rem] leading-7 text-zinc-600 dark:text-zinc-400"
+          >
+            {pending ? (
+              <span className="sr-only">Sending…</span>
+            ) : state.status === "sent" ? (
+              "Sent, thanks. If I write an answer it turns up on this page."
+            ) : state.status === "error" ? (
+              failureCopy(state.reason, retryAfterMinutes)
+            ) : (
+              ""
+            )}
+          </p>
+        </form>
+      </div>
     </section>
   );
 }

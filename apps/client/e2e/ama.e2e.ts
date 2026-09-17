@@ -59,13 +59,24 @@ test("answers start as previews and can be expanded", async ({ page }) => {
   await expect(firstAnswer.locator(".prose p")).toHaveCount(3);
 });
 
-test("the ask box has a real label and states what happens to a question", async ({
+test("the ask box expands from a text button and explains what happens", async ({
   page,
 }) => {
   await page.goto("/ama");
 
+  const disclosure = page.getByRole("button", { name: "Ask a question" });
+  await expect(disclosure).toHaveAttribute("aria-expanded", "false");
+
   // Found by its visible <label>, not by a placeholder standing in for one.
   const question = page.getByLabel("Your question");
+  await expect(question).toBeHidden();
+
+  await disclosure.click();
+
+  await expect(page.getByRole("button", { name: "Hide question form" })).toHaveAttribute(
+    "aria-expanded",
+    "true"
+  );
   await expect(question).toBeVisible();
   await expect(page.getByRole("button", { name: "Send question" })).toBeVisible();
   await expect(page.getByText(/goes to a private inbox/i)).toBeVisible();
@@ -75,6 +86,7 @@ test("a submission with no store configured says so instead of faking success", 
   page,
 }) => {
   await page.goto("/ama");
+  await page.getByRole("button", { name: "Ask a question" }).click();
 
   await page.getByLabel("Your question").fill("Does the ask box tell the truth?");
   await page.getByRole("button", { name: "Send question" }).click();
