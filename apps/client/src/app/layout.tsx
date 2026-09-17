@@ -69,7 +69,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html
       lang={siteMetadata.language}
-      className={`${inter.variable} scroll-smooth scroll-pt-16`}
+      className={`${inter.variable} scroll-pt-16 scroll-smooth`}
       suppressHydrationWarning={true}
     >
       <head>
