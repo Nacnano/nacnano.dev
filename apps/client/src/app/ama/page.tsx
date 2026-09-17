@@ -44,8 +44,8 @@ export default function Ama() {
         Ask me anything
       </h1>
       <p className="max-w-measure mt-4 text-[1.0625rem] leading-[1.75] text-zinc-600 dark:text-zinc-400">
-        Anything you like. Most of it gets a short reply and goes no further. The answers
-        below are the ones I kept thinking about afterwards.
+        Ask anything. I keep most replies private and publish the ones I keep thinking
+        about.
       </p>
       <p className="mt-2 text-sm leading-6 text-zinc-500 dark:text-zinc-400">
         Inspired by{" "}
