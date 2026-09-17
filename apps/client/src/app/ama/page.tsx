@@ -5,10 +5,11 @@ import { PAGE_TITLES } from "@/data/pageTitles";
 import siteMetadata from "@/data/siteMetadata";
 import { formatDate } from "@/lib/formatDate";
 import { jsonLdScriptProps } from "@/lib/content";
-import { publishedAma, amaStructuredData } from "@/lib/ama";
+import { publishedAma, amaPreview, amaStructuredData } from "@/lib/ama";
 import { MAX_CONTACT, MAX_QUESTION, RETENTION_DAYS } from "@/lib/amaInbox";
 import { ASK_RETRY_AFTER_SECONDS } from "@/lib/rateLimit";
 import AskForm from "./AskForm";
+import AnswerDisclosure from "./AnswerDisclosure";
 
 export const metadata = genPageMetaData({
   title: PAGE_TITLES.ama,
@@ -45,6 +46,16 @@ export default function Ama() {
       <p className="max-w-measure mt-4 text-[1.0625rem] leading-[1.75] text-zinc-600 dark:text-zinc-400">
         Anything you like. Most of it gets a short reply and goes no further. The answers
         below are the ones I kept thinking about afterwards.
+      </p>
+      <p className="mt-2 text-sm leading-6 text-zinc-500 dark:text-zinc-400">
+        Inspired by{" "}
+        <CustomLink
+          href="https://brianlovin.com/ama"
+          className="hover:text-accent-600 hover:decoration-accent-600 dark:hover:text-accent-300 dark:hover:decoration-accent-300 rounded underline decoration-zinc-300 underline-offset-4 transition-colors dark:decoration-zinc-700"
+        >
+          Brian Lovin&rsquo;s AMA
+        </CustomLink>
+        .
       </p>
 
       <AskForm
@@ -96,9 +107,12 @@ export default function Ama() {
                       </p>
                     )}
 
-                    <div className="prose max-w-measure dark:prose-invert mt-2.5">
+                    <AnswerDisclosure
+                      id={`${entry.slug}-answer`}
+                      preview={amaPreview(entry.answer)}
+                    >
                       <Mdx source={entry.answer} />
-                    </div>
+                    </AnswerDisclosure>
                   </div>
                 </div>
               </article>
@@ -106,17 +120,6 @@ export default function Ama() {
           </div>
         )}
       </section>
-
-      <p className="mt-10 text-xs leading-5 text-zinc-500 dark:text-zinc-400">
-        Page inspired by{" "}
-        <CustomLink
-          href="https://brianlovin.com/ama"
-          className="hover:text-accent-600 hover:decoration-accent-600 dark:hover:text-accent-300 dark:hover:decoration-accent-300 rounded underline decoration-zinc-300 underline-offset-4 transition-colors dark:decoration-zinc-700"
-        >
-          Brian Lovin&rsquo;s AMA
-        </CustomLink>
-        .
-      </p>
     </div>
   );
 }

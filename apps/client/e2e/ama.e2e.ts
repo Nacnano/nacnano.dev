@@ -41,6 +41,24 @@ test("every answer has a unique anchor for feed deep links", async ({ page }) =>
   expect(ids.size).toBe(count);
 });
 
+test("answers start as previews and can be expanded", async ({ page }) => {
+  await page.goto("/ama");
+
+  const firstAnswer = page.locator("article").first();
+  const toggle = firstAnswer.getByRole("button", { name: "Read more" });
+
+  await expect(toggle).toHaveAttribute("aria-expanded", "false");
+  await expect(firstAnswer.getByText(/…$/)).toBeVisible();
+
+  await toggle.click();
+
+  await expect(firstAnswer.getByRole("button", { name: "Show less" })).toHaveAttribute(
+    "aria-expanded",
+    "true"
+  );
+  await expect(firstAnswer.locator(".prose p")).toHaveCount(3);
+});
+
 test("the ask box has a real label and states what happens to a question", async ({
   page,
 }) => {

@@ -55,6 +55,11 @@ export function mdToPlainText(md: string): string {
   );
 }
 
+/** The first authored paragraph, used as the collapsed answer preview. */
+export function amaPreview(md: string): string {
+  return mdToPlainText(md.split(/\n\s*\n/, 1)[0] ?? md).replace(/[.!?…]+$/, "");
+}
+
 /**
  * schema.org FAQPage — the list of answered questions, newest first.
  *
