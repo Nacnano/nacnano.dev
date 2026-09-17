@@ -73,7 +73,7 @@ test("the ask box expands from a text button and explains what happens", async (
 
   await disclosure.click();
 
-  await expect(page.getByRole("button", { name: "Hide question form" })).toHaveAttribute(
+  await expect(page.getByRole("button", { name: "Close form" })).toHaveAttribute(
     "aria-expanded",
     "true"
   );
