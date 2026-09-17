@@ -75,7 +75,7 @@ export default function AskForm({
         aria-expanded={expanded}
         aria-controls={panelId}
         onClick={() => setExpanded((current) => !current)}
-        className="hover:text-accent-600 hover:decoration-accent-600 dark:hover:text-accent-300 dark:hover:decoration-accent-300 rounded text-sm font-medium text-zinc-700 underline decoration-zinc-300 underline-offset-4 transition-colors dark:text-zinc-300 dark:decoration-zinc-700"
+        className="hover:text-accent-600 hover:decoration-accent-600 dark:hover:text-accent-300 dark:hover:decoration-accent-300 -mx-2 rounded px-2 py-2 text-[1.0625rem] leading-7 font-semibold tracking-[-0.011em] text-zinc-900 underline decoration-zinc-300 underline-offset-4 transition-colors dark:text-zinc-100 dark:decoration-zinc-700"
       >
         {expanded ? "Hide question form" : "Ask a question"}
       </button>
