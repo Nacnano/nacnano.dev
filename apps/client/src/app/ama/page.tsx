@@ -1,4 +1,5 @@
 import Mdx from "@/components/Mdx";
+import CustomLink from "@/components/Link";
 import { genPageMetaData } from "@/app/seo";
 import { PAGE_TITLES } from "@/data/pageTitles";
 import siteMetadata from "@/data/siteMetadata";
@@ -105,6 +106,17 @@ export default function Ama() {
           </div>
         )}
       </section>
+
+      <p className="mt-10 text-xs leading-5 text-zinc-500 dark:text-zinc-400">
+        Page inspired by{" "}
+        <CustomLink
+          href="https://brianlovin.com/ama"
+          className="hover:text-accent-600 hover:decoration-accent-600 dark:hover:text-accent-300 dark:hover:decoration-accent-300 rounded underline decoration-zinc-300 underline-offset-4 transition-colors dark:decoration-zinc-700"
+        >
+          Brian Lovin&rsquo;s AMA
+        </CustomLink>
+        .
+      </p>
     </div>
   );
 }
