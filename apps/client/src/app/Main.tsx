@@ -5,7 +5,7 @@ import type { Blog } from "@/lib/content";
 
 const Main = ({ posts }: { posts: Blog[] }) => (
   <>
-    <section className="animate-rise py-14 sm:py-20">
+    <section className="animate-rise pt-10 pb-14 sm:pt-12 sm:pb-20">
       <div className="flex items-center gap-4">
         {/* The photo does the introducing; the type can stay quiet. */}
         <Image

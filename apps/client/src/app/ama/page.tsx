@@ -31,7 +31,7 @@ export default function Ama() {
   const jsonLd = amaStructuredData(entries);
 
   return (
-    <div className="animate-rise py-12 sm:py-16">
+    <div className="animate-rise pt-8 pb-12 sm:pt-10 sm:pb-16">
       {/*
         Escaped through the shared helper, exactly as the essay page does — a
         `</script>` inside an authored answer would otherwise close the element

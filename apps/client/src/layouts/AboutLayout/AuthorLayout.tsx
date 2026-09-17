@@ -16,7 +16,7 @@ export default function AuthorLayout({ children, content }: Props) {
   const { name, avatar } = content;
 
   return (
-    <div className="animate-rise py-12 sm:py-16">
+    <div className="animate-rise pt-8 pb-12 sm:pt-10 sm:pb-16">
       <header className="flex flex-col gap-5 sm:flex-row sm:items-center sm:gap-7">
         {avatar && (
           <Image

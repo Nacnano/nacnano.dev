@@ -57,7 +57,7 @@ export default function BlogWithDetail({ content, newer, older, children }: Prop
   const showNewer = Boolean(newer?.path);
 
   return (
-    <article className="py-12 sm:py-16">
+    <article className="pt-8 pb-12 sm:pt-10 sm:pb-16">
       <header className="max-w-measure">
         <h1 className="text-[1.75rem] leading-[1.2] font-semibold tracking-[-0.022em] text-zinc-900 sm:text-[2.125rem] dark:text-zinc-100">
           {title}
