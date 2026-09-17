@@ -155,17 +155,16 @@ export default function AskForm({
 
         {/*
           One live region, always present in the DOM so a screen reader is
-          already watching it when the result arrives. `pending` is announced
-          too: on a slow connection the gap between press and answer is exactly
-          where a sighted user sees the button change and a non-sighted one
-          hears nothing.
+          already watching it when the result arrives. The pending message is
+          visually hidden because the button already shows the same state, but
+          it remains announced for anyone who cannot see that change.
         */}
         <p
           aria-live="polite"
           className="mt-3 min-h-[1.75rem] text-[0.9375rem] leading-7 text-zinc-600 dark:text-zinc-400"
         >
           {pending
-            ? "Sending…"
+            ? <span className="sr-only">Sending…</span>
             : state.status === "sent"
               ? "Sent, thanks. If I write an answer it turns up on this page."
               : state.status === "error"
