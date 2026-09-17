@@ -12,7 +12,7 @@ export default function ActivityLayout({ children }: { children: React.ReactNode
   // needs no client JS and never disturbs the early paint.
   const live = isActivityLive();
   return (
-    <div className="animate-rise py-12 sm:py-16">
+    <div className="animate-rise pt-8 pb-12 sm:pt-10 sm:pb-16">
       <h1 className="text-[1.75rem] leading-[1.2] font-semibold tracking-[-0.022em] text-zinc-900 sm:text-[2.125rem] dark:text-zinc-100">
         Activity
         {live ? (
