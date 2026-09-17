@@ -163,13 +163,15 @@ export default function AskForm({
           aria-live="polite"
           className="mt-3 min-h-[1.75rem] text-[0.9375rem] leading-7 text-zinc-600 dark:text-zinc-400"
         >
-          {pending
-            ? <span className="sr-only">Sending…</span>
-            : state.status === "sent"
-              ? "Sent, thanks. If I write an answer it turns up on this page."
-              : state.status === "error"
-                ? failureCopy(state.reason, retryAfterMinutes)
-                : ""}
+          {pending ? (
+            <span className="sr-only">Sending…</span>
+          ) : state.status === "sent" ? (
+            "Sent, thanks. If I write an answer it turns up on this page."
+          ) : state.status === "error" ? (
+            failureCopy(state.reason, retryAfterMinutes)
+          ) : (
+            ""
+          )}
         </p>
       </form>
     </section>
