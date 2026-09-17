@@ -25,37 +25,58 @@ test("renders a parseable FAQPage JSON-LD block", async ({ page }) => {
   }
 });
 
-test("every answer has a distinctly-named permalink pointing at a real anchor", async ({
-  page,
-}) => {
+test("every answer has a unique anchor for feed deep links", async ({ page }) => {
   await page.goto("/ama");
 
-  const permalinks = page.locator('h3 a[href^="#"]');
-  const count = await permalinks.count();
+  const headings = page.locator("article h3[id]");
+  const count = await headings.count();
   expect(count, "the page should publish at least one answer").toBeGreaterThan(0);
 
-  const names = new Set<string>();
+  const ids = new Set<string>();
   for (let i = 0; i < count; i += 1) {
-    const link = permalinks.nth(i);
-    const name = await link.getAttribute("aria-label");
-    // Six links called "Link to this question" are six indistinguishable rows
-    // in a screen reader's link list.
-    expect(name).toBeTruthy();
-    names.add(name!);
-
-    const href = (await link.getAttribute("href"))!;
-    await expect(page.locator(href)).toHaveCount(1);
+    const id = await headings.nth(i).getAttribute("id");
+    expect(id).toBeTruthy();
+    ids.add(id!);
   }
-  expect(names.size).toBe(count);
+  expect(ids.size).toBe(count);
 });
 
-test("the ask box has a real label and states what happens to a question", async ({
+test("answers start as previews and can be expanded", async ({ page }) => {
+  await page.goto("/ama");
+
+  const firstAnswer = page.locator("article").first();
+  const toggle = firstAnswer.getByRole("button", { name: "Read more" });
+
+  await expect(toggle).toHaveAttribute("aria-expanded", "false");
+  await expect(firstAnswer.getByText(/…$/)).toBeVisible();
+
+  await toggle.click();
+
+  await expect(firstAnswer.getByRole("button", { name: "Show less" })).toHaveAttribute(
+    "aria-expanded",
+    "true"
+  );
+  await expect(firstAnswer.locator(".prose p")).toHaveCount(3);
+});
+
+test("the ask box expands from a text button and explains what happens", async ({
   page,
 }) => {
   await page.goto("/ama");
+
+  const disclosure = page.getByRole("button", { name: "Ask a question" });
+  await expect(disclosure).toHaveAttribute("aria-expanded", "false");
 
   // Found by its visible <label>, not by a placeholder standing in for one.
   const question = page.getByLabel("Your question");
+  await expect(question).toBeHidden();
+
+  await disclosure.click();
+
+  await expect(page.getByRole("button", { name: "Close form" })).toHaveAttribute(
+    "aria-expanded",
+    "true"
+  );
   await expect(question).toBeVisible();
   await expect(page.getByRole("button", { name: "Send question" })).toBeVisible();
   await expect(page.getByText(/goes to a private inbox/i)).toBeVisible();
@@ -65,6 +86,7 @@ test("a submission with no store configured says so instead of faking success", 
   page,
 }) => {
   await page.goto("/ama");
+  await page.getByRole("button", { name: "Ask a question" }).click();
 
   await page.getByLabel("Your question").fill("Does the ask box tell the truth?");
   await page.getByRole("button", { name: "Send question" }).click();

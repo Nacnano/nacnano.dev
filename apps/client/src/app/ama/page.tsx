@@ -1,13 +1,15 @@
 import Mdx from "@/components/Mdx";
+import CustomLink from "@/components/Link";
 import { genPageMetaData } from "@/app/seo";
 import { PAGE_TITLES } from "@/data/pageTitles";
 import siteMetadata from "@/data/siteMetadata";
 import { formatDate } from "@/lib/formatDate";
 import { jsonLdScriptProps } from "@/lib/content";
-import { publishedAma, amaStructuredData } from "@/lib/ama";
+import { publishedAma, amaPreview, amaStructuredData } from "@/lib/ama";
 import { MAX_CONTACT, MAX_QUESTION, RETENTION_DAYS } from "@/lib/amaInbox";
 import { ASK_RETRY_AFTER_SECONDS } from "@/lib/rateLimit";
 import AskForm from "./AskForm";
+import AnswerDisclosure from "./AnswerDisclosure";
 
 export const metadata = genPageMetaData({
   title: PAGE_TITLES.ama,
@@ -23,32 +25,6 @@ export const metadata = genPageMetaData({
     },
   },
 });
-
-/**
- * A drawn permalink mark. `#` would be a Unicode glyph standing in for an icon,
- * which the Drawn Icon Rule forbids; this is the same stroked-SVG material as
- * every other icon on the site. It sits in a 24px inline target rather than the
- * standalone icon control's 44px one — an inline mark inside a heading's line
- * box cannot be 44px without breaking the line it belongs to.
- */
-function PermalinkIcon() {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      width="16"
-      height="16"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
-      <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
-    </svg>
-  );
-}
 
 export default function Ama() {
   const entries = publishedAma();
@@ -68,8 +44,18 @@ export default function Ama() {
         Ask me anything
       </h1>
       <p className="max-w-measure mt-4 text-[1.0625rem] leading-[1.75] text-zinc-600 dark:text-zinc-400">
-        Anything you like. Most of it gets a short reply and goes no further. The answers
-        below are the ones I kept thinking about afterwards.
+        Ask anything. I keep most replies private and publish the ones I keep thinking
+        about.
+      </p>
+      <p className="mt-2 text-sm leading-6 text-zinc-500 dark:text-zinc-400">
+        Inspired by{" "}
+        <CustomLink
+          href="https://brianlovin.com/ama"
+          className="hover:text-accent-600 hover:decoration-accent-600 dark:hover:text-accent-300 dark:hover:decoration-accent-300 rounded underline decoration-zinc-300 underline-offset-4 transition-colors dark:decoration-zinc-700"
+        >
+          Brian Lovin&rsquo;s AMA
+        </CustomLink>
+        .
       </p>
 
       <AskForm
@@ -108,16 +94,7 @@ export default function Ama() {
                       id={entry.slug}
                       className="text-[1.0625rem] leading-7 font-semibold tracking-[-0.011em] text-zinc-900 dark:text-zinc-100"
                     >
-                      {entry.question}{" "}
-                      <a
-                        href={`#${entry.slug}`}
-                        // Naming every one of these "Link to this question" gives
-                        // a screen reader an unusable list of identical entries.
-                        aria-label={`Link to this question: ${entry.question}`}
-                        className="hover:text-accent-600 dark:hover:text-accent-300 ml-0.5 inline-flex h-6 w-6 translate-y-1 items-center justify-center rounded text-zinc-500 no-underline transition-colors dark:text-zinc-400"
-                      >
-                        <PermalinkIcon />
-                      </a>
+                      {entry.question}
                     </h3>
 
                     {/*
@@ -130,9 +107,12 @@ export default function Ama() {
                       </p>
                     )}
 
-                    <div className="prose max-w-measure dark:prose-invert mt-2.5">
+                    <AnswerDisclosure
+                      id={`${entry.slug}-answer`}
+                      preview={amaPreview(entry.answer)}
+                    >
                       <Mdx source={entry.answer} />
-                    </div>
+                    </AnswerDisclosure>
                   </div>
                 </div>
               </article>
