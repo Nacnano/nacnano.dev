@@ -69,6 +69,22 @@ The site runs in one of two modes, chosen entirely by environment:
   Redis stream and the feed and ask box go live. Setting exactly one credential
   is a hard configuration error, not a silent fallback — see `docs/architecture.md`.
 
+## Daily activity report
+
+In live mode, the Discord bot also brings the activity feed to you: once a day
+Vercel Cron hits `GET /api/cron/daily-report`, and the bot posts a summary of
+the last 24 hours — visits, countries, top pages, and the running total — to
+the same channel or DM the /ama notifications and error alerts use. The
+schedule lives in `crons` in `vercel.json` (`0 21 * * *`, UTC = 04:00 ICT);
+edit it there. A quiet day still gets a report saying so, because silence from
+the bot should mean the cron did not run, not merely that nobody visited.
+
+Two settings make it work: the Discord bot vars above, and `CRON_SECRET` (see
+`apps/client/.env.example`) so the route can tell a cron request from a
+stranger's GET — unset, the endpoint is closed, not open. `bun run
+activity:report` posts the same report from the terminal right now, without
+the secret, which is how you verify the setup without waiting for tomorrow.
+
 ## Deploys and rollback
 
 `main` is the deploy trigger: a push to `main` promotes the Vercel **Production**
