@@ -20,6 +20,7 @@
     "typecheck": "tsc --noEmit",
     "test": "bun test",
     "ama:inbox": "bun ./src/scripts/amaInbox.ts",
+    "activity:report": "bun ./src/scripts/activityReport.ts",
     "verify:csp": "bun ./src/scripts/verifyCsp.ts",
     "perf": "bunx @lhci/cli@0.14.0 autorun",
     "discord:setup": "bun ./src/scripts/discordSetup.ts",

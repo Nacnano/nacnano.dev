@@ -64,6 +64,11 @@ loudly at `getActivityClient()` rather than silently degrading to static.
   empty feed), so the client keeps its last-known-good page.
 - `/ama` action + inbox — submissions land in a private expiring stream; the
   public page reads authored answers only, never the raw inbox.
+- `GET /api/cron/daily-report` — Vercel Cron's daily summary of the last 24
+  hours, posted as the Discord bot (`lib/activityReport.ts`). Requires
+  `Authorization: Bearer $CRON_SECRET`; the endpoint is closed, not open, when
+  the secret is unset. `bun run activity:report` posts the same report from
+  the terminal.
 
 ## Build pipeline
 
