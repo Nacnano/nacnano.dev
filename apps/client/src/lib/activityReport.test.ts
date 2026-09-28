@@ -97,6 +97,7 @@ afterAll(() => {
 import {
   buildDailySummary,
   dailyReportMessage,
+  placesInWindow,
   REPORT_WINDOW_MS,
   sendDailyActivityReport,
   visitsInWindow,
@@ -180,7 +181,70 @@ describe("buildDailySummary", () => {
   });
 });
 
+describe("placesInWindow", () => {
+  it("groups by country then city, most visits first, case-insensitive codes", () => {
+    const places = placesInWindow([
+      visit("a", NOW.toISOString(), "/", { countryCode: "jp", city: "Tokyo" }),
+      visit("b", NOW.toISOString(), "/", { countryCode: "TH", city: "Chiang Mai" }),
+      visit("c", NOW.toISOString(), "/", { countryCode: "TH", city: "Bangkok" }),
+      visit("d", NOW.toISOString(), "/", { countryCode: "th", city: "Bangkok" }),
+      visit("e", NOW.toISOString(), "/", { countryCode: "TH" }), // no city
+      visit("f", NOW.toISOString(), "/", { city: "Nowhere" }), // no country
+    ]);
+    expect(places).toEqual([
+      {
+        countryCode: "TH",
+        count: 4,
+        cities: [
+          { city: "Bangkok", count: 2 },
+          { city: "Chiang Mai", count: 1 },
+        ],
+      },
+      { countryCode: "JP", count: 1, cities: [{ city: "Tokyo", count: 1 }] },
+    ]);
+  });
+});
+
 describe("dailyReportMessage", () => {
+  it("lists countries by name with flag, count, and their cities", () => {
+    const visits = [
+      visit("a", "2026-09-23T10:00:00.000Z", "/", { countryCode: "TH", city: "Bangkok" }),
+      visit("b", "2026-09-23T10:00:00.000Z", "/", { countryCode: "TH", city: "Bangkok" }),
+      visit("c", "2026-09-23T10:00:00.000Z", "/", {
+        countryCode: "TH",
+        city: "Chiang Mai",
+      }),
+      visit("d", "2026-09-23T10:00:00.000Z", "/", { countryCode: "US" }),
+      ...Array.from({ length: 7 }, (_, i) =>
+        visit(`j${i}`, "2026-09-23T09:00:00.000Z", "/", {
+          countryCode: "JP",
+          city: `C${i}`,
+        })
+      ),
+    ];
+    const embed = dailyReportMessage(buildDailySummary(visits, 11, NOW)).embeds?.[0];
+    expect(embed?.fields?.[0]?.name).toBe("Where from");
+    const value = embed?.fields?.[0]?.value ?? "";
+    expect(value).toContain(
+      "\u{1F1F9}\u{1F1ED} **Thailand** — 3 visits\n  Bangkok ×2, Chiang Mai"
+    );
+    expect(value).toContain("**United States** — 1 visit");
+    expect(value).not.toContain("United States** — 1 visit\n");
+    expect(value).toContain("C0, C1, C2, C3, C4, +2 more");
+    expect(value.indexOf("Japan")).toBeLessThan(value.indexOf("Thailand"));
+  });
+
+  it("falls back to the raw code when it is not a region code", () => {
+    const embed = dailyReportMessage(
+      buildDailySummary(
+        [visit("x", "2026-09-23T10:00:00.000Z", "/", { countryCode: "1A" })],
+        1,
+        NOW
+      )
+    ).embeds?.[0];
+    expect(embed?.fields?.[0]?.value).toContain("**1A** — 1 visit");
+  });
+
   it("shapes the embed: title, link, accent, timestamp, and totals footer", () => {
     const message = dailyReportMessage(buildDailySummary(fixtureVisits, 123, NOW));
     const embed = message.embeds?.[0];
@@ -197,8 +261,7 @@ describe("dailyReportMessage", () => {
   it("lists the top pages with title, path, and count", () => {
     const embed = dailyReportMessage(buildDailySummary(fixtureVisits, 123, NOW))
       .embeds?.[0];
-    expect(embed?.fields?.[0]?.name).toBe("Top pages");
-    const value = embed?.fields?.[0]?.value ?? "";
+    const value = embed?.fields?.find((f) => f.name === "Top pages")?.value ?? "";
     expect(value).toContain("**Hello** `/blogs/hello` — 2 visits");
     expect(value).toContain("`/about` — 1 visit");
   });
@@ -215,8 +278,9 @@ describe("dailyReportMessage", () => {
         title: `Very long title ${i} `.repeat(60),
       })
     );
-    const value = dailyReportMessage(buildDailySummary(padded, 5, NOW)).embeds?.[0]
-      ?.fields?.[0]?.value;
+    const value = dailyReportMessage(
+      buildDailySummary(padded, 5, NOW)
+    ).embeds?.[0]?.fields?.find((f) => f.name === "Top pages")?.value;
     expect((value ?? "").length).toBeLessThanOrEqual(1024);
     expect((value ?? "").endsWith("…")).toBe(true);
   });

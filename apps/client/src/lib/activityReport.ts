@@ -4,7 +4,7 @@
  * The /activity page shows the feed to whoever opens it; this is the version
  * that comes to you unprompted: once a day, Vercel Cron hits
  * `GET /api/cron/daily-report` and the bot posts the last 24 hours — visits,
- * countries, top pages, and the running total — to the same channel or DM the
+ * countries and cities, top pages, and the running total — to the same channel or DM the
  * /ama notifications use (see `discord.ts` for why a bot rather than a
  * webhook). A quiet day still gets a report: silence from the bot is
  * ambiguous between "nobody visited" and "the cron never ran", and the second
@@ -18,7 +18,13 @@
 
 import "server-only";
 
-import { countCountries, isActivityLive, topPages, type PageAggregate } from "./activity";
+import {
+  countCountries,
+  countryFlag,
+  isActivityLive,
+  topPages,
+  type PageAggregate,
+} from "./activity";
 import { readActivityFeed, STREAM_MAXLEN } from "./activityRedis";
 import {
   clampToLimit,
@@ -41,6 +47,10 @@ export const REPORT_WINDOW_MS = 24 * 60 * 60 * 1000;
  *  you can read off a phone notification. */
 const TOP_PAGES_IN_REPORT = 5;
 
+/** How many countries fit under "Where from", and cities under each. */
+const COUNTRIES_IN_REPORT = 10;
+const CITIES_PER_COUNTRY = 5;
+
 /** Signal Blue, like the /ama embed (`amaNotify.ts`). */
 const ACCENT = 0x2556da;
 
@@ -52,8 +62,18 @@ export type DailySummary = {
   countries: number;
   /** Most-viewed pages in the window, report order already applied. */
   top: PageAggregate[];
+  /** Visits per country, most first, each with its cities (most first). */
+  places: CountryAggregate[];
   /** Lifetime running total (the `activity:count` key), not window-bounded. */
   total: number;
+};
+
+export type CityAggregate = { city: string; count: number };
+
+export type CountryAggregate = {
+  countryCode: string;
+  count: number;
+  cities: CityAggregate[];
 };
 
 export type DailyReportOutcome =
@@ -79,6 +99,32 @@ export function visitsInWindow(
   });
 }
 
+/**
+ * Group visits by country, then by city inside each country. Both levels sort
+ * by count, ties in first-seen order. A visit without a country is skipped
+ * (the same rule `countCountries` uses); one without a city still counts
+ * toward its country.
+ */
+export function placesInWindow(visits: readonly VisitEvent[]): CountryAggregate[] {
+  const byCountry = new Map<string, { count: number; cities: Map<string, number> }>();
+  for (const visit of visits) {
+    const code = visit.countryCode?.toUpperCase();
+    if (!code) continue;
+    const entry = byCountry.get(code) ?? { count: 0, cities: new Map<string, number>() };
+    entry.count += 1;
+    const city = visit.city?.trim();
+    if (city) entry.cities.set(city, (entry.cities.get(city) ?? 0) + 1);
+    byCountry.set(code, entry);
+  }
+  return Array.from(byCountry, ([countryCode, { count, cities }]) => ({
+    countryCode,
+    count,
+    cities: Array.from(cities, ([city, n]) => ({ city, count: n })).sort(
+      (a, b) => b.count - a.count
+    ),
+  })).sort((a, b) => b.count - a.count);
+}
+
 /** Roll a newest-first page of visits into the numbers the report shows. */
 export function buildDailySummary(
   visits: readonly VisitEvent[],
@@ -92,6 +138,7 @@ export function buildDailySummary(
     visits: inWindow.length,
     countries: countCountries(inWindow),
     top: topPages(inWindow).slice(0, TOP_PAGES_IN_REPORT),
+    places: placesInWindow(inWindow).slice(0, COUNTRIES_IN_REPORT),
     total: count,
   };
 }
@@ -113,6 +160,32 @@ function topLines(top: readonly PageAggregate[]): string {
     .join("\n");
 }
 
+const regionNames = new Intl.DisplayNames(["en"], { type: "region" });
+
+function countryName(code: string): string {
+  try {
+    return regionNames.of(code) ?? code;
+  } catch {
+    return code;
+  }
+}
+
+function placeLines(places: readonly CountryAggregate[]): string {
+  return places
+    .map((place) => {
+      const flag = countryFlag(place.countryCode);
+      const head = `${flag ? `${flag} ` : ""}**${countryName(place.countryCode)}** — ${plural(place.count, "visit")}`;
+      const shown = place.cities.slice(0, CITIES_PER_COUNTRY);
+      if (shown.length === 0) return head;
+      const more = place.cities.length - shown.length;
+      const cities = shown
+        .map((c) => (c.count > 1 ? `${c.city} ×${c.count}` : c.city))
+        .join(", ");
+      return `${head}\n  ${cities}${more > 0 ? `, +${more} more` : ""}`;
+    })
+    .join("\n");
+}
+
 /**
  * The embed. A quiet day reads as one honest line rather than an absence: the
  * bot sends a report every day it is configured, and `0 visits` is the
@@ -125,6 +198,25 @@ export function dailyReportMessage(summary: DailySummary): DiscordMessage {
       ? `No visits in the 24 hours to ${day} ${summary.to.slice(11, 16)} UTC.`
       : `${plural(summary.visits, "visit")} from ${plural(summary.countries, "country")} in the 24 hours to ${day} ${summary.to.slice(11, 16)} UTC.`;
 
+  const fields = [
+    ...(summary.places.length > 0
+      ? [
+          {
+            name: "Where from",
+            value: clampToLimit(placeLines(summary.places), MAX_EMBED_FIELD_VALUE),
+          },
+        ]
+      : []),
+    ...(summary.top.length > 0
+      ? [
+          {
+            name: "Top pages",
+            value: clampToLimit(topLines(summary.top), MAX_EMBED_FIELD_VALUE),
+          },
+        ]
+      : []),
+  ];
+
   return {
     embeds: [
       {
@@ -133,16 +225,7 @@ export function dailyReportMessage(summary: DailySummary): DiscordMessage {
         description,
         color: ACCENT,
         timestamp: summary.to,
-        ...(summary.top.length > 0
-          ? {
-              fields: [
-                {
-                  name: "Top pages",
-                  value: clampToLimit(topLines(summary.top), MAX_EMBED_FIELD_VALUE),
-                },
-              ],
-            }
-          : {}),
+        ...(fields.length > 0 ? { fields } : {}),
         footer: { text: `${plural(summary.total, "visit")} tracked in total` },
       },
     ],
