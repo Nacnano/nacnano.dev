@@ -75,7 +75,7 @@ In live mode, the Discord bot also brings the activity feed to you: once a day
 Vercel Cron hits `GET /api/cron/daily-report`, and the bot posts a summary of
 the last 24 hours — visits, countries, top pages, and the running total — to
 the same channel or DM the /ama notifications and error alerts use. The
-schedule lives in `crons` in `vercel.json` (`0 21 * * *`, UTC = 04:00 ICT);
+schedule lives in `crons` in `apps/client/vercel.json` (the Vercel project root) (`0 21 * * *`, UTC = 04:00 ICT);
 edit it there. A quiet day still gets a report saying so, because silence from
 the bot should mean the cron did not run, not merely that nobody visited.
 
