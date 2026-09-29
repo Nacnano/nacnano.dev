@@ -60,7 +60,7 @@
     "@types/react-dom": "^19",
     "cross-env": "^10.1.0",
     "oxlint": "1.85.0",
-    "prettier": "^3.0.0",
+    "prettier": "^3.9.9",
     "tsconfig": "workspace:*",
     "typescript": "^7.0.2"
   }
