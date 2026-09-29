@@ -20,7 +20,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "2.5.14",
-    "@turbo/gen": "^2.5.5",
+    "@turbo/gen": "^2.11.4",
     "oxlint": "1.85.0",
     "prettier": "^3.9.9",
     "prettier-plugin-tailwindcss": "^0.8.1",
