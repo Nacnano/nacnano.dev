@@ -9,8 +9,9 @@ import type { MarkKind } from "@/app/projects/ProjectMark";
  * a dead one. `repo` is the source. A card links to `href` when there is one
  * and falls back to `repo`, showing a separate "Source" link only when both
  * exist.
- * `imgSrc` is a real screenshot; `mark` is a drawn diagram for the projects
- * with nothing deployed to capture.
+ * `imgSrc` is a real image — a screenshot of the live site, or for research
+ * work a figure lifted from the project's own slides or report. `mark` is a
+ * drawn diagram for the projects with nothing of their own to show.
  */
 export type Project = {
   title: string;
@@ -123,7 +124,7 @@ const projectsData: Project[] = [
       "Built a Thai benchmark for multimodal models, generating the evaluation questions from Visual Genome data. Mostly a lesson in how much of benchmarking is arguing about what counts as a correct answer.",
     stack: ["Python", "Visual Genome"],
     category: "research",
-    mark: "grid",
+    imgSrc: "/static/images/thai-context-benchmark.png",
     repo: "https://github.com/Nacnano/thai-context-llm-benchmark",
   },
   {
@@ -132,7 +133,7 @@ const projectsData: Project[] = [
       "Supervised fine-tuning of the LLaDA diffusion model for Thai text summarisation, evaluated against the usual suspects with DeepEval. It held up better than I expected on some things and worse on others.",
     stack: ["Python", "LLaDA", "DeepEval"],
     category: "research",
-    mark: "denoise",
+    imgSrc: "/static/images/nano-llada.png",
     repo: "https://github.com/pupipatsk/NanoLLaDA",
   },
   {
@@ -141,7 +142,7 @@ const projectsData: Project[] = [
       "A computer-vision pipeline that turns chess video into notation, fine-tuning ResNet and InceptionV3. It works well on the boards it was trained on, which is the honest caveat.",
     stack: ["Python", "ResNet", "InceptionV3"],
     category: "research",
-    mark: "board",
+    imgSrc: "/static/images/chess-move-detection.png",
     repo: "https://github.com/athensclub/chess-video-move-detection",
   },
   {
@@ -150,7 +151,7 @@ const projectsData: Project[] = [
       "Forecasting S&P 500 returns with a handful of ML models, then running portfolio optimisation on top. The backtest looked great, which is exactly when you should be suspicious of a backtest.",
     stack: ["Python", "scikit-learn", "Pandas"],
     category: "research",
-    mark: "forecast",
+    imgSrc: "/static/images/stock-forecasting.png",
     repo: "https://github.com/Nacnano/stock-machine-learning-project",
   },
   {
@@ -159,7 +160,7 @@ const projectsData: Project[] = [
       "A school research project on whether multimedia actually helps people take better notes. Mask R-CNN and a random forest, and a lot of trial and error.",
     stack: ["Python", "Mask R-CNN", "Random Forest"],
     category: "research",
-    mark: "segment",
+    imgSrc: "/static/images/multimedia-note-taking.png",
     repo: "https://github.com/Nacnano/predicting-and-comparing-learners-interest-in-note-taking-from-multimedia-using-a-machine-learning-",
   },
   {
@@ -168,7 +169,7 @@ const projectsData: Project[] = [
       "A maths model for arguing about the greatest tennis player of all time, built for IMMC 2021. Settles nothing, which is the point.",
     stack: ["Python", "Pandas"],
     category: "research",
-    mark: "court",
+    imgSrc: "/static/images/gfinder.png",
     repo: "https://github.com/Nacnano/IMMC-2021",
   },
 ];
