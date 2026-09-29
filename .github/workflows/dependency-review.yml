@@ -19,7 +19,7 @@ jobs:
       # the `bun audit --audit-level=high` gate in CI: that audits the whole tree,
       # this audits only what a pull request *adds*.
       - name: Review dependencies
-        uses: actions/dependency-review-action@v4
+        uses: actions/dependency-review-action@v5
         with:
           fail-on-severity: high
           # Bun is not yet understood by the checker's ecosystem auto-detect; the
