@@ -2,8 +2,16 @@ import { createHash } from "node:crypto";
 
 // React escapes `<` as `\u003c` inside the inline payloads it serializes, so a
 // non-greedy scan for the closing tag cannot be fooled by script contents.
-const INLINE_SCRIPT = /<script([^>]*)>([\s\S]*?)<\/script>/g;
-const HAS_SRC = /(^|\s)src\s*=/;
+// Tag and attribute names are matched case-insensitively because HTML says
+// they are (CodeQL flagged the lowercase-only pattern): a hand-written
+// `<SCRIPT>` — e.g. in MDX content — must still yield its hash, or the CSP
+// would block it at runtime while every check below kept reporting it as
+// covered. The closing tag tolerates anything up to its `>` (`</script >`,
+// `</script\n bar>` — end tags may carry whitespace and junk in HTML), for
+// the same reason. The body is hashed byte-exact regardless; tag syntax
+// never enters the hash input.
+const INLINE_SCRIPT = /<script([^>]*)>([\s\S]*?)<\/script[^>]*>/gi;
+const HAS_SRC = /(^|\s)src\s*=/i;
 
 export type InlineScript = { attributes: string; body: string };
 
