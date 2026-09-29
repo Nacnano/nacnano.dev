@@ -16,17 +16,14 @@ updates:
       dev-tooling:
         dependency-type: development
     # Majors that are known-breakable for this repo, so Dependabot stops
-    # opening PRs that fail CI (see #90). Drop each ignore once its migration
-    # has landed:
-    #   - typescript 7 removed the JS compiler API that
-    #     apps/client/src/scripts/checkEnvVars.ts imports at runtime, plus the
-    #     moduleResolution=node10 / baseUrl options the tsconfigs still use.
+    # opening PRs that fail CI. Drop each ignore once its blocker is resolved:
     #   - @types/node must track the pinned Node major (engines, CI setup-node
     #     and Vercel are all on 22), so a 26.x would type-check against APIs
-    #     the runtime does not have.
+    #     the runtime does not have. Raise this when the Node runtime moves.
+    # (typescript 7 was unblocked by the migration in the commit that adds
+    # this comment: tsconfigs moved to bundler resolution and checkEnvVars.ts
+    # moved off the removed JS compiler API onto typescript/unstable/ast.)
     ignore:
-      - dependency-name: typescript
-        update-types: ["version-update:semver-major"]
       - dependency-name: "@types/node"
         update-types: ["version-update:semver-major"]
     labels: ["dependencies"]
