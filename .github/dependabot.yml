@@ -1,6 +1,10 @@
 version: 2
 updates:
-  - package-ecosystem: npm
+  # The Bun ecosystem (not npm): this repo is Bun-managed (bun.lock +
+  # packageManager) and Dependabot's npm_and_yarn updater cannot write
+  # bun.lock — it shipped #90 with edited package.json files and a stale
+  # lockfile, then started failing its weekly update outright.
+  - package-ecosystem: bun
     directory: /
     schedule:
       interval: weekly
