@@ -56,6 +56,19 @@ describe("extractInlineScripts", () => {
 
     expect(extractInlineScripts(html)).toEqual([String.raw`push("\u003c/script>rest")`]);
   });
+
+  it("matches tag casing and closing-tag junk, as HTML requires", () => {
+    const html =
+      `<SCRIPT SRC="/a.js"></SCRIPT><Script>two()</Script><script SRC="x">three()</SCRIPT>\n` +
+      "<script>four()</script\t\n bar>" +
+      "<script>five()</script\t x >";
+
+    // The two sourced scripts are skipped — one upper-case <SCRIPT SRC=…>,
+    // one lower-case open tag with an upper-case SRC attribute (both prove
+    // HAS_SRC is case-insensitive) — while mixed-case inline tags extract
+    // even when the closing tag carries whitespace or junk before its `>`.
+    expect(extractInlineScripts(html)).toEqual(["two()", "four()", "five()"]);
+  });
 });
 
 describe("hashInlineScripts", () => {
