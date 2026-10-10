@@ -21,6 +21,12 @@ export default function Mdx({ source }: { source: string }) {
       source={source}
       components={components}
       options={{
+        // next-mdx-remote v6 defaults blockJS to true, and that plugin deletes
+        // every JSX expression attribute. Posts pass width={1280} to next/image;
+        // without those numbers the image component throws and the page 500s.
+        // blockDangerousJS still rejects eval, process, and the other globals.
+        blockJS: false,
+        blockDangerousJS: true,
         mdxOptions: {
           remarkPlugins: [remarkGfm],
           rehypePlugins: [
