@@ -14,15 +14,32 @@ import path from "node:path";
 import { hashInlineScripts } from "../lib/cspHashes";
 
 const CLIENT_ROOT = path.join(import.meta.dir, "../..");
-const APP_BUILD_DIR = path.join(CLIENT_ROOT, ".next/server/app");
+const SERVER_DIR = path.join(CLIENT_ROOT, ".next/server");
+const APP_BUILD_DIR = path.join(SERVER_DIR, "app");
 const MANIFEST = path.join(CLIENT_ROOT, "src/generated/cspScriptHashes.ts");
 
-function prerenderedPages(dir: string): string[] {
-  return readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
-    const full = path.join(dir, entry.name);
-    if (entry.isDirectory()) return prerenderedPages(full);
-    return entry.name.endsWith(".html") ? [full] : [];
-  });
+function htmlFiles(dir: string, recursive: boolean): string[] {
+  try {
+    return readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
+      const full = path.join(dir, entry.name);
+      if (entry.isDirectory()) return recursive ? htmlFiles(full, true) : [];
+      return entry.name.endsWith(".html") ? [full] : [];
+    });
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Local and CI builds write each page to `.next/server/app`. Vercel injects a
+ * Next adapter, and that path stores the same HTML as flat files directly in
+ * `.next/server` (`useScopedBuildArtifacts`). Prefer the app-dir files when
+ * they exist so a normal build keeps hashing exactly what it used to.
+ */
+function prerenderedPages(): string[] {
+  const appPages = htmlFiles(APP_BUILD_DIR, true);
+  if (appPages.length > 0) return appPages;
+  return htmlFiles(SERVER_DIR, false);
 }
 
 function render(hashes: string[]): string {
@@ -38,10 +55,10 @@ function render(hashes: string[]): string {
 }
 
 export function generate(): string {
-  const pages = prerenderedPages(APP_BUILD_DIR);
+  const pages = prerenderedPages();
   if (pages.length === 0) {
     throw new Error(
-      `No prerendered HTML under ${APP_BUILD_DIR}; run \`next build\` first.`
+      `No prerendered HTML under ${APP_BUILD_DIR} or ${SERVER_DIR}; run \`next build\` first.`
     );
   }
   return render(hashInlineScripts(pages.map((page) => readFileSync(page, "utf8"))));
