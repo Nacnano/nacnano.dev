@@ -31,15 +31,29 @@ function htmlFiles(dir: string, recursive: boolean): string[] {
 }
 
 /**
- * Local and CI builds write each page to `.next/server/app`. Vercel injects a
- * Next adapter, and that path stores the same HTML as flat files directly in
- * `.next/server` (`useScopedBuildArtifacts`). Prefer the app-dir files when
- * they exist so a normal build keeps hashing exactly what it used to.
+ * Local and CI builds write each page to `.next/server/app`. On Vercel, Next
+ * 16.3's adapter copies that HTML into the build-output directory during
+ * `onBuildComplete` and does not leave `.html` files under `.next/server`.
+ * Prefer the app-dir files when they exist so a normal build keeps hashing
+ * exactly what it used to.
  */
 function prerenderedPages(): string[] {
   const appPages = htmlFiles(APP_BUILD_DIR, true);
   if (appPages.length > 0) return appPages;
-  return htmlFiles(SERVER_DIR, false);
+  return [
+    htmlFiles(SERVER_DIR, false),
+    htmlFiles(path.join(CLIENT_ROOT, ".vercel/output/static"), true),
+    htmlFiles(path.join(CLIENT_ROOT, ".next/output/static"), true),
+    htmlFiles(path.join(CLIENT_ROOT, "../.vercel/output/static"), true),
+  ].flat();
+}
+
+function peek(dir: string): string {
+  try {
+    return readdirSync(dir).slice(0, 40).join(", ");
+  } catch {
+    return "(missing)";
+  }
 }
 
 function render(hashes: string[]): string {
@@ -58,7 +72,11 @@ export function generate(): string {
   const pages = prerenderedPages();
   if (pages.length === 0) {
     throw new Error(
-      `No prerendered HTML under ${APP_BUILD_DIR} or ${SERVER_DIR}; run \`next build\` first.`
+      `No prerendered HTML after next build. ` +
+        `.next/server: ${peek(SERVER_DIR)}; ` +
+        `.next/server/app: ${peek(APP_BUILD_DIR)}; ` +
+        `.vercel/output: ${peek(path.join(CLIENT_ROOT, ".vercel/output"))}; ` +
+        `../.vercel/output: ${peek(path.join(CLIENT_ROOT, "../.vercel/output"))}`
     );
   }
   return render(hashInlineScripts(pages.map((page) => readFileSync(page, "utf8"))));
