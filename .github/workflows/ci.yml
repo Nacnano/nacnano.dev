@@ -73,7 +73,9 @@ jobs:
         run: bun run build
 
       # Serve that build and check, per page, that every inline script it emits
-      # is allowed by the policy it was served with.
+      # is allowed by the policy it was served with. This is the local build.
+      # `verify-csp-deploy.yml` repeats the check against www.nacnano.dev after
+      # a production deploy, which is the HTML visitors actually receive.
       #
       # This is not a duplicate of `e2e/csp.e2e.ts`, which watches for real
       # `securitypolicyviolation` events in a browser. Measured: delete the

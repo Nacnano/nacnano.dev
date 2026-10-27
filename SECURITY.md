@@ -65,7 +65,16 @@ delete the `/ama` JSON-LD hash from the manifest and rebuild, and the browser
 suite still passes — a `type="application/ld+json"` block is a data block,
 never prepared as a script, so no refusal and no violation event is produced.
 Run it locally against `bun run start` when changing anything that emits
-markup; CI runs it after the build.
+markup; CI runs it after the build, against that local server.
+
+That local run cannot see the HTML a host actually serves. Vercel writes
+prerendered pages somewhere else than `.next/server/app`, and a policy hashed
+from the wrong files stays green in CI — every page was blocked for 17 days
+that way. `.github/workflows/verify-csp-deploy.yml` runs the same script
+against `https://www.nacnano.dev` after each production deploy, once the live
+HTML contains that deploy's commit. The deployment's own `*.vercel.app` URL
+is behind Vercel's login wall, so the check uses the public site. With no
+build on disk it takes the page list from the live sitemap.
 
 ## Automation
 
