@@ -11,8 +11,8 @@ import { INLINE_SCRIPT_HASHES } from "@/generated/cspScriptHashes";
  *    in it — Next only injects a nonce while it renders. These are covered by
  *    `'sha256-…'` hashes of the exact inline scripts the build emitted; see
  *    `src/scripts/cspScriptHashes.ts`.
- *  - **Server-rendered pages** (`/activity`, an un-prerendered `/link/[link]`,
- *    dev). Their inline scripts differ per request, so they get the nonce that
+ *  - **Server-rendered pages** (`/activity`, dev). Their inline scripts differ
+ *    per request, so they get the nonce that
  *    `src/proxy.ts` mints and forwards on the request, which Next then stamps
  *    onto its own bootstrap scripts.
  *
