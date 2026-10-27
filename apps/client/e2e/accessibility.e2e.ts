@@ -34,7 +34,7 @@ const SURFACES: ReadonlyArray<{ path: string; label: string }> = [
   { path: "/this-route-does-not-exist", label: "not-found" },
 ];
 
-function describe(violations: Violation[]) {
+function describeViolations(violations: Violation[]) {
   return violations.map((v) => ({
     id: v.id,
     impact: v.impact,
@@ -72,7 +72,7 @@ async function scan(page: Page, path: string, theme: Theme) {
   );
 
   expect(
-    describe(blocking),
+    describeViolations(blocking),
     `${path} (${theme}) has serious/critical accessibility violations`
   ).toEqual([]);
 }

@@ -1,5 +1,5 @@
 {
-  "$schema": "https://biomejs.dev/schemas/2.5.13/schema.json",
+  "$schema": "https://biomejs.dev/schemas/2.6.2/schema.json",
   // Single Biome config for the workspace. Biome walks up from the file being
   // checked, so `biome lint .` inside apps/client picks this up — no per-app
   // config, and no shared config package to keep in sync.
