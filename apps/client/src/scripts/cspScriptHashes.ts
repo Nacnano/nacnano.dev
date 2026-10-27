@@ -15,14 +15,21 @@ import { hashInlineScripts } from "../lib/cspHashes";
 
 const CLIENT_ROOT = path.join(import.meta.dir, "../..");
 const SERVER_DIR = path.join(CLIENT_ROOT, ".next/server");
-const APP_BUILD_DIR = path.join(SERVER_DIR, "app");
+const PRERENDER_MANIFEST = path.join(CLIENT_ROOT, ".next/prerender-manifest.json");
 const MANIFEST = path.join(CLIENT_ROOT, "src/generated/cspScriptHashes.ts");
 
-function htmlFiles(dir: string, recursive: boolean): string[] {
+// Where a prerendered page lands under `.next/server`, keyed back to its route.
+// A plain `next build` writes `app/about.html`. With a deployment adapter —
+// which Vercel always sets — Next 16.3 writes the same page to
+// `route-cache/APP_PAGE/<sha256 of the source route>/$/about.html` instead, and
+// the adapter only *copies* it onwards into `.vercel/output`.
+const PAGE_HTML = /^(?:app|route-cache\/[^/]+\/[^/]+\/\$)\/(.+)\.html$/;
+
+function htmlFiles(dir: string): string[] {
   try {
     return readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
       const full = path.join(dir, entry.name);
-      if (entry.isDirectory()) return recursive ? htmlFiles(full, true) : [];
+      if (entry.isDirectory()) return htmlFiles(full);
       return entry.name.endsWith(".html") ? [full] : [];
     });
   } catch {
@@ -30,30 +37,51 @@ function htmlFiles(dir: string, recursive: boolean): string[] {
   }
 }
 
-/**
- * Local and CI builds write each page to `.next/server/app`. On Vercel, Next
- * 16.3's adapter copies that HTML into the build-output directory during
- * `onBuildComplete` and does not leave `.html` files under `.next/server`.
- * Prefer the app-dir files when they exist so a normal build keeps hashing
- * exactly what it used to.
- */
-function prerenderedPages(): string[] {
-  const appPages = htmlFiles(APP_BUILD_DIR, true);
-  if (appPages.length > 0) return appPages;
-  return [
-    htmlFiles(SERVER_DIR, false),
-    htmlFiles(path.join(CLIENT_ROOT, ".vercel/output/static"), true),
-    htmlFiles(path.join(CLIENT_ROOT, ".next/output/static"), true),
-    htmlFiles(path.join(CLIENT_ROOT, "../.vercel/output/static"), true),
-  ].flat();
+/** The route a prerendered HTML file serves, or null for anything else. */
+function routeOf(file: string): string | null {
+  const relative = path.relative(SERVER_DIR, file).split(path.sep).join("/");
+  const name = PAGE_HTML.exec(relative)?.[1];
+  if (name === undefined) return null;
+  return name === "index" ? "/" : `/${name}`;
 }
 
-function peek(dir: string): string {
-  try {
-    return readdirSync(dir).slice(0, 40).join(", ");
-  } catch {
-    return "(missing)";
+/**
+ * Every page route Next says it prerendered. Route handlers such as
+ * `/sitemap.xml` are in the manifest too, but have no `dataRoute` and no HTML.
+ */
+function expectedRoutes(): string[] {
+  const manifest = JSON.parse(readFileSync(PRERENDER_MANIFEST, "utf8")) as {
+    routes: Record<string, { dataRoute?: string | null }>;
+  };
+  const routes = Object.entries(manifest.routes)
+    .filter(([, route]) => route.dataRoute)
+    .map(([pathname]) => pathname);
+  // An empty list would let the coverage check below pass without checking
+  // anything — which is what a renamed manifest field would quietly produce.
+  if (routes.length === 0) {
+    throw new Error(`${PRERENDER_MANIFEST} lists no prerendered pages.`);
   }
+  return routes;
+}
+
+/**
+ * Hashing too few pages fails silently: the build passes, and the CSP then
+ * blocks the RSC payload of every page it missed, so nothing hydrates. That is
+ * how Vercel shipped a policy built from the 404 page alone. Refuse to write a
+ * manifest unless every prerendered route contributed its HTML.
+ */
+function prerenderedPages(): string[] {
+  const pages = htmlFiles(SERVER_DIR);
+  const found = new Set(pages.map(routeOf));
+  const missing = expectedRoutes().filter((route) => !found.has(route));
+  if (missing.length > 0) {
+    throw new Error(
+      `No prerendered HTML under .next/server for ${missing.join(", ")}. ` +
+        `The CSP would block their inline scripts. Found: ` +
+        `${pages.map((page) => path.relative(SERVER_DIR, page)).join(", ") || "(none)"}`
+    );
+  }
+  return pages;
 }
 
 function render(hashes: string[]): string {
@@ -70,15 +98,6 @@ function render(hashes: string[]): string {
 
 export function generate(): string {
   const pages = prerenderedPages();
-  if (pages.length === 0) {
-    throw new Error(
-      `No prerendered HTML after next build. ` +
-        `.next/server: ${peek(SERVER_DIR)}; ` +
-        `.next/server/app: ${peek(APP_BUILD_DIR)}; ` +
-        `.vercel/output: ${peek(path.join(CLIENT_ROOT, ".vercel/output"))}; ` +
-        `../.vercel/output: ${peek(path.join(CLIENT_ROOT, "../.vercel/output"))}`
-    );
-  }
   return render(hashInlineScripts(pages.map((page) => readFileSync(page, "utf8"))));
 }
 
