@@ -82,9 +82,12 @@ loudly at `getActivityClient()` rather than silently degrading to static.
    disagree, then `postbuild.ts` runs the content-graph guard and writes the RSS
    feeds.
 
-CSP is enforced two ways: this hash-manifest check (served policy vs served
-markup) and the Playwright `securitypolicyviolation` suite (real browser
-refusals). They catch different drift, which is why both exist.
+CSP is enforced three ways. The hash-manifest check compares served policy
+against served markup. The Playwright `securitypolicyviolation` suite catches
+real browser refusals. `verify:csp` runs again against `https://www.nacnano.dev`
+after each production deploy (`.github/workflows/verify-csp-deploy.yml`),
+because the CI run serves a local `next start` and never sees the HTML Vercel
+writes. They catch different drift, which is why all three exist.
 
 ## Content pipeline
 
