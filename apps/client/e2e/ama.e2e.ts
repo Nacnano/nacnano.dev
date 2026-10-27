@@ -80,6 +80,10 @@ test("the ask box expands from a text button and explains what happens", async (
   await expect(question).toBeVisible();
   await expect(page.getByRole("button", { name: "Send question" })).toBeVisible();
   await expect(page.getByText(/goes to a private inbox/i)).toBeVisible();
+  await expect(page.getByText("1000 characters left")).toBeVisible();
+
+  await question.fill("Hello");
+  await expect(page.getByText("995 characters left")).toBeVisible();
 });
 
 test("a submission with no store configured says so instead of faking success", async ({
