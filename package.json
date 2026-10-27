@@ -19,12 +19,12 @@
     "test": "turbo run test"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.5.15",
-    "@turbo/gen": "^2.11.7",
-    "oxlint": "1.87.0",
-    "prettier": "^3.9.9",
+    "@biomejs/biome": "2.6.2",
+    "@turbo/gen": "^2.11.10",
+    "oxlint": "1.89.0",
+    "prettier": "^3.9.10",
     "prettier-plugin-tailwindcss": "^0.8.1",
-    "turbo": "^2.11.7"
+    "turbo": "^2.11.10"
   },
   "trustedDependencies": [
     "esbuild",
