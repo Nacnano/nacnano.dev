@@ -98,13 +98,13 @@ export function requireIsoDate(value: unknown, field: string, file: string): str
   // the post to the bottom of the feed and poisons the RSS `lastBuildDate`.
   if (!(value instanceof Date) && typeof value !== "string") {
     throw new Error(
-      `blogs/${file}: \`${field}\` must be a date (string or Date), got ${describe(value)}`
+      `blogs/${file}: \`${field}\` must be a date (string or Date), got ${describeValue(value)}`
     );
   }
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) {
     throw new Error(
-      `blogs/${file}: \`${field}\` is not a valid date (${describe(value)})`
+      `blogs/${file}: \`${field}\` is not a valid date (${describeValue(value)})`
     );
   }
   return date.toISOString();
@@ -142,7 +142,7 @@ export function requireBooleanOrUndefined(
   if (value === undefined || value === null) return undefined;
   if (typeof value !== "boolean") {
     throw new Error(
-      `blogs/${file}: \`${field}\` must be an unquoted boolean (true/false), got ${describe(value)}`
+      `blogs/${file}: \`${field}\` must be an unquoted boolean (true/false), got ${describeValue(value)}`
     );
   }
   return value;
@@ -156,7 +156,7 @@ export function requireOptionalString(
   if (value === undefined || value === null) return undefined;
   if (typeof value !== "string") {
     throw new Error(
-      `blogs/${file}: \`${field}\` must be a string when present, got ${describe(value)}`
+      `blogs/${file}: \`${field}\` must be a string when present, got ${describeValue(value)}`
     );
   }
   return value.trim() || undefined;
@@ -170,7 +170,7 @@ export function requireKnownLayout(
   if (value === undefined || value === null) return undefined;
   if (typeof value !== "string" || !(LAYOUT_NAMES as readonly string[]).includes(value)) {
     throw new Error(
-      `blogs/${file}: \`${field}\` must be one of ${LAYOUT_NAMES.join(", ")}, got ${describe(value)}`
+      `blogs/${file}: \`${field}\` must be one of ${LAYOUT_NAMES.join(", ")}, got ${describeValue(value)}`
     );
   }
   return value;
@@ -187,7 +187,7 @@ export function requireAuthorName(value: unknown, file: string): string {
   const str = typeof value === "string" ? value.trim() : "";
   if (!str) {
     throw new Error(
-      `authors/${file}: \`name\` must be a non-empty string, got ${describe(value)}`
+      `authors/${file}: \`name\` must be a non-empty string, got ${describeValue(value)}`
     );
   }
   return str;
@@ -201,7 +201,7 @@ export function requireAuthorOptionalString(
   if (value === undefined || value === null) return undefined;
   if (typeof value !== "string") {
     throw new Error(
-      `authors/${file}: \`${field}\` must be a string when present, got ${describe(value)}`
+      `authors/${file}: \`${field}\` must be a string when present, got ${describeValue(value)}`
     );
   }
   return value.trim() || undefined;
@@ -255,7 +255,7 @@ export function requireAuthorUrl(
 }
 
 /** Short, safe rendering of an offending value for an error message. */
-function describe(value: unknown): string {
+function describeValue(value: unknown): string {
   if (value === null) return "null";
   if (Array.isArray(value)) return "an array";
   if (typeof value === "object") return "an object";
