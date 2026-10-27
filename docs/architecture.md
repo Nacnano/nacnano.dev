@@ -69,6 +69,9 @@ loudly at `getActivityClient()` rather than silently degrading to static.
   `Authorization: Bearer $CRON_SECRET`; the endpoint is closed, not open, when
   the secret is unset. `bun run activity:report` posts the same report from
   the terminal.
+- `POST /api/csp-report` — CSP violation reports from the browser, forwarded
+  to the same Discord error alerts. Always answers 204; extension noise is
+  dropped.
 
 ## Build pipeline
 

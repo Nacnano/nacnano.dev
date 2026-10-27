@@ -52,6 +52,15 @@ unreproducible.
 `style-src` still allows `'unsafe-inline'`: Tailwind's runtime theme switch and
 `next/font` write `style` attributes, which no nonce or hash can reach.
 
+A blocked script is reported, not only refused. Production adds `report-to`
+(and `report-uri`, for browsers that don't implement the Reporting API)
+pointing at `POST /api/csp-report`. `proxy.ts` sends the matching
+`Reporting-Endpoints` header. The route forwards a short description — which
+directive, what was blocked, which page — to the same Discord alerts as
+`/api/report`. Browser-extension noise is dropped, query strings are stripped,
+and the policy text itself is never forwarded. The browser sends these
+reports on its own, so `connect-src` stays `'self'`. Dev does not report.
+
 Two guards, because neither covers the other. `e2e/csp.e2e.ts` catches the
 failure a browser sees: a stale manifest and a Next release that stops applying
 the nonce fail the same silent way — the policy looks right, the browser

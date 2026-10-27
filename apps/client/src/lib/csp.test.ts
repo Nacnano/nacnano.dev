@@ -1,6 +1,11 @@
 import { describe, expect, it } from "bun:test";
 
-import { contentSecurityPolicy, createNonce } from "./csp";
+import {
+  contentSecurityPolicy,
+  createNonce,
+  cspReportUrl,
+  reportingEndpointsHeader,
+} from "./csp";
 import { extractInlineScripts, hashInlineScript, hashInlineScripts } from "./cspHashes";
 import { INLINE_SCRIPT_HASHES } from "@/generated/cspScriptHashes";
 
@@ -30,6 +35,36 @@ describe("contentSecurityPolicy", () => {
     expect(policy).toContain("default-src 'self'");
     expect(policy).toContain("object-src 'none'");
     expect(policy).toContain("frame-ancestors 'none'");
+    expect(policy).toContain("connect-src 'self'");
+  });
+
+  it("names the report endpoint in production and stays quiet in dev", () => {
+    const prod = contentSecurityPolicy({
+      nonce: "n0nce",
+      isDev: false,
+      origin: "https://www.nacnano.dev",
+    });
+
+    expect(prod).toContain("report-uri https://www.nacnano.dev/api/csp-report");
+    expect(prod).toContain("report-to csp-endpoint");
+    expect(reportingEndpointsHeader("https://www.nacnano.dev")).toBe(
+      'csp-endpoint="https://www.nacnano.dev/api/csp-report"'
+    );
+
+    const dev = contentSecurityPolicy({
+      nonce: "n0nce",
+      isDev: true,
+      origin: "https://www.nacnano.dev",
+    });
+    expect(dev).not.toContain("report-uri");
+    expect(dev).not.toContain("report-to");
+  });
+
+  it("refuses to embed an origin that could change the policy", () => {
+    expect(cspReportUrl('https://evil.test/"; script-src *')).toBe("/api/csp-report");
+    expect(cspReportUrl("http://localhost:3000")).toBe(
+      "http://localhost:3000/api/csp-report"
+    );
   });
 });
 
