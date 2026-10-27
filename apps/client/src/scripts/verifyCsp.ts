@@ -87,9 +87,9 @@ function scriptSrc(policy: string): string[] {
 }
 
 async function checkPage(pathname: string): Promise<string[]> {
-  // Manual redirects: `/link/*` sends visitors off-site, and an off-site
-  // document is not ours to police. A redirect to Vercel's login is the
-  // opposite — the page exists and we were refused it.
+  // A redirect leaves this origin. The document it lands on is not ours to
+  // police. A redirect to Vercel's login is the opposite — the page exists
+  // and we were refused it.
   const response = await fetch(new URL(pathname, BASE_URL), {
     headers: { accept: "text/html" },
     redirect: "manual",

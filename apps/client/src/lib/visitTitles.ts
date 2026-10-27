@@ -21,7 +21,6 @@ const STATIC_TITLES: Record<string, string> = {
   "/": siteMetadata.title,
   "/about": PAGE_TITLES.about,
   "/projects": PAGE_TITLES.projects,
-  "/link": PAGE_TITLES.link,
   "/activity": PAGE_TITLES.activity,
   "/ama": PAGE_TITLES.ama,
 };

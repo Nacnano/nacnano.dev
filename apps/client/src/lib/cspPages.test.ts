@@ -34,7 +34,6 @@ describe("routesToCheck", () => {
       "/",
       "/activity",
       "/about",
-      "/link",
       "/this-page-does-not-exist",
     ]);
   });
@@ -42,7 +41,6 @@ describe("routesToCheck", () => {
   it("ignores a relative path", () => {
     expect(routesToCheck(["about"])).toEqual([
       "/activity",
-      "/link",
       "/this-page-does-not-exist",
     ]);
   });

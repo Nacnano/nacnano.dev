@@ -35,8 +35,7 @@ at once, in one header built by `apps/client/src/lib/csp.ts` and sent by
 `apps/client/src/proxy.ts`:
 
 - **A per-request nonce**, which Next stamps onto the bootstrap scripts it
-  emits while server-rendering — `/activity`, an un-prerendered `/link/[link]`,
-  and dev.
+  emits while server-rendering — `/activity`, and dev.
 - **`sha256` hashes** of the inline scripts in the prerendered HTML. A nonce
   can never appear in a page that was built once and served from cache, so
   those are pinned at build time instead, in

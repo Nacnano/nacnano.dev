@@ -12,11 +12,10 @@
 /** Documents the sitemap leaves out, added on top of whichever source ran.
  *
  * `/activity` is rendered per request, so no prerendered file names it.
- * `/link` is a real page with `noindex`, so the sitemap omits it. The last
- * entry is not a route: requesting it is how the `_not-found` document is
- * reached. `/link/[slug]` is absent on purpose — those redirect off-site.
+ * The last entry is not a route: requesting it is how the `_not-found`
+ * document is reached.
  */
-export const EXTRA_CSP_ROUTES = ["/activity", "/link", "/this-page-does-not-exist"];
+export const EXTRA_CSP_ROUTES = ["/activity", "/this-page-does-not-exist"];
 
 const LOC = /<loc>\s*([^<\s]+)\s*<\/loc>/gi;
 
@@ -65,8 +64,8 @@ export function routesToCheck(discovered: readonly string[]): string[] {
  * A redirect to Vercel's login is not an off-site link. Deployment URLs
  * (`*.vercel.app`) sit behind Deployment Protection and answer 302 to
  * `vercel.com`; treating that as "nothing to check" would pass the run
- * without seeing a single page. Off-site redirects such as `/link/map` stay
- * skipped — that document isn't ours.
+ * without seeing a single page. Any other redirect stays skipped — that
+ * document isn't ours.
  */
 export function isDeploymentAuthWall(location: string): boolean {
   try {

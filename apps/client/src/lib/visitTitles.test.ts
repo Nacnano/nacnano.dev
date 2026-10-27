@@ -20,7 +20,6 @@ describe("resolveVisitTitle", () => {
     expect(resolveVisitTitle("/")).toBe(siteMetadata.title);
     expect(resolveVisitTitle("/about")).toBe(PAGE_TITLES.about);
     expect(resolveVisitTitle("/projects")).toBe(PAGE_TITLES.projects);
-    expect(resolveVisitTitle("/link")).toBe(PAGE_TITLES.link);
     expect(resolveVisitTitle("/activity")).toBe(PAGE_TITLES.activity);
     expect(resolveVisitTitle("/ama")).toBe(PAGE_TITLES.ama);
   });

@@ -9,7 +9,6 @@
 export const PAGE_TITLES = {
   about: "About",
   projects: "Projects",
-  link: "Links",
   activity: "Activity",
   ama: "Ask me anything",
 } as const;
