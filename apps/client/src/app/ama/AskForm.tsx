@@ -54,6 +54,8 @@ export default function AskForm({
   const honeypotId = useId();
   const panelId = useId();
   const [expanded, setExpanded] = useState(false);
+  const [questionLength, setQuestionLength] = useState(0);
+  const remaining = maxQuestion - questionLength;
 
   // Clear the box once a question is actually stored, so asking a second one
   // starts from empty. Keyed on the state OBJECT, not on `status`: the action
@@ -89,7 +91,12 @@ export default function AskForm({
           answer for it. Questions are deleted after {retentionDays} days.
         </p>
 
-        <form ref={formRef} action={formAction} className="max-w-measure mt-5">
+        <form
+          ref={formRef}
+          action={formAction}
+          className="max-w-measure mt-5"
+          onReset={() => setQuestionLength(0)}
+        >
           <label
             htmlFor={questionId}
             className="block text-xs tracking-[0.08em] text-zinc-500 uppercase dark:text-zinc-400"
@@ -103,13 +110,14 @@ export default function AskForm({
             rows={3}
             maxLength={maxQuestion}
             aria-describedby={`${hintId} ${countId}`}
+            onChange={(event) => setQuestionLength(event.currentTarget.value.length)}
             className="field mt-1.5 resize-y"
           />
           <p
             id={countId}
             className="tabular mt-1 font-mono text-xs tracking-[0.08em] text-zinc-500 uppercase dark:text-zinc-400"
           >
-            Up to {maxQuestion} characters
+            {remaining} {remaining === 1 ? "character" : "characters"} left
           </p>
 
           <label
