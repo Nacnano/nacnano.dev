@@ -115,7 +115,7 @@ export default function AskForm({
           />
           <p
             id={countId}
-            className="tabular mt-1 font-mono text-xs tracking-[0.08em] text-zinc-500 uppercase dark:text-zinc-400"
+            className="tabular mt-1 font-mono text-[0.625rem] leading-4 tracking-[0.08em] text-zinc-500 uppercase dark:text-zinc-400"
           >
             {remaining} {remaining === 1 ? "character" : "characters"} left
           </p>
