@@ -51,7 +51,7 @@
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.14",
-    "@biomejs/biome": "2.6.2",
+    "@biomejs/biome": "2.6.4",
     "@playwright/test": "^1.64.1",
     "@types/bun": "^1.4.4",
     "@types/mdx": "^2.0.5",
@@ -59,7 +59,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "cross-env": "^10.1.0",
-    "oxlint": "1.89.0",
+    "oxlint": "1.90.0",
     "prettier": "^3.9.10",
     "tsconfig": "workspace:*",
     "typescript": "^7.0.2"
