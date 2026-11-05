@@ -130,7 +130,7 @@ const projectsData: Project[] = [
       "Circuit Tracing",
     ],
     category: "research",
-    imgSrc: "/static/images/jaist-steering-42-to-7.png",
+    imgSrc: "/static/images/jaist-random-subgraph.png",
     repo: "https://github.com/Nacnano/jaist-intern",
   },
   {
