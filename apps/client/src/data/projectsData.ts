@@ -119,6 +119,16 @@ const projectsData: Project[] = [
 
   // ── Things I looked into ──────────────────────────────────────────────
   {
+    title: "Why language models can't pick a random number",
+    description:
+      "Started at JAIST hunting for models whose chain-of-thought doesn't match their answer — found plenty, but none that held up when rerun. So I narrowed it to randomness: ask for one number and you get 42 or 7; ask for a thousand and the model skips the work and just assumes they're uniform. Circuit tracing showed where the bias lives; nudging a feature or two barely moved it.",
+    stack: ["Python", "Transformers", "Neuronpedia", "Circuit Tracing"],
+    category: "research",
+    imgSrc: "/static/images/jaist-random-number.png",
+    repo: "https://github.com/Nacnano/jaist-intern",
+    note: "Presented at JAIST–Thai Week 2025. Joint Chula–JAIST project, advised by Ekapol Chuangsuwanich, Natthawut Kertkeidkachorn and Kiyoaki Shirai.",
+  },
+  {
     title: "Thai context benchmark for multimodal LLMs",
     description:
       "Built a Thai benchmark for multimodal models, generating the evaluation questions from Visual Genome data. Mostly a lesson in how much of benchmarking is arguing about what counts as a correct answer.",
