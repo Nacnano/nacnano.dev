@@ -121,10 +121,10 @@ const projectsData: Project[] = [
   {
     title: "Why language models can't pick a random number",
     description:
-      "Started at JAIST hunting for models whose chain-of-thought doesn't match their answer — found plenty of odd cases, but none I could reliably reproduce. So I narrowed it to randomness: ask for one number and you get 42 or 7; ask for a thousand and the model skips the work and just assumes they're uniform. Circuit tracing showed the bias in the probabilities, with '1' beating every other number from 1 to 10, but nudging a feature or two barely moved it.",
+      "Ask a language model for a random number and it's anything but: Gemini said 7 fifty times running, and Gemma's circuits lean hard on 1. Nudging a feature or two barely moved it.",
     stack: ["Python", "Transformers", "Neuronpedia", "Circuit Tracing"],
     category: "research",
-    imgSrc: "/static/images/jaist-random-number.png",
+    imgSrc: "/static/images/jaist-random-1-to-10-circuit.png",
     repo: "https://github.com/Nacnano/jaist-intern",
     note: "Presented at JAIST–Thai Week 2025. Joint Chula–JAIST project, advised by Ekapol Chuangsuwanich, Natthawut Kertkeidkachorn and Kiyoaki Shirai.",
   },
