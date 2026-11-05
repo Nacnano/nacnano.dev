@@ -119,6 +119,21 @@ const projectsData: Project[] = [
 
   // ── Things I looked into ──────────────────────────────────────────────
   {
+    title: "Why language models can't pick a random number",
+    description:
+      "An AI-safety internship at JAIST on whether a model's reasoning shows how it really answers. Unfaithful cases were rare, but 'random' picks were reliably biased. Mechanistic interpretability found number features; steering a few didn't fix it, so the bias likely runs deeper.",
+    stack: [
+      "Python",
+      "Transformers",
+      "LLM-as-a-Judge",
+      "Sparse Autoencoders",
+      "Circuit Tracing",
+    ],
+    category: "research",
+    imgSrc: "/static/images/jaist-steering-42-to-7.png",
+    repo: "https://github.com/Nacnano/jaist-intern",
+  },
+  {
     title: "Thai context benchmark for multimodal LLMs",
     description:
       "Built a Thai benchmark for multimodal models, generating the evaluation questions from Visual Genome data. Mostly a lesson in how much of benchmarking is arguing about what counts as a correct answer.",

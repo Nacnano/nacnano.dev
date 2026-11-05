@@ -50,6 +50,18 @@ let readLimiter: Ratelimit | null | undefined;
 let askLimiter: Ratelimit | null | undefined;
 let reportLimiter: Ratelimit | null | undefined;
 
+/**
+ * Forget the memoised limiters. Bun runs every test file in one process and
+ * keeps one copy of this module, so a suite that ran with no store configured
+ * would otherwise leave `null` cached for a later suite that fakes one.
+ */
+export function __resetLimitersForTests(): void {
+  limiter = undefined;
+  readLimiter = undefined;
+  askLimiter = undefined;
+  reportLimiter = undefined;
+}
+
 function buildLimiter(
   prefix: string,
   limit: number,

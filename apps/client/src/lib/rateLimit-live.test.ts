@@ -47,7 +47,7 @@ mock.module("@/lib/observability", () => ({
   captureError: (error: unknown) => errors.push(error),
 }));
 
-import { allowFeed, allowVisit } from "./rateLimit";
+import { __resetLimitersForTests, allowFeed, allowVisit } from "./rateLimit";
 
 // A configured store needs valid credentials + a salt so `limitKey` (via
 // `getRuntimeConfig`) produces a bucket; the store client itself is faked above.
@@ -57,8 +57,12 @@ beforeAll(() => {
   process.env.UPSTASH_REDIS_REST_TOKEN = "fake-token";
   process.env.VISIT_IP_SALT = SALT;
   resetRuntimeConfigCache();
+  // An earlier file may have cached a null limiter in this shared module.
+  __resetLimitersForTests();
 });
 afterAll(() => {
+  // Don't leave this suite's faked limiter cached for the next file.
+  __resetLimitersForTests();
   delete process.env.UPSTASH_REDIS_REST_URL;
   delete process.env.UPSTASH_REDIS_REST_TOKEN;
   delete process.env.VISIT_IP_SALT;
