@@ -1,4 +1,4 @@
-import { describe, it, expect, afterEach, afterAll, mock } from "bun:test";
+import { describe, it, expect, afterEach, afterAll, beforeAll, mock } from "bun:test";
 
 /**
  * The report's windowing, aggregation, and embed shaping are pure and get
@@ -83,6 +83,12 @@ afterEach(() => {
   getReturn = null;
   clearLiveEnv();
 });
+// Start from a fresh client: an earlier file may have cached one built from
+// its own fake store in this shared module.
+beforeAll(() => {
+  __resetCachedClientForTests();
+});
+
 afterAll(() => {
   // `mock.module` is process-global — put every swapped module back for the
   // files that run after this one, and drop the memoised fake client so a

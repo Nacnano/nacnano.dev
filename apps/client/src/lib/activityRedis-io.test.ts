@@ -7,8 +7,10 @@ import { describe, expect, it, beforeAll, afterAll, mock } from "bun:test";
  * through the mocked boundary in the route tests.
  */
 import * as observabilityReal from "./observability";
+import * as upstashRedisReal from "@upstash/redis";
 
 const originalObservability = { ...observabilityReal };
+const originalUpstashRedis = { ...upstashRedisReal };
 
 type Captured = { error: unknown; context: Record<string, unknown> };
 const capturedErrors: Captured[] = [];
@@ -61,11 +63,19 @@ afterAll(() => {
   delete process.env.UPSTASH_REDIS_REST_URL;
   delete process.env.UPSTASH_REDIS_REST_TOKEN;
   delete process.env.VISIT_IP_SALT;
-  // `mock.module` is process-global — put observability back for the next file.
+  // `mock.module` is process-global — put every swapped module back for the
+  // next file, and drop the client built from the fake so it isn't reused.
   mock.module("./observability", () => originalObservability);
+  mock.module("@upstash/redis", () => originalUpstashRedis);
+  __resetCachedClientForTests();
 });
 
-import { getActivityClient, readActivityFeed, recordVisit } from "./activityRedis";
+import {
+  __resetCachedClientForTests,
+  getActivityClient,
+  readActivityFeed,
+  recordVisit,
+} from "./activityRedis";
 
 describe("getActivityClient", () => {
   it("constructs once and caches", () => {
