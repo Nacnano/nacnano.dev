@@ -2,6 +2,12 @@ import { describe, it, expect, afterAll, beforeEach, mock } from "bun:test";
 import * as observabilityReal from "./observability";
 import * as upstashRedisReal from "@upstash/redis";
 
+// Snapshot the real exports before mocking. An `import * as` namespace is live:
+// once `mock.module` runs it reflects the mock, so restoring with the namespace
+// itself would re-register the mock and leak it into every later test file.
+const originalObservability = { ...observabilityReal };
+const originalUpstashRedis = { ...upstashRedisReal };
+
 /**
  * Covers the swallow in `getActivityClientOrNull` directly — its whole value is
  * that a broken live configuration becomes a reported `null`, not a throw. The
@@ -45,8 +51,8 @@ beforeEach(() => {
 
 afterAll(() => {
   setEnv({});
-  mock.module("@upstash/redis", () => upstashRedisReal);
-  mock.module("./observability", () => observabilityReal);
+  mock.module("@upstash/redis", () => originalUpstashRedis);
+  mock.module("./observability", () => originalObservability);
 });
 
 describe("getActivityClientOrNull", () => {
