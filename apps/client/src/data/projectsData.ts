@@ -121,8 +121,14 @@ const projectsData: Project[] = [
   {
     title: "Why language models can't pick a random number",
     description:
-      "Ask a language model for a random number and it's anything but: Gemini said 7 fifty times running, Gemma said 42. Turning up Gemma's 'one' features made it say seven, not one.",
-    stack: ["Python", "Transformers", "Neuronpedia", "Circuit Tracing"],
+      "Started at JAIST as a chain-of-thought faithfulness study — LLM-as-judge evals on GSM8K, Game of 24, Thai O-NET/TPAT1 exams and 20 Questions — then narrowed to randomness: models' 'random' numbers and words are heavily biased, and generated figures and text follow Benford's and Zipf's laws. SAE steering and transcoder circuit tracing on Gemma 2 found number features, but boosting 'one' turned 42 into 7, not 1.",
+    stack: [
+      "Python",
+      "Transformers",
+      "LLM-as-a-Judge",
+      "Sparse Autoencoders",
+      "Circuit Tracing",
+    ],
     category: "research",
     imgSrc: "/static/images/jaist-steering-42-to-7.png",
     repo: "https://github.com/Nacnano/jaist-intern",
