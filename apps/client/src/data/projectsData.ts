@@ -121,7 +121,7 @@ const projectsData: Project[] = [
   {
     title: "Why language models can't pick a random number",
     description:
-      "An AI-safety internship at JAIST. I tested whether a model's step-by-step reasoning actually explains its answer, with another LLM as judge, on math, Thai exams and 20 Questions. Randomness was the clearer thread: Gemini picked 7 as its 'random' number 50 times out of 50, and figures models invent follow Benford's law like real data. Inside Gemma 2, sparse autoencoders and circuit tracing found number features, but boosting 'one' turned 42 into 7, not 1.",
+      "An AI-safety internship at JAIST. I tested whether a model's step-by-step reasoning explains its answer, using an LLM as judge, then focused on randomness: Gemini picked 7 as its 'random' number 50 times out of 50. Mechanistic interpretability on Gemma 2 found number features, but boosting 'one' turned 42 into 7, not\u00a01.",
     stack: [
       "Python",
       "Transformers",
