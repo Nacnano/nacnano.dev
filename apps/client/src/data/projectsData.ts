@@ -121,12 +121,11 @@ const projectsData: Project[] = [
   {
     title: "Why language models can't pick a random number",
     description:
-      "Ask a language model for a random number and it's anything but: Gemini said 7 fifty times running, and Gemma's circuits lean hard on 1. Nudging a feature or two barely moved it.",
+      "Ask a language model for a random number and it's anything but: Gemini said 7 fifty times running, Gemma said 42. Turning up Gemma's 'one' features made it say seven, not one.",
     stack: ["Python", "Transformers", "Neuronpedia", "Circuit Tracing"],
     category: "research",
-    imgSrc: "/static/images/jaist-random-1-to-10-circuit.png",
+    imgSrc: "/static/images/jaist-steering-42-to-7.png",
     repo: "https://github.com/Nacnano/jaist-intern",
-    note: "Presented at JAIST–Thai Week 2025. Joint Chula–JAIST project, advised by Ekapol Chuangsuwanich, Natthawut Kertkeidkachorn and Kiyoaki Shirai.",
   },
   {
     title: "Thai context benchmark for multimodal LLMs",
