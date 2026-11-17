@@ -119,7 +119,7 @@ const projectsData: Project[] = [
 
   // ── Things I looked into ──────────────────────────────────────────────
   {
-    title: "Why language models can't pick a random number",
+    title: "Mechanistic interpretability of randomness in LLMs",
     description:
       "An AI-safety internship at JAIST on whether a model's reasoning shows how it really answers. Unfaithful cases were rare, but 'random' picks were reliably biased. Mechanistic interpretability found number features; steering a few didn't fix it, so the bias likely runs deeper.",
     stack: [
