@@ -18,6 +18,15 @@ export type TimelineItem = {
 
 export const workItems: TimelineItem[] = [
   {
+    period: "Aug 2026 – Present",
+    start: "2026-08-01",
+    title: "Software Engineer, Intern",
+    organisation: "Nansen",
+    location: "Bangkok",
+    description:
+      "Building blockchain analytics and AI trading features, and keeping the whole thing from falling over.",
+  },
+  {
     period: "Jan – Apr 2026",
     start: "2026-01-01",
     title: "Data Scientist, Intern",
