@@ -78,11 +78,19 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           sizes="180x180"
           href="/static/favicons/apple-touch-icon.png"
         />
+        {/* Full-bleed squares in multiples of 48px: Google Search masks the icon
+            to a circle itself, so a pre-rounded icon shows up as a ring. */}
         <link
           rel="icon"
           type="image/png"
-          sizes="32x32"
-          href="/static/favicons/favicon-32x32.png"
+          sizes="96x96"
+          href="/static/favicons/favicon-96x96.png"
+        />
+        <link
+          rel="icon"
+          type="image/png"
+          sizes="48x48"
+          href="/static/favicons/favicon-48x48.png"
         />
         <link rel="manifest" href="/static/favicons/site.webmanifest" />
         <meta name="msapplication-TileColor" content="#09090b" />
